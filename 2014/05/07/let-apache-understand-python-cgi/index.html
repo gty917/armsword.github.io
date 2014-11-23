@@ -1,0 +1,244 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>让Apache支持python编写的cgi程序 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="让Apache支持python编写的cgi程序"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-05-07T11:33:02.000Z"><a href="/2014/05/07/let-apache-understand-python-cgi/">5月 7 2014</a></time>
+      
+      
+  
+    <h1 class="title">让Apache支持python编写的cgi程序</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>需要用C 写个CGI，所以，我先用python简单的写了一点代码，来验证自己的想法。由于第一次写cgi程序，所以配置环境不是太熟，遇到了一些小问题，折腾了个把小时才搞明白，这里记录下让python支持cgi时，Apache配置文件的设置。</p>
+<p>1.先创建cgi-bin文件夹</p>
+<p>Ubuntu下的Apache默认WWW地址为/var/www，在此目录下创建cgi-bin文件夹，即/var/www/cgi-bin</p>
+<p>2.使用python编写cgi程序，我们简单的写个hello world吧，hello.py</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">#!/usr/bin/<span class="keyword">python</span></div><div class="line"></div><div class="line"><span class="keyword">print</span> &quot;Content-type:<span class="keyword">text</span>/html\r\n\r\n&quot;</div><div class="line"><span class="keyword">print</span> <span class="string">'&lt;html&gt;'</span></div><div class="line"><span class="keyword">print</span> <span class="string">'&lt;head&gt;'</span></div><div class="line"><span class="keyword">print</span> <span class="string">'&lt;title&gt;Hello Word - First CGI Program&lt;/title&gt;'</span></div><div class="line"><span class="keyword">print</span> <span class="string">'&lt;/head&gt;'</span></div><div class="line"><span class="keyword">print</span> <span class="string">'&lt;body&gt;'</span></div><div class="line"><span class="keyword">print</span> <span class="string">'&lt;h2&gt;Hello Word! This is my first CGI program&lt;/h2&gt;'</span></div><div class="line"><span class="keyword">print</span> <span class="string">'&lt;/body&gt;'</span></div><div class="line"><span class="keyword">print</span> <span class="string">'&lt;/html&gt;'</span></div></pre></td></tr></table></figure>
+
+<p>然后将cgi-bin文件夹下的内容权限设置为755，即chmod 755 hello.py</p>
+<p>3.访问hello.py，即127.0.0.1/cgi-bin/hello.py</p>
+<p>这时候会出现 错误提示：You don’t have permission to access /cgi-bin/ on this server.</p>
+<p>4.修改apache配置文件，使其能访问cgi-bin下文件<br>sudo vim /etc/apache2/sites-available/default ，更改为下面所示，然后sudo service apache2 restart重启apache</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">#ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/</div><div class="line">    #&lt;<span class="keyword">Directory</span> <span class="string">"/usr/lib/cgi-bin"</span>&gt;</div><div class="line">        &lt;<span class="keyword">Directory</span> <span class="string">"/var/www/cgi-bin"</span>&gt;</div><div class="line">            AllowOverride <span class="keyword">None</span></div><div class="line">            <span class="keyword">Options</span> +ExecCGI -MultiViews +SymLinksIfOwnerMatch</div><div class="line">            <span class="keyword">Order</span> allow,deny     </div><div class="line">            Allow from all</div><div class="line">       &lt;/<span class="keyword">Directory</span>&gt;</div></pre></td></tr></table></figure>
+
+<p>5.继续访问hello.py，会发现服务器把hello.py里面的内容显示出来，而没有解析<br>添加AddHandler，使apache支持python写的cgi程序，如下所示，注意，此步骤可以与步骤四一块完成。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">#ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/</div><div class="line">#&lt;<span class="keyword">Directory</span> <span class="string">"/usr/lib/cgi-bin"</span>&gt;</div><div class="line">&lt;<span class="keyword">Directory</span> <span class="string">"/var/www/cgi-bin"</span>&gt;</div><div class="line">    AllowOverride <span class="keyword">None</span></div><div class="line">    <span class="keyword">Options</span> +ExecCGI -MultiViews +SymLinksIfOwnerMatch</div><div class="line">    <span class="keyword">Order</span> allow,deny</div><div class="line">    Allow from all</div><div class="line">&lt;/<span class="keyword">Directory</span>&gt;</div><div class="line">AddHandler cgi-script .py</div></pre></td></tr></table></figure>
+
+<p>然后重启apache服务器，访问hello.py，显示：</p>
+<h2 id="Hello_Word!_This_is_my_first_CGI_program">Hello Word! This is my first CGI program</h2>
+<p>这样apache就支持python写的cgi程序了。</p>
+<pre></pre>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Linux/">Linux</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="让Apache支持python编写的cgi程序" data-url="http://armsword.com/2014/05/07/let-apache-understand-python-cgi/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

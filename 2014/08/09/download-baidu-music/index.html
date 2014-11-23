@@ -1,0 +1,243 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>获得百度无损音乐下载地址最新方法 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="获得百度无损音乐下载地址最新方法"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-08-09T13:55:42.000Z"><a href="/2014/08/09/download-baidu-music/">8月 9 2014</a></time>
+      
+      
+  
+    <h1 class="title">获得百度无损音乐下载地址最新方法</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>之前我写过一篇文章，介绍过怎么下载百度音乐无损音乐，地址点击<a href="http://armsword.com/2014/01/01/get-baidu-music-addr.html" title="百度无损音乐下载" target="_blank" rel="external">此处</a>进入，但是前几天有网友给我邮件说这个方法现在不能使用了。我今天正好回实验室改论文，弄完后，研究了下，发现之前的无损音乐下载方法确实不能使用了，之后用了几十分钟又分析了下，终于找到新方法了，因为我听见外面打雷了，貌似要下雨，我简单的说下方法吧：</p>
+<p>1、之前是从<a href="http://music.baidu.com/" target="_blank" rel="external">http://music.baidu.com/</a> 入手的，现在发现从此处入手已经找不到方法了。由于我又不是太懂JS语法，于是用了几十分钟，没分析到地址放弃。</p>
+<p>2、灵光一闪，从<a href="http://fm.baidu.com/" target="_blank" rel="external">http://fm.baidu.com/</a> 入手，在Chrome下抓包，细心分析后，果然发现蜘丝马迹，如下图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/08/20140809213933.png" alt=""></p>
+<p>见左图那个灰色的链接，我们打开<a href="http://music.baidu.com/data/music/fmlink?songIds=1181294,291890,620023,7329389,448152,7325038,2119209,309877,7331713,2121730&amp;type=mp3&amp;rate=320&amp;callback=jQuery1102037159983557648957_1407590773561&amp;_=1407590773570" title="百度无损音乐下载方法" target="_blank" rel="external">链接</a>看下，嘿，发现了许多歌曲信息哦，如下图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/08/20140809214133.png" alt=""></p>
+<p>&nbsp;</p>
+<p>由于是FM，所以songIDs有一大串，咱们试试构造下，以黑蝙蝠中队为例，其有三种音乐格式，第一种是可以直接下载的，第二三种是收费的：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/08/20140809214532.png" alt=""></p>
+<p>我们构造下不同格式的音乐试试看，以无损音乐flac格式和921kbps为例：</p>
+<p>构造的链接为：<a href="http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=mp3&amp;rate=921" target="_blank" rel="external">http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac&amp;rate=921</a></p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/08/20140809214749.png" alt=""></p>
+<p>&nbsp;</p>
+<p>将songLink后的地址格式化为正常网页地址，如下所示：<br><a href="http://yinyueshiting.baidu.com/data2/music/33809115/966991111600921.flac?xcode=a6ed00d30421e9bebbbef0f52f4938299d0fba1db032ff5f" target="_blank" rel="external">http://yinyueshiting.baidu.com/data2/music/33809115/966991111600921.flac?xcode=a6ed00d30421e9bebbbef0f52f4938299d0fba1db032ff5f</a><br>下载下，发现可以正常下载，28.8M，flac格式的无损音乐。</p>
+<p>所以，超高/无损音乐下载方法就是：<br>将此链接的：<br><a href="http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac&amp;rate=921" title="百度无损音乐下载方法教程" target="_blank" rel="external">http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac&amp;rate=921</a><br>songIds、type、rate改完你想下载的音乐就可以了。</p>
+<p>如果只想下载无损音乐flac格式的（前提条件是百度下载里包含无损格式），这样就可以了，只需要更改歌曲songIds。</p>
+<p><a href="http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac" title="百度音乐下载方法" target="_blank" rel="external">http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac</a></p>
+<p>代码不写，分析就到此为止吧。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/计算机网络/">计算机网络</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="获得百度无损音乐下载地址最新方法" data-url="http://armsword.com/2014/08/09/download-baidu-music/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

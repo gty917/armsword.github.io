@@ -1,0 +1,610 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>第 7 页 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-12T12:05:38.000Z"><a href="/2013/06/12/virtual-function-table/">6月 12 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/12/virtual-function-table/">C++的虚函数和虚函数表</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>如果一个类有一个或多个成员函数是虚函数，那么编译器认为这个类创建一个虚函数表。该表为每一个虚函数成员记录一个指针（内存地址）。指针指向相应成员函数代码的入口地址。如果一个虚函数被继承下来，并且没有改变，那么虚函数表中相应项指向的是这个函数在父类（或其他祖先类，如果可能的话）中的定义。如果另一个虚函数在类中有新的定义，那么表中这个虚函数的指针指向的就是新的定义（注意，作为一个虚函数的属性是会被继承的，因此，一旦某个类有一个虚函数表，那么它的子孙类都有一个虚函数表）。</p>
+<p>无论何时创建一个包含一个或多个虚函数的类的对象，都会为这个对象新增一个指针，并存储在内存中。这个指针指向这个类的虚函数表。当通过指向对象的指针来调用一个成员函数，运行系统会使用虚函数表来决定成员函数的哪一个定义被调用，而不是使用指针的类型。</p>
+<p>当然，这些都是自动发生的，因此我们不需要为此担心。编译器的作者可以用其他的方式去实现虚函数，只要它可以正常工作。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-11T13:48:50.000Z"><a href="/2013/06/11/no-inherit-function/">6月 11 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/11/no-inherit-function/">不可继承的函数</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>一般来言，如果Derived是派生自Base的派生类，那么基类中所有“正常”的函数都可被派生类Derived继承，并且在派生类中是可用的。但是，由于特定的原因，基类中也有一些特殊的函数是不可以被继承的。我们已经知道构造函数是不可被继承的，私有成员函数是不可被继承的，析构函数也是不可被继承的。</p>
+<p>复制构造函数是不可被继承的，但是如果你在派生类中（或任何类中）不定义默认构造函数，那么C++会自动生成一个复制构造函数。然而，这个默认的复制构造函数只是简单的复制成员变量的内容，对于成员变量中含有指针或动态数据的类来说，它是不能正常工作的。因此，如果你的类的成员变量中含有指针、动态数组或其他的动态数据，应该为这个类定义一个复制构造函数。这一点，不管这个类是否是派生类，都是成立的。</p>
+<p>赋值操作符“=”也是不可被继承的。如果基类Base定义了赋值操作符，但是派生类Derived没有定义赋值操作符，那么派生类Derived也会有一个赋值操作符，但是这个赋值操作符是C++为你创建的默认的赋值操作符（当你没有定义赋值操作符“=”），它和定义在基类Base中的赋值操作符没有任何关系。</p>
+<p>构造函数、析构函数和赋值操作符不可被继承是正常的。要正确的执行它们的任务，它们需要基类所没有涉及的信息，即它们需要知道由派生类引入的新的成员变量的信息。</p>
+<p>重载的赋值操作符和构造函数是不可被继承的。但是，在为派生类定义重载的赋值操作符和复制构造函数时，它们可以被使用，并且几乎在所有情况下都必须使用。</p>
+<p>在派生类中重载赋值操作符时，通常要使用基类重载的赋值操作符。</p>
+<p>如果基类有一个正确可用的析构函数，那么为这个类的派生类定义一个正确可用的析构函数就相对容易了。当派生类的析构函数被调用时，它会自动调用基类的析构函数。因此，我们没有必要明确地写出对基类析构函数的调用，它总是自动产生调用，派生类析构函数只需要关心派生类新增的成员变量是否需要使用delete。至于继承而来的成员变量是否需要使用delete，则是基类析构函数的任务了。</p>
+<p>如果类B是派生自类A，类C是派生自类B，那么当类C的一个对象超出作用域，首先是类C的析构函数被调用，然后是类B的析构函数被调用，最后是类A的析构函数被调用。注意，析构函数的调用次数正好与构造函数的调用次数相反。</p>
+<p>参考文献：</p>
+<p>《Absolute C++》</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-02T08:33:30.000Z"><a href="/2013/06/02/the-big-three/">6月 2 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/02/the-big-three/">The Big Three</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>在C++中，复制构造函数、赋值操作符以及析构函数可以称为三合一，因为专家们说，如果类定义中需要其中的任何一个，那么这三个都是需要的。</p>
+<p>如果其中任何一个没有定义，那么编译器将会产生默认的版本，但默认的版本可能不会按照我们所期望的行为进行。因此，最好自己定义它们。编译器自动产生的复制构造函数和赋值操作符对于那些所有的成员变量都是预定义类型（如int和double等）的情况下可以工作良好。但对于那些包含指针成员并使用new操作符分配内存的类来说，最好自己定义复制构造函数。</p>
+<p>析构函数是类中的一个特殊成员函数。当一个类的对象超出其作用域范围时，析构函数将自动调用。析构函数的主要用途是用来释放该对象所占据的内存空间，以便这些内存能够被再次使用。</p>
+<p>复制构造函数是包含一个和该类类型相同的引用调用参数的构造函数。如果定义了复制构造函数，那么在一个函数返回某个类的值时，或者在将某个类对象传递给传值调用参数时，都将自动调用复制构造函数。任何包含指针成员并使用new操作符分配空间的类都应该定义复制构造函数。</p>
+<p>当重载赋值操作符时，必须将其作为类的成员重载。但必须保证当赋值操作符两边为同一个对象时，重载后的赋值操作符仍然能够正常工作。</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-05-06T15:50:34.000Z"><a href="/2013/05/06/how-to-use-gcc/">5月 6 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/05/06/how-to-use-gcc/">gcc使用入门</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>随便写了点，主要写给我看的，原因可能读者不容易看懂-_-!</p>
+<p>1.gcc -Wall hello.c -o hello</p>
+<p>-Wall会出现警告信息</p>
+<p>2.gcc -Wall main.c hello.c -o newhello</p>
+<p>3.-V：展示详细信息<br>gcc -V -Wall hello.c -o hello</p>
+<p>4.-c 指定目标文件，编译一个源文件 —&gt; 目标文件，只编译不链接。<br>gcc -Wall -c main.c （不需要 -o）</p>
+<p>5.有了目标文件，产生可执行文件，gcc使用链接库ld<br>gcc main.o hello.o -o hello<br>注意链接顺序，被调用的在右边，现在的编译器不考虑顺序，gcc不需要考虑。</p>
+<p>6.链接比编译快很多，只改动编译过的文件，但是源文件太多时候，需要用Make，原理是比较源文件和目标文件的时间戳。</p>
+<p>7.静态库 *.a，库是多个目标文件联合起来，比如math库。<br>gcc -Wall main.c /usr/lib/libm.a -o Calc<br>或者<br>-l 链接库<br>gcc -Wall main.c -lm -o Calc</p>
+<p>编译选项 -lName 尝试在标准库目录下找到库文件libNAME.a</p>
+<p>8.系统缺省头文件和库目录</p>
+<p>/usr/local/include<br>/usr/include</p>
+<p>/usr/local/lib<br>/usr/lib</p>
+<p>当在其它目录下，需要指定目录 ‘-I’（头文件目录）和’-L’（库文件目录）<br>比如 -I/opt/include<br>注意绝对路径不需要，不利于移植，相对路径可以。<br>定义环境变量就不需要指定-I,-L了，比如在.bash_profile</p>
+<p>C_INCLUDE_PATH (for c header file)<br>CPLUS_INCLUDE_PATH (for C++ header)</p>
+<p>库：</p>
+<p>LIBRARY_PATH</p>
+<p>一般用 -I、-L方法，Makefile。</p>
+<p>9.创建库文件ar</p>
+<p>ar cr libNAME.a file1.o file2.o … filen.o</p>
+<p>ar也可以查看库文件有多少目标文件</p>
+<p>ar t libNAME.a ar t /usr/lib/libssl.a （查看包含的目标文件—-&gt;对应一个C文件）</p>
+<p>gcc -Wall main.c libhello.a -o hello （注意顺序）<br>gcc -Wall main.c -L. -lhello -o hello<br>gcc -Wall -Iinclude -c main.c （src文件下有对应的lib）</p>
+<p>10.不加选项，默认是gcc dialect ===&gt;GNU C，包含嵌套函数，动态数组</p>
+<p>-ansi 和 -pedantic 指定 ANSI 编译，如下：<br>gcc -Wall -ansi -pedantic hello.c</p>
+<p>-std指定C标准<br>-std=c89 or -std=iso9899:1990<br>-std=iso9899:199409<br>-std=c99 or -std=iso9899:1999</p>
+<p>gcc -Wall -ansi -D_GNU_SOURCE hello.c -o hello</p>
+<p>GNU_SOURCE：使用标准的ansi标准，但使用GNU的库(GNU_SOURCE)。</p>
+<p>-D宏定义，-DNUM = 1234 ，-DTEST相当于定义了该宏</p>
+<p>11.预处理器<br>gcc -E hello.c 只调预处理器，将预处理结果打印到屏幕上。<br>gcc -Wall -c -save-temps hello.c</p>
+<p>-save-temps:将临时结果输出到当前文件夹下，hello.i—&gt;hello.s—&gt;hello.o</p>
+<p>12.gcc -g 调试信息，为了让gdb使用。一般不产生coredump，为了产生coredump<br>ulimit -c unlimited<br>gdb hello.out core.xxx （调试）</p>
+<p>13.优化<br>CSE/FL/Loop unrolling (-funroll-loops)</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(<span class="built_in">i</span>=<span class="number">0</span>;<span class="built_in">i</span>&lt;<span class="number">8</span>;<span class="built_in">i</span>++)</div><div class="line"><span class="cell">{</span></div><div class="line"> y[i]=i;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>======&gt;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="xml"><span class="tag"><span class="attribute">for</span>(<span class="attribute">i</span>=<span class="value">0;i&lt;8;i+=4)</span></span></span></div><div class="line">{</div><div class="line"> <span class="attribute">y</span>[<span class="attribute">i</span>]=<span class="value">i;</span></div><div class="line"> <span class="attribute">y</span>[<span class="attribute">i</span>+<span class="attribute">1</span>]=<span class="value">i+1;</span></div><div class="line"> <span class="attribute">y</span>[<span class="attribute">i</span>+<span class="attribute">2</span>]=<span class="value">i+2;</span></div><div class="line"> <span class="attribute">y</span>[<span class="attribute">i</span>+<span class="attribute">3</span>]=<span class="value">i+3;</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(<span class="built_in">i</span>=<span class="number">0</span>;<span class="built_in">i</span>&lt;n;<span class="built_in">i</span>++)</div><div class="line"><span class="cell">{</span></div><div class="line"> y[i]=i;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>=======&gt;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(<span class="built_in">i</span>=<span class="number">0</span>;<span class="built_in">i</span>&lt;(n<span class="comment">%2);i++)</span></div><div class="line"><span class="cell">{</span></div><div class="line"> y[i]=i;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(;<span class="built_in">i</span>+<span class="number">1</span>&lt;n;<span class="built_in">i</span>+<span class="number">2</span>)</div><div class="line"><span class="cell">{</span></div><div class="line"> y[i]=i;</div><div class="line"> y[i+<span class="number">1</span>]=i+<span class="number">1</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>14.gcc编译C程序，g++编译C++，gcc是True C++编译器，不将C++—&gt;C—&gt;汇编，而将C++—&gt;汇编</p>
+<p>15.编译器是怎么工作的<br>Preprocessing —&gt; Compilation —&gt; Assembly —&gt;Linking</p>
+<p>Preprocessing：cpp hello.c — &gt; hello.i<br>Compilation： gcc -Wall -s hello.i — &gt; hello.s<br>Assembly: as hello.s -o hello.o<br>Linking: gcc hello.o -o hello</p>
+<p>16.辅助工具<br>file:判断文件一些特性<br>nm: 符号表<br>ldd：查找需要的动态链接库</p>
+<p>17.编译器相关工具<br>gprof:记录函数调用次数、花费时间等等<br>gcc -Wall -pg -hello.c -o hello<br>执行hello.out产生gmon.out, gprof hello.out 之后查看文件开始部分</p>
+<p>gcov:分析程序里每一行执行时间，发现程序里没被调用的代码<br>gcc -Wall -fprofile-arcs -ftest-coverage hello.c<br>会产生hello.gcno，执行hello.out会产生hello.gcda<br>gcov hello.c，之后其会产生hello.c.gcov，vi查看hello.c.gcov，”#####”表示没被执行的代码。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-25T11:52:44.000Z"><a href="/2013/04/25/net-snmp-install-configure/">4月 25 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/25/net-snmp-install-configure/">Ubuntu下net-snmp的简单安装和配置</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1、官网下载最新版本</p>
+<p><a href="http://www.net-snmp.com/download.html" target="_blank" rel="external">http://www.net-snmp.com/download.html</a></p>
+<p>解压缩 tar xzvf net-snmp-5.7.2.tar.gz</p>
+<p>cd net-snmp-5.7.2</p>
+<p>2、安装依赖环境</p>
+<p>apt-get install libperl-dev</p>
+<p>3、配置net-snmp</p>
+<p>./configure —prefix=/usr/local/snmp —with-mib-modules=ucd-snmp/diskio</p>
+<p>—with-mib-modules=ucd-snmp/diskio 选项，可以让服务器支持磁盘I/O监控。<br>—with-default-snmp-version 选项，是默认装V3版本<br>—with-sys-location 位置<br>—with-sys-contact 联系人<br>—with-logfile 日志文件目录<br>—with-persistent-directory</p>
+<p>4、编译并安装</p>
+<p>make</p>
+<p>make install  最好记得加上sudo哦~</p>
+<p>5、配置文件 snmpd.conf</p>
+<p>这里有两种方式，一种方式是用命令snmpconf -g basic_setup生成snmpd.conf文件，比较费时，我这里用了一种较简便的方法生成配置文件,就是把解压后的那个文件目录下的EXAMPLE.conf文件拷在我们的安装路径下并修改，命令格式如下：</p>
+<p>sudo cp EXAMPLE.conf /usr/local/snmp/share/snmp/snmpd.conf</p>
+<p>这里最新版本的貌似与其他版本的配置不一样，具体配置我还没有弄清楚，还有这个地方，snmpd进程好像是起不来的。所以，折腾了半天，我安装了SNMP</p>
+<p>sudo apt-get install snmpd</p>
+<p>6、设置环境变量</p>
+<p>在/etc/environmet里面自己添加。</p>
+<p>之后使用snmpwalk命令查看下：</p>
+<p>linuxer@imlinuxer:/var$ snmpwalk -v 2c -c public 10.109.33.96<br>SNMPv2-MIB::sysDescr.0 = STRING: Linux firewall.waf 2.6.32-220.el6.i686 #1 SMP Tue Dec 6 16:15:40 GMT 2011 i686<br>SNMPv2-MIB::sysObjectID.0 = OID: NET-SNMP-MIB::netSnmpAgentOIDs.10<br>DISMAN-EVENT-MIB::sysUpTimeInstance = Timeticks: (11998) 0:01:59.98<br>SNMPv2-MIB::sysContact.0 = STRING: Root &lt;root@localhost&gt; (configure /etc/snmp/snmp.local.conf)<br>SNMPv2-MIB::sysName.0 = STRING: firewall.waf<br>SNMPv2-MIB::sysLocation.0 = STRING: Unknown (edit /etc/snmp/snmpd.conf)<br>SNMPv2-MIB::sysORLastChange.0 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORID.1 = OID: SNMP-MPD-MIB::snmpMPDMIBObjects.3.1.1<br>SNMPv2-MIB::sysORID.2 = OID: SNMP-USER-BASED-SM-MIB::usmMIBCompliance<br>SNMPv2-MIB::sysORID.3 = OID: SNMP-FRAMEWORK-MIB::snmpFrameworkMIBCompliance<br>SNMPv2-MIB::sysORID.4 = OID: SNMPv2-MIB::snmpMIB<br>SNMPv2-MIB::sysORID.5 = OID: TCP-MIB::tcpMIB<br>SNMPv2-MIB::sysORID.6 = OID: IP-MIB::ip<br>SNMPv2-MIB::sysORID.7 = OID: UDP-MIB::udpMIB<br>SNMPv2-MIB::sysORID.8 = OID: SNMP-VIEW-BASED-ACM-MIB::vacmBasicGroup<br>SNMPv2-MIB::sysORDescr.1 = STRING: The MIB for Message Processing and Dispatching.<br>SNMPv2-MIB::sysORDescr.2 = STRING: The MIB for Message Processing and Dispatching.<br>SNMPv2-MIB::sysORDescr.3 = STRING: The SNMP Management Architecture MIB.<br>SNMPv2-MIB::sysORDescr.4 = STRING: The MIB module for SNMPv2 entities<br>SNMPv2-MIB::sysORDescr.5 = STRING: The MIB module for managing TCP implementations<br>SNMPv2-MIB::sysORDescr.6 = STRING: The MIB module for managing IP and ICMP implementations<br>SNMPv2-MIB::sysORDescr.7 = STRING: The MIB module for managing UDP implementations<br>SNMPv2-MIB::sysORDescr.8 = STRING: View-based Access Control Model for SNMP.<br>SNMPv2-MIB::sysORUpTime.1 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.2 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.3 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.4 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.5 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.6 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.7 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.8 = Timeticks: (38) 0:00:00.38<br>HOST-RESOURCES-MIB::hrSystemUptime.0 = Timeticks: (16030332) 1 day, 20:31:43.32<br>HOST-RESOURCES-MIB::hrSystemUptime.0 = No more variables left in this MIB View (It is past the end of the MIB tree)</p>
+<p>linuxer@imlinuxer:~$ snmpwalk -v 2c -c public localhost<br>SNMPv2-MIB::sysDescr.0 = STRING: Linux imlinuxer 3.5.0-27-generic #46-Ubuntu SMP Mon Mar 25 20:00:05 UTC 2013 i686<br>SNMPv2-MIB::sysObjectID.0 = OID: NET-SNMP-MIB::netSnmpAgentOIDs.10<br>DISMAN-EVENT-MIB::sysUpTimeInstance = Timeticks: (939957) 2:36:39.57<br>SNMPv2-MIB::sysContact.0 = STRING: Me &lt;me@example.org&gt;<br>SNMPv2-MIB::sysName.0 = STRING: imlinuxer<br>SNMPv2-MIB::sysLocation.0 = STRING: Sitting on the Dock of the Bay<br>SNMPv2-MIB::sysServices.0 = INTEGER: 72<br>SNMPv2-MIB::sysORLastChange.0 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORID.1 = OID: SNMP-FRAMEWORK-MIB::snmpFrameworkMIBCompliance<br>SNMPv2-MIB::sysORID.2 = OID: SNMP-MPD-MIB::snmpMPDCompliance<br>SNMPv2-MIB::sysORID.3 = OID: SNMP-USER-BASED-SM-MIB::usmMIBCompliance<br>SNMPv2-MIB::sysORID.4 = OID: SNMPv2-MIB::snmpMIB<br>SNMPv2-MIB::sysORID.5 = OID: TCP-MIB::tcpMIB<br>SNMPv2-MIB::sysORID.6 = OID: IP-MIB::ip<br>SNMPv2-MIB::sysORID.7 = OID: UDP-MIB::udpMIB<br>SNMPv2-MIB::sysORID.8 = OID: SNMP-VIEW-BASED-ACM-MIB::vacmBasicGroup<br>SNMPv2-MIB::sysORDescr.1 = STRING: The SNMP Management Architecture MIB.<br>SNMPv2-MIB::sysORDescr.2 = STRING: The MIB for Message Processing and Dispatching.<br>SNMPv2-MIB::sysORDescr.3 = STRING: The management information definitions for the SNMP User-based Security Model.<br>SNMPv2-MIB::sysORDescr.4 = STRING: The MIB module for SNMPv2 entities<br>SNMPv2-MIB::sysORDescr.5 = STRING: The MIB module for managing TCP implementations<br>SNMPv2-MIB::sysORDescr.6 = STRING: The MIB module for managing IP and ICMP implementations<br>SNMPv2-MIB::sysORDescr.7 = STRING: The MIB module for managing UDP implementations<br>SNMPv2-MIB::sysORDescr.8 = STRING: View-based Access Control Model for SNMP.<br>SNMPv2-MIB::sysORUpTime.1 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.2 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.3 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.4 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.5 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.6 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.7 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.8 = Timeticks: (1) 0:00:00.01<br>HOST-RESOURCES-MIB::hrSystemUptime.0 = Timeticks: (2875468) 7:59:14.68<br>HOST-RESOURCES-MIB::hrSystemDate.0 = STRING: 2013-4-25,19:51:51.0,+8:0<br>HOST-RESOURCES-MIB::hrSystemInitialLoadDevice.0 = INTEGER: 1536<br>HOST-RESOURCES-MIB::hrSystemInitialLoadParameters.0 = STRING: “BOOT_IMAGE=/boot/vmlinuz-3.5.0-27-generic root=UUID=226da7a1-f349-4cbf-a63f-3abed38a7371 ro quiet splash vt.handoff=7<br>“<br>HOST-RESOURCES-MIB::hrSystemNumUsers.0 = Gauge32: 2<br>HOST-RESOURCES-MIB::hrSystemProcesses.0 = Gauge32: 155<br>HOST-RESOURCES-MIB::hrSystemMaxProcesses.0 = INTEGER: 0<br>HOST-RESOURCES-MIB::hrSystemMaxProcesses.0 = No more variables left in this MIB View (It is past the end of the MIB tree)</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-12T09:51:23.000Z"><a href="/2013/04/12/lamp-install/">4月 12 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/12/lamp-install/">Ubuntu 12.10环境下Apache、MySql和PHP的安装和配置</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>需要修改下实验室的网站，而windows下的WAMP环境出了点问题，于是就在刚安装的ubuntu 12.10 环境下安装下 Apache 、MySql和PHP环境。虽然之前知道linux下apache、mysql以及PHP的安装和配置过程，但是还是简单记录下刚才的安装和配置环境过程吧，以下环境安装都是默认情况。</p>
+<p>1、Apache</p>
+<p>安装：sudo apt-get install apache2</p>
+<p>默认安装在etc/apache2文件夹下，执行文件在/usr/sbin/apache2\apache2ctl\apachectl</p>
+<p>/etc/apache2下：</p>
+<p>apache2.conf  ———— 全局配置文件</p>
+<p>conf.d （文件夹） ———— 该目录存放一些一般性的配置</p>
+<p>httpd.conf      ———— 用户配置文件（默认没有此文件）</p>
+<p>默认情况下，网站文件在/var/www目录下，通过DocumenRoot 关键字的设置，可以把任意目录指定为网页文件的根目录。</p>
+<p>虚拟主机的配置文件放在/etc/apache2/sites-available目录下的default文件。</p>
+<p>Apache2的开启、关闭以及重启命令：</p>
+<p>sudo service apache2 start/stop/restart  或者 sudo apache2ctl -k start</p>
+<p>2、MySql</p>
+<p>安装：</p>
+<p>sudo apt-get install mysql-server</p>
+<p>安装文件以及执行文件都与apache2相似，服务端在/etc/mysql ，配置文件是 /etc/mysql/my.cnf 数据库存储在/usr/lib/mysql文件夹下。执行文件在/usr/sbin/mysqld</p>
+<p>连接：</p>
+<p>mysql -u root -p</p>
+<p>-u选项用来指定登录的用户，后面的root表示采用root帐号登录。 -p表示采用密码验证的方式登录。</p>
+<p>数据库进程的开启关闭和重启：</p>
+<p>sudo service mysql start/stop</p>
+<p>apache和mysql的服务程序在etc/init.d文件夹下。</p>
+<p>简单的数据库操作：</p>
+<p>（1）创建数据库</p>
+<p>命令：create database</p>
+<p>例如：建立一个名为linuxer的数据库</p>
+<p>mysql&gt; create database linuxer;</p>
+<p>（2）显示所有的数据库</p>
+<p>命令：show databases （注意：最后有个s）</p>
+<p>mysql&gt; show databases;</p>
+<p>（3）删除数据库</p>
+<p>命令：drop database</p>
+<p>例如：删除名为linuxer的数据库</p>
+<p>mysql&gt; drop database linuxer;</p>
+<p>（4）连接数据库</p>
+<p>命令： use</p>
+<p>例如：如果linuxer数据库存在，尝试存取它：</p>
+<p>mysql&gt; use linuxer;</p>
+<p>屏幕提示：Database changed</p>
+<p>（5）当前选择（连接）的数据库</p>
+<p>mysql&gt; select database();</p>
+<p>（6）当前数据库包含的表信息：</p>
+<p>mysql&gt; show tables; （注意：最后有个s）</p>
+<p>（7）建表</p>
+<p>命令：create table ( [,.. ]);</p>
+<p>mysql&gt; CREATE TABLE <code>helloworld</code> (<br>-&gt; <code>id</code> int(10) UNSIGNED NOT NULL AUTO_INCREMENT,<br>-&gt; <code>name</code> varchar(20) DEFAULT NULL ,<br>-&gt; PRIMARY KEY (<code>id</code>)<br>-&gt; ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;</p>
+<p>（8）获取表结构</p>
+<p>命令： desc 表名，或者show columns from 表名</p>
+<p>mysql&gt; DESCRIBE 表名</p>
+<p>mysql&gt; desc 表名;</p>
+<p>mysql&gt; show columns from 表名;</p>
+<p>（9）删除表</p>
+<p>命令：drop table</p>
+<p>例如：删除表名为 linuxer 的表</p>
+<p>mysql&gt; drop table linuxer;</p>
+<p>（10）插入数据</p>
+<p>命令：insert into [( [,.. ])] values ( 值1 )[, ( 值n )]</p>
+<p>（11）查询表中的数据</p>
+<p>1)、查询所有行</p>
+<p>mysql&gt; select * from linuxer;</p>
+<p>2）、查询前几行数据</p>
+<p>mysql&gt; select * from linuxer order by id limit 0,2;</p>
+<p>（12）删除表中数据</p>
+<p>命令：delete from 表名 where 表达式</p>
+<p>例如：删除表 linuxer中编号为1 的记录</p>
+<p>mysql&gt; delete from linuxer where id=1;</p>
+<p>（13）修改表中数据：update 表名 set 字段=新值,… where 条件</p>
+<p>mysql&gt; update linuxer set name=”helloworld” where id=1;</p>
+<p>（14）在表中增加字段：</p>
+<p>命令：alter table 表名 add字段 类型其他;</p>
+<p>例如：在表linuxer中添加了一个字段test，类型为int(4)，默认值为0</p>
+<p>mysql&gt; alter table linuxer add test int(4) default ”0”</p>
+<p>（15）更改表名：</p>
+<p>命令：rename table 原表名 to 新表名;</p>
+<p>例如：在表linuxer名字更改为YourName</p>
+<p>mysql&gt; rename table linuxer to YourName;</p>
+<p>3、PHP</p>
+<p>安装：</p>
+<p>sudo apt-get install php5</p>
+<p>sudo apt-get install libapache2-mod-php5</p>
+<p>让PHP能与MySql一起工作，需要安装下PHP-MySql软件包：</p>
+<p>sudo apt-get install libapache2-mod-auth-mysql</p>
+<p>sudo apt-get install php5-mysql</p>
+<p>编辑下/etc/php5/apache2/php.in，取消对 ;extension = mysql.so 的注释 ===&gt; extension = mysql.so</p>
+<p>安装phpmyadmin：</p>
+<p>默认安装在/usr/share/phpmyadmin</p>
+<p>安装完毕后在浏览器上输入：127.0.0.1/phpmyadmin ，会发现not found（当然，我们服务器目录下没此文件呗），所以我们做下软链接：</p>
+<p>sudo ln -s /usr/share/phpadmin   /var/www</p>
+<p>输入在安装phpmyadmin时候输入的密码就可以登录了。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-08T14:43:29.000Z"><a href="/2013/04/08/linux-c-3/">4月 8 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/08/linux-c-3/">《Linux C编程一站式学习》读书笔记(三)</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1、所有的I/O操作最终都是在内核中做的，以前我们用的C标准I/O库函数最终也是通过系统调用把I/O操作从用户空间传给内核，然后让内核去做I/O操作。</p>
+<p>2、ebx 文件描述符</p>
+<p>edx 文件输出的字节</p>
+<p>ecx 输出缓冲区的首地址</p>
+<p>3、open、read、write、close等系统函数成为无缓冲区I/O（unbuffered I/O）函数，因为它们位于C标准库的I/O缓冲区的底层。用户程序在读写文件时既可以调用C标准I/O库函数，也可以直接调用底层的unbuffered I/O函数，但unbuffered I/O函数每次读写都要进内核，调一个系统调用比调一个用户空间的函数要慢得多，所以在用户空间开辟I/O缓冲区还是必要的，用标准I/O库函数就比较方便，省去了自己管理I/O缓冲区的麻烦。</p>
+<p>但是，unix的传统是Eerything is a file。I/O不仅用于读写常规文件，也便于读写设备，比如终端或网络设备。在读写设备时通常是不希望有缓冲区的，例如向代表网络设备的文件写数据就是希望数据通过网络设备发送出去，而不希望只写到缓冲区里就算完事儿了，当网络设备接收到数据时应用程序也希望第一时间被通知到，所以网络编程通常直接调用unbuffered I/O 函数。</p>
+<p>4、读常规文件不会阻塞的，不管读多少字节，read一定会在有限的时间内返回，从终端设备或网络读则不一定。如果从终端输入的数据没有换行符，调用read读终端设备就会阻塞，如果网络上没有接收到数据包，调用read从网络读就会阻塞。至于阻塞多长时间也是不确定的，如果一直没有数据到达就一直阻塞在那里，同样，写常规文件是不会阻塞的，而向终端设备或网络设备写则不一定。当进程调用一个阻塞的系统函数时，该进程被至于睡眠状态，这时内核调用其它进程运行，直到该进程等待的事件发生了（比如网络上接收到数据包，或者调用sleep指定的睡眠时间到了）它才有可能继续运行，与睡眠状态相对的是运行（Running）状态，在linux内核中，处于运行状态的进程分为两种情况：正在被调度执行，就绪状态。</p>
+<p>5、可以用strace命令执行程序，跟踪该程序执行过程中用到的所有系统调用的参数及返回值。</p>
+<p>6、在shell命令下可以运行一个命令，是因为shell进程在读取用户输入的命令之后会调用fork复制出一个新的shell进程，然后新的shell进程调用exec执行新的程序。</p>
+<p>7、子进程中fork的返回值是0，而父进程中fork的返回值则是子进程的id。</p>
+<p>fork的另一个特性是所有由父进程打开的描述符都被复制到子进程中。父、子进程中相同编号的文件描述符在内核中指向同一个file结构体，也就是说，file结构体的引用计数要增加。用gdb调试多进程的程序会遇到困难，gdb只能跟踪一个进程（默认是跟踪父进程），而不能同时跟踪多个进程，但可以设置gdb在fork之后跟踪父进程还是子进程。</p>
+<p>set follow-fork-mode child 命令设置gdb在fork之后跟踪子进程。set follow-fork-mode parent 则是跟踪父进程。</p>
+<p>8、子进程往往要调用一种exec函数以执行另一个程序，当进程调用一种exec函数时，该进程的用户空间代码和数据完全被新程序替换，从新程序的启动例程开始执行，调用exec并不创建新进程，所以调用exec前后该进程的id并未改变。</p>
+<p>9、一个进程在终止时会关闭所有文件描述符，释放在用户空间分配的内存，但它的pcb还保留着，内核在其中保存一些信息；如果是正常终止，则保存着退出状态，如果是异常终止，则保存着导致该进程终止的信号是哪个。</p>
+<p>10、每个进程各自有不同的用户地址空间，任何一个进程的全局变量在另一个进程中都看不到，所以进程之间要交换数据必须通过内核，在内核中开辟一块缓冲区，进程1把数据从用户空间拷到内核缓冲区，进程2再从内核缓冲区把数据读走，内核提供的这种机制称为进程间通信（IPC，Inter Process Communication）</p>
+<p>11、FIFO和Unix Domain Socket 这2种IPC机制都是利用文件系统中的特殊文件来标识的。</p>
+<p>12、默认是不允许产生core文件的，因为core文件中可能包含用户密码等敏感信息，不安全。在开发调试阶段可以用ulimit命令改变这个限制，允许产生core文件。首先用ulimit命令改变shell进程的Resource Limit，允许core文件最大为1024k，$ ulimit -c 1024</p>
+<p>13、sig_atomic_t 类型的变量应该总是加上volatile限定符，因为要使用sig_atomic_t 类型的理由也真是要加volatile限定符的理由。</p>
+<p>14、Shell分前后台来控制的不是进程而是作业（Job）或者进程组（Process Group），一个前台作业可以由多个进程组成，一个后台作业也可以由多个进程组成，shell可以同时运行一个前台作业和任意多个后台作业，这称为作业控制（Job Control）。</p>
+<p>15、由Shell进程fork出的子进程本来具有和Shell相同的Session、进程组和控制终端，但是Shell调用setpgid函数将作业中的某个子进程指定为一个新进程组的leader，然后调用setpgid将该作业中的其他子进程也转移到这个进程组中。如果这个进程组需要在前台运行，就调用tcsetpgrp函数将它设置为前台进程组，由于一个session只能有一个前台进程组，所以shell所在的进程组就自动变成后台进程组。</p>
+<p>16、TCP/IP网络协议栈分为四层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-24-26.png" alt=""></p>
+<p>不同的协议层对数据包有不同的称谓，在传输层叫做段（segment）、在网络层叫做数据报（datagram），在链路层叫做帧（frame）。数据封装成帧后发到传输介质上，到达目的主机后每层协议再削掉相应的首部，最后将应用层数据交给应用程序处理。</p>
+<p>17、Multiplexing过程：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-29-17.png" alt=""></p>
+<p>18、Socket：如果发送端发送的速度较快，接收端接收到的数据后处理的速度较慢，而接收缓冲区的大小是固定的，就会丢失数据，TCP协议通过“滑动窗口”机制解决这一问题。</p>
+<p>19、TCP/IP协议规定，网络数据流应采用大端字节序，即低地址高字节，为使网络程序具有可移植性，使同样的C代码在大端和小端计算机上编译后都能正常运行，可以调用库函数做网络字节序和主机字节序的转换。</p>
+<p>20、TCP协议通信流程：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-35-03.png" alt=""></p>
+<p>21、socket编程时，客户端不需要固定的端口号，因此不必调用bind(),客户端的端口号由内核自动分配。注意，客户端不是不允许调用bind()，只是没有必要调用bind()固定一个端口号，服务器也不是必须调用bind()，但如果服务器不调用bind()，内核会自动给服务器分配监听端口，每次启动服务器时端口号都不一样，客户端要连接服务器就会遇到麻烦。</p>
+<p>22、TCP协议是面向流的，read和write调用的返回值往往小于参数指定的字节数，对于read调用，如果接收缓冲区有20字节，请求读100个字节，就会返回20。对于write调用，如果请求写100个字节，而发送缓冲区中只有20个字节的空闲位置，那么write会阻塞，直到把100个字节全部交给发送缓冲区才返回，但如果socket文件描述符有0——NONBLOCK标志，则write不阻塞，直接返回20。以上情况可以避免。</p>
+<p>23、UDP通信流程图：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-42-27.png" alt=""></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+<nav id="pagination">
+  
+    <a href="/page/6/" class="alignleft prev">上一页</a>
+  
+  
+    <a href="/page/8/" class="alignright next">下一页</a>
+  
+  <div class="clearfix"></div>
+</nav></div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

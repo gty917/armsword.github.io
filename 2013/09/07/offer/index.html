@@ -1,0 +1,249 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>看了点《剑指offer》 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="看了点《剑指offer》"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-09-07T11:51:53.000Z"><a href="/2013/09/07/offer/">9月 7 2013</a></time>
+      
+      
+  
+    <h1 class="title">看了点《剑指offer》</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>早就听说，《剑指offer》这本书特别赞，对于马上要找工作的同学（技术岗）帮助特别大，今天随便翻了几十页，这本书确实值得读一读，比如一些简单的程序，这本书会提示你别忘记考虑边界条件，特殊情况，比如判断指针为空，字符串长度为0情况以及错误处理方面，还多次提到别忘记写test case，还有一些问题答案虽然很简单，但是其解释特别详细，原理也说的很明白。当然参加过ACM的同学这本书可能就意义不是太大了。这里简单记录下几道入门题目：</p>
+<p>1.C++里定义一个空的类型，里面没有任何成员变量和成员函数。对该类型求sizeof，得到的结果是多少？</p>
+<p>答案：1</p>
+<p>这个时候面试官肯定如果问你为什么不是0，我想不少同学就可能答不出来具体的原因了，当然这本书很好的讲解了这些基础原理。</p>
+<p>原因：空类型的实例中不包含任何信息，本来求sizeof应该是0，但是当我们声明该类型的实例的时候，它必须在内存中占有一定的空间，否则无法使用这些实例。至于占用多少内存，由编译器决定。Visual Studio中每个空类型的实例占用1字节的空间。</p>
+<p>问：如果在该类型中添加一个构造函数和析构函数，再对该类型求sizeof，得到的结果又是多少？</p>
+<p>答：和前面一样，还是1。调用构造函数和析构函数只需要知道函数的地址即可，而这些函数的地址只与类型相关，而与类型的实例无关，编译器也不会因为这两个函数而在实例内添加任何额外的信息。</p>
+<p>问：那如果把析构函数标记为虚函数呢？ 你看看，这题都是逐渐深入的。所以这是我推荐这本书的主要原因。</p>
+<p>答：C++编译器一旦发现一个类型中有虚函数，就会为该类型生成虚函数表，并在该类型的每一个实例中添加一个虚函数表的指针。在32位的机器上，一个指针占4字节的空间，因此求sizeof得到4；如果是64位的机器，一个指针占8字节的空间，因此求sizeof则得到8。</p>
+<p>2.分析以下程序的编译运行结果，3个选项：A.编译错误；B.编译成功，运行时程序崩溃；C.编译运行正常，输出10</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">class</span> A</div><div class="line">{</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">int</span> value;</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> A(<span class="keyword">int</span> n) {value = n;}</div><div class="line"> A(A other) {value = other.value;}</div><div class="line"> <span class="keyword">void</span> Print() {std::<span class="built_in">cout</span> &lt;&lt; value &lt;&lt; std::endl;}</div><div class="line">};</div><div class="line"></div><div class="line"><span class="keyword">int</span> _tmain(<span class="keyword">int</span> argc,_TCHAR* argv[])</div><div class="line">{</div><div class="line"> A a = <span class="number">10</span>;</div><div class="line"> A b = a;</div><div class="line"> b.Print();</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>在上述代码中，复制构造函数A(A other)传入的参数是A的一个实例。由于是传值参数，我们把形参复制到实参会调用复制构造函数。因此如果允许复制构造函数传值，就会在复制构造函数内调用复制构造函数，就会形成永无休止的递归调用从而导致栈溢出。因此C++的标准不允许复制构造函数传值参数，在VS和GCC中，都将编译出错。要解决这个问题，我们可以把构造函数修改为A(const A&amp; other)，也就是把传值参数改成常量引用。</p>
+<p>3.如下为类型CMyString的声明，请为该类型添加赋值运算符函数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">class CMyString</div><div class="line">{</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="title">CMyString</span>(<span class="keyword">char</span>* pData = NULL);</div><div class="line"> CMyString(<span class="keyword">const</span> CMyString&amp; str);</div><div class="line"> ~CMyString(<span class="keyword">void</span>);</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">char</span>* m_pData;</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>此题其实不是太难，但是此题书中的解题思路和考虑的问题让我叹服，这里把书中的观点表述下：<br>(1)是否把返回值的类型声明为该类型的引用，并在函数结束前返回实例自身的引用(即<em>this)。只有返回一个引用，才可以允许连续赋值。否则如果函数的返回值是void，应用该赋值运算符将不能做连续赋值。假设有3个CMyString的对象:str1、str2和str3，在程序中语句str1=str2=str3将不能通过编译。<br>(2)是否把传入的参数的类型声明为常量引用。如果传入的参数不是引用而是实例，那么从形参到实参会调用一次复制构造函数。把参数声明为引用可以避免这样的无谓消耗，能提高代码的效率。同时，我们在赋值运算符函数内不会改变传入的实例的状态，因此应该为传入的引用参数加上const关键字。<br>(3)是否释放实例自身已有的内存。如果我们忘记在分配内存之前释放自身已有的空间，程序将出现内存泄漏。<br>(4)是否判断传入的参数和当前的实例(</em>this)是不是同一个实例。如果是同一个，则不进行赋值操作，直接返回。如果事先不判断就进行赋值，那么在释放实例自身的内存的时候就会导致严重的问题：当*this和传入的参数是同一个实例时，那么一旦释放了自身的内存，传入的参数的内存也同时被释放了，因此再也找不到需要赋值的内容了。<br>经典的解法：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">CMyString&amp; CMyString::<span class="keyword">operator</span> =(<span class="keyword">const</span> CMyString &amp;str)</div><div class="line">{</div><div class="line"> <span class="keyword">if</span>(<span class="keyword">this</span> == &amp;str)</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line"></div><div class="line"><span class="keyword">delete</span> []m_pData;</div><div class="line"> m_pData = NULL;</div><div class="line"> m_pData = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="built_in">strlen</span>(str.m_pData) + <span class="number">1</span>];</div><div class="line"> <span class="built_in">strcpy</span>(m_pData,str.m_pData);</div><div class="line"></div><div class="line"><span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>考虑异常安全性的解法：<br>在前面的函数中，我们在分配内存之前先用delete释放了实例m_pData的内存。如果此时内存不足导致new char 抛出异常，m_pData将是一个空指针，这样非常容易导致程序崩溃。也就是说一旦在赋值运算符函数内部抛出一个异常，CMyString的实例不再保持有效的状态，这就违背了异常安全性(Exception Safety)原则。<br>要想在赋值运算符函数中实现异常安全性，我们有两种方法。一个简单的方式是我们先用new分配新内容再用delete释放已有的内存。这样只在分配内容成功之后再释放原来的内容，也就是当分配内存失败时我们能确保CMyString的实例不会被修改。我们还有一个更好的办法是先创建一个临时实例，再交换临时实例和原来的实例。下面是这种思路的参考代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">CMyString&amp; CMyString::operator =(<span class="keyword">const</span> CMyString &amp;<span class="keyword">str</span>)</div><div class="line">{</div><div class="line"> <span class="keyword">if</span>(this != &amp;<span class="keyword">str</span>)</div><div class="line"> {</div><div class="line"> CMyString strTemp(<span class="keyword">str</span>);</div><div class="line"> <span class="keyword">char</span>* pTemp = strTemp.m_pData;</div><div class="line"> strTemp.m_pData = m_pData;</div><div class="line"> m_pData = pTemp;</div><div class="line"> }</div><div class="line"> <span class="keyword">return</span> *this;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>在这个函数中，我们先创建一个临时实例strTemp，接着把strTemp.m_pData和实例自身的m_pData做交换。由于strTemp是一个局部变量，但程序运行到if的外面时也就出了该变量的作用域，就会自动调用strTemp的析构函数，把strTemp.m_pData所指向的内存释放掉。由于strTemp.m_pData指向的内存就是实例之前m_pData的内存，这就相当于自动调用析构函数释放实例的内存。<br>在新的代码中，我们在CMyString的构造函数里用new分配内存。如果由于内存不足抛出诸如bad_alloc等异常，我们还没有修改原来实例的状态，因此实例的状态还是有效的，这也就保证了异常安全性。</p>
+<p>参考资料：<br>《剑指offer》</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/算法-数据结构/">算法/数据结构</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="看了点《剑指offer》" data-url="http://armsword.com/2013/09/07/offer/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>《Linux C编程一站式学习》读书笔记(二) | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="《Linux C编程一站式学习》读书笔记(二)"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-03-30T12:06:22.000Z"><a href="/2013/03/30/linux-c-2/">3月 30 2013</a></time>
+      
+      
+  
+    <h1 class="title">《Linux C编程一站式学习》读书笔记(二)</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1、无符号数，没有溢出的问题，只有借位。8位二进制数，可以表示的无符号数是0-255。做加法，超过了255，就会进位，做减法，不够减就会借位，一旦出现进位，借位，CF就为1。</p>
+<p>有符号数，没有借位的问题，只有溢出。8位二进制数，可以表示的无符号数是-128～+127。做加法，减法超过了这个范围就会溢出，一旦出现溢出，OF就为1。</p>
+<p>2、gcc的-v选项可以了解详细的编译过程。</p>
+<p>gcc提供了一种扩展语法，可以在C代码中使用内联汇编（Inline Assembly），最简单的格式是<strong>asm</strong>(“assembly code”)，例如<strong>asm</strong>(“nop”)；如果需要执行多条汇编指令，则应该用\n\t将各条指令分隔开：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">__asm_<span class="number">_</span>(&quot;mov <span class="variable">$1</span>,<span class="variable">%eax</span> \n\t&quot;</div><div class="line"></div><div class="line">&quot;mov <span class="variable">$4</span>,<span class="variable">%ebx</span> \n\t&quot;</div><div class="line"></div><div class="line">&quot;<span class="keyword">int</span> <span class="variable">$0</span>x8<span class="number">0</span>&quot;);</div></pre></td></tr></table></figure>
+
+<p>3、gcc的编译优化选项有-O0、-O、-O1、-O2、-O3、-Os几种，-O0表示不优化，这是缺省的选项。-O1、-O2和-O3这几个选项一个比一个优化得更多，编译时间也更长。</p>
+<p>4、有了volatile限定符，是可以防止编译器优化对设备寄存器的访问，但是对于有cache的平台，仅仅这样还不够，还是无法防止Cache优化对设备寄存器的访问。在访问普通的内存单元时，Cache对程序员是透明的，比如执行了movzbl 0x804a019,%eax这样一条指令，我们并不知道eax的值是真的从内存地址0x804a019读到的，还是从Cache中读到的，如果Cache已经缓存了这个地址的数据就从Cache读，如果Cache没有缓存就从内存读，这些步骤都是硬件自动做的，而不是用指令控制Cache去做的，程序员写的指令中只有寄存器、内存地址，而没有Cache，程序员甚至不需要知道Cache的存在。同样道理，如果执行了mov %al,0x804a01a这样一条指令，我们并不知道寄存器的值是真的写回内存了，还是只写到了Cache中，以后再由Cache写回内存，即使只写到了Cache中而暂时没有写回内存，下次读0x804a01a这个地址时仍然可以从Cache中读到上次写的数据。然而，在读写设备寄存器时Cache的存在就不容忽视了，如果串口发送和接收寄存器的内存地址被Cache缓存了会有问题。通常，有cache的平台都有办法对某一段地址范围禁用cache，一般是在页表中设置的，可以设定哪些页面允许Cache缓存，哪些页面不允许cache缓存，MMU不仅要做地址转换和访问权限检查，也要和cache协调工作。</p>
+<p>5、除了设备寄存器需要用volatile限定之外，当一个全局变量被同一进程中的多个控制流程访问时也要用volatile限定，比如信号处理函数和多线程。</p>
+<p>6、在C标准中没有做明确规定的地方会用Implementation-defined、Unspecified或Undefined来表述，编译器可以定义char型是无符号的，也可以定义char型是有符号的，在该编译器所对应的体系结构上哪种实现效率高就可以采用哪种实现，x86平台的gcc定义char型是有符号的。这也是C标准的Rationale之一：优先考虑效率，而可移植性尚在其次。</p>
+<p>7、通常操作系统把虚拟地址空间划分为用户空间和内核空间，例如x86平台的Linux系统虚拟地址空间是0x00000000~0xffffffff，前3GB（0x00000000~0xbfffffff）是用户空间，后1GB（0xc0000000~0xffffffff）是内核空间。用户程序加载到用户空间，在用户模式下执行，不能访问内核中的数据，也不能跳转到内核代码中执行。这样可以保护内核，如果一个进程访问了非法地址，顶多这一个进程崩溃，而不会影响到内核和整个系统的稳定性。</p>
+<p>8、int $0x80(unix平台用的AT&amp;T语法) int指令中的立即数0x80是一个参数，在异常处理程序中要根据这个参数决定如何处理，在Linux内核中int $0x80这种异常称为系统调用（System Call）。内核提供了很多系统服务供用户程序使用，但这些系统服务不能像库函数（比如printf）那样调用，因为在执行用户程序时CPU处于用户模式，不能直接调用内核函数，所以需要通过系统调用切换CPU模式，经由异常处理程序进入内核。</p>
+<p>9、库文件都是以lib开头的，静态库以.a作为后缀表示为Archive。ar命令类似于tar命令，一个打包的命令，但是把目录文件打包成静态库只能用ar命令而不能用tar命令。</p>
+<p>10、ps -C bash  (假如其PID为29977)</p>
+<p>cat /proc/29977/maps</p>
+<p>得知bash进程pid是29977，然后用cat /proc/29977/maps 命令查看它的虚拟地址空间。/proc目录中的文件并不是真正的磁盘文件，而是由内核虚拟出来的文件系统，当前系统中运行的每个进程在/proc 下都存有一个子目录，目录名就是进程的id，查看目录下的文件可以得到该进程的相关信息，此外用pmap 29977命令也可以得到类型的输出结果。</p>
+<p>11、分级存储器体系</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/2013-03-30-9-4.png" alt=""></p>
+<p>Cache和内存都是由RAM（Random Access Memory）组成的，可以根据地址随机访问，计算机掉电时RAM中保存的数据会丢失。不同的是，Cache通常由SRAM（Static RAM，静态RAM）组成，而内存通常由DRAM（Dynamic RAM，动态RAM）组成。DRAM电路比SRAM简单，存储容量可以做得更大，但DRAM的访问速度比SRAM慢。</p>
+<p>12、系统中可分配的内存总量 = 物理内存的大小 + 交换设备的大小</p>
+<p>下图为进程地址空间：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/2013-03-30-19-45.png" alt=""></p>
+<p>13、C99引入了一个新关键字inline，用于定义内联函数（inline function），inline关键字告诉编译器，这个函数的调用要尽可能快，可以当普通的函数调用实现，也可以用宏展开的办法实现。</p>
+<p>14、函数的声明extern关键词是可有可无的，因为函数本身不加修饰的话就是extern，而全局变量在外部使用声明时，extern关键词是必须的，如果变量无extern修饰且没有显式的初始化，同样成为变量的定义，因此此时必须加extern。</p>
+<p>15、NULL在C标准库的头文件stddef.h中定义： #define NULL ((void *)0) ，就是把地址0转换成指针类型，称为空指针，它的特殊之处就在于，操作系统不会把任何数据保存在地址0及其附近，也不会把地址0～0xfff的页面映射到物理内存，所以任何对地址0的访问都会立即导致段错误。</p>
+<p>16、函数指针存放的就是函数的入口地址，它位于.text段。并程序按功能划分为数值运算、符号运算和I/O操作三类。</p>
+<p>17、为什么printf和scanf不用打开就能对终端设备进行操作呢？因为在程序启动时（main函数还没有开始执行之前）会自动把终端设备打开三次，分别赋给三个FILE*指针stdin、stdout和stder，这三个文件是libc中定义的全局变量，在stdio.h中声明，printf向stdout写，而scanf从stdin读，这三个文件指针的打开方式都是可读可写的，但通常stdin只用于读操作，称为标准输入，stdout只用于写操作，成为标准输出，stderr只用于写操作，称为标准错误输出。</p>
+<p>18、C标准库的I/O缓冲区：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/2013-03-30-20-47-19.png" alt=""></p>
+<p>用户程序调用C标准I/O库函数读写文件或设备，而这些库函数要通过系统调用把读写请求传给内核，最终由内核驱动磁盘或设备完成I/O操作。标准输出是行缓冲的，如果打印的字符串没有换行符，所以只把字符串写到标准输出的I/O缓冲区而没有写回内核（写到终端）。</p>
+<p>C标准库的I/O缓冲区有三种类型：全缓冲、行缓冲和无缓冲。当用户程序调用库函数做写操作时，不同类型的缓冲区具有不同的特性。</p>
+<p>全缓冲:<br>如果缓冲区写满了就写回内核。常规文件通常是全缓冲的。<br>行缓冲:<br>如果用户程序写的数据中有换行符就把这一行写回内核，或者如果缓冲区写满了就写回内核。标准输入和标准输出对应终端设备时通常是行缓冲的。<br>无缓冲：<br>用户程序每次调库函数做写操作都要通过系统调用写回内核。标准错误输出通常是无缓冲的，这样用户程序产生的错误信息可以尽快输出到设备。</p>
+<p>例一：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdio.h&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> <span class="built_in">printf</span>(&quot;hello world&quot;);</div><div class="line"> <span class="keyword">while</span>(<span class="number">1</span>);</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>运行这个程序，会发现hello world并没有打印到屏幕上。</p>
+<p>我们知道main函数被启动代码这样调用：exit(main(argc, argv));。main函数return时启动代码会调用exit，exit函数首先关闭所有尚未关闭的FILE *指针（关闭之前要做Flush操作），然后通过_exit系统调用进入内核退出当前进程。</p>
+<p>例二：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdio.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;unistd.h&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> <span class="built_in">printf</span>(<span class="string">"hello world"</span>);</div><div class="line"> _exit(<span class="number">0</span>);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>结果也不会把字符串打印到屏幕上，因为_exit()没做Flush操作。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Linux/">Linux</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="《Linux C编程一站式学习》读书笔记(二)" data-url="http://armsword.com/2013/03/30/linux-c-2/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

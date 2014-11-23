@@ -1,0 +1,546 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>第 8 页 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-03-30T12:06:22.000Z"><a href="/2013/03/30/linux-c-2/">3月 30 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/03/30/linux-c-2/">《Linux C编程一站式学习》读书笔记(二)</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1、无符号数，没有溢出的问题，只有借位。8位二进制数，可以表示的无符号数是0-255。做加法，超过了255，就会进位，做减法，不够减就会借位，一旦出现进位，借位，CF就为1。</p>
+<p>有符号数，没有借位的问题，只有溢出。8位二进制数，可以表示的无符号数是-128～+127。做加法，减法超过了这个范围就会溢出，一旦出现溢出，OF就为1。</p>
+<p>2、gcc的-v选项可以了解详细的编译过程。</p>
+<p>gcc提供了一种扩展语法，可以在C代码中使用内联汇编（Inline Assembly），最简单的格式是<strong>asm</strong>(“assembly code”)，例如<strong>asm</strong>(“nop”)；如果需要执行多条汇编指令，则应该用\n\t将各条指令分隔开：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">__asm_<span class="number">_</span>(&quot;mov <span class="variable">$1</span>,<span class="variable">%eax</span> \n\t&quot;</div><div class="line"></div><div class="line">&quot;mov <span class="variable">$4</span>,<span class="variable">%ebx</span> \n\t&quot;</div><div class="line"></div><div class="line">&quot;<span class="keyword">int</span> <span class="variable">$0</span>x8<span class="number">0</span>&quot;);</div></pre></td></tr></table></figure>
+
+<p>3、gcc的编译优化选项有-O0、-O、-O1、-O2、-O3、-Os几种，-O0表示不优化，这是缺省的选项。-O1、-O2和-O3这几个选项一个比一个优化得更多，编译时间也更长。</p>
+<p>4、有了volatile限定符，是可以防止编译器优化对设备寄存器的访问，但是对于有cache的平台，仅仅这样还不够，还是无法防止Cache优化对设备寄存器的访问。在访问普通的内存单元时，Cache对程序员是透明的，比如执行了movzbl 0x804a019,%eax这样一条指令，我们并不知道eax的值是真的从内存地址0x804a019读到的，还是从Cache中读到的，如果Cache已经缓存了这个地址的数据就从Cache读，如果Cache没有缓存就从内存读，这些步骤都是硬件自动做的，而不是用指令控制Cache去做的，程序员写的指令中只有寄存器、内存地址，而没有Cache，程序员甚至不需要知道Cache的存在。同样道理，如果执行了mov %al,0x804a01a这样一条指令，我们并不知道寄存器的值是真的写回内存了，还是只写到了Cache中，以后再由Cache写回内存，即使只写到了Cache中而暂时没有写回内存，下次读0x804a01a这个地址时仍然可以从Cache中读到上次写的数据。然而，在读写设备寄存器时Cache的存在就不容忽视了，如果串口发送和接收寄存器的内存地址被Cache缓存了会有问题。通常，有cache的平台都有办法对某一段地址范围禁用cache，一般是在页表中设置的，可以设定哪些页面允许Cache缓存，哪些页面不允许cache缓存，MMU不仅要做地址转换和访问权限检查，也要和cache协调工作。</p>
+<p>5、除了设备寄存器需要用volatile限定之外，当一个全局变量被同一进程中的多个控制流程访问时也要用volatile限定，比如信号处理函数和多线程。</p>
+<p>6、在C标准中没有做明确规定的地方会用Implementation-defined、Unspecified或Undefined来表述，编译器可以定义char型是无符号的，也可以定义char型是有符号的，在该编译器所对应的体系结构上哪种实现效率高就可以采用哪种实现，x86平台的gcc定义char型是有符号的。这也是C标准的Rationale之一：优先考虑效率，而可移植性尚在其次。</p>
+<p>7、通常操作系统把虚拟地址空间划分为用户空间和内核空间，例如x86平台的Linux系统虚拟地址空间是0x00000000~0xffffffff，前3GB（0x00000000~0xbfffffff）是用户空间，后1GB（0xc0000000~0xffffffff）是内核空间。用户程序加载到用户空间，在用户模式下执行，不能访问内核中的数据，也不能跳转到内核代码中执行。这样可以保护内核，如果一个进程访问了非法地址，顶多这一个进程崩溃，而不会影响到内核和整个系统的稳定性。</p>
+<p>8、int $0x80(unix平台用的AT&amp;T语法) int指令中的立即数0x80是一个参数，在异常处理程序中要根据这个参数决定如何处理，在Linux内核中int $0x80这种异常称为系统调用（System Call）。内核提供了很多系统服务供用户程序使用，但这些系统服务不能像库函数（比如printf）那样调用，因为在执行用户程序时CPU处于用户模式，不能直接调用内核函数，所以需要通过系统调用切换CPU模式，经由异常处理程序进入内核。</p>
+<p>9、库文件都是以lib开头的，静态库以.a作为后缀表示为Archive。ar命令类似于tar命令，一个打包的命令，但是把目录文件打包成静态库只能用ar命令而不能用tar命令。</p>
+<p>10、ps -C bash  (假如其PID为29977)</p>
+<p>cat /proc/29977/maps</p>
+<p>得知bash进程pid是29977，然后用cat /proc/29977/maps 命令查看它的虚拟地址空间。/proc目录中的文件并不是真正的磁盘文件，而是由内核虚拟出来的文件系统，当前系统中运行的每个进程在/proc 下都存有一个子目录，目录名就是进程的id，查看目录下的文件可以得到该进程的相关信息，此外用pmap 29977命令也可以得到类型的输出结果。</p>
+<p>11、分级存储器体系</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/2013-03-30-9-4.png" alt=""></p>
+<p>Cache和内存都是由RAM（Random Access Memory）组成的，可以根据地址随机访问，计算机掉电时RAM中保存的数据会丢失。不同的是，Cache通常由SRAM（Static RAM，静态RAM）组成，而内存通常由DRAM（Dynamic RAM，动态RAM）组成。DRAM电路比SRAM简单，存储容量可以做得更大，但DRAM的访问速度比SRAM慢。</p>
+<p>12、系统中可分配的内存总量 = 物理内存的大小 + 交换设备的大小</p>
+<p>下图为进程地址空间：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/2013-03-30-19-45.png" alt=""></p>
+<p>13、C99引入了一个新关键字inline，用于定义内联函数（inline function），inline关键字告诉编译器，这个函数的调用要尽可能快，可以当普通的函数调用实现，也可以用宏展开的办法实现。</p>
+<p>14、函数的声明extern关键词是可有可无的，因为函数本身不加修饰的话就是extern，而全局变量在外部使用声明时，extern关键词是必须的，如果变量无extern修饰且没有显式的初始化，同样成为变量的定义，因此此时必须加extern。</p>
+<p>15、NULL在C标准库的头文件stddef.h中定义： #define NULL ((void *)0) ，就是把地址0转换成指针类型，称为空指针，它的特殊之处就在于，操作系统不会把任何数据保存在地址0及其附近，也不会把地址0～0xfff的页面映射到物理内存，所以任何对地址0的访问都会立即导致段错误。</p>
+<p>16、函数指针存放的就是函数的入口地址，它位于.text段。并程序按功能划分为数值运算、符号运算和I/O操作三类。</p>
+<p>17、为什么printf和scanf不用打开就能对终端设备进行操作呢？因为在程序启动时（main函数还没有开始执行之前）会自动把终端设备打开三次，分别赋给三个FILE*指针stdin、stdout和stder，这三个文件是libc中定义的全局变量，在stdio.h中声明，printf向stdout写，而scanf从stdin读，这三个文件指针的打开方式都是可读可写的，但通常stdin只用于读操作，称为标准输入，stdout只用于写操作，成为标准输出，stderr只用于写操作，称为标准错误输出。</p>
+<p>18、C标准库的I/O缓冲区：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/2013-03-30-20-47-19.png" alt=""></p>
+<p>用户程序调用C标准I/O库函数读写文件或设备，而这些库函数要通过系统调用把读写请求传给内核，最终由内核驱动磁盘或设备完成I/O操作。标准输出是行缓冲的，如果打印的字符串没有换行符，所以只把字符串写到标准输出的I/O缓冲区而没有写回内核（写到终端）。</p>
+<p>C标准库的I/O缓冲区有三种类型：全缓冲、行缓冲和无缓冲。当用户程序调用库函数做写操作时，不同类型的缓冲区具有不同的特性。</p>
+<p>全缓冲:<br>如果缓冲区写满了就写回内核。常规文件通常是全缓冲的。<br>行缓冲:<br>如果用户程序写的数据中有换行符就把这一行写回内核，或者如果缓冲区写满了就写回内核。标准输入和标准输出对应终端设备时通常是行缓冲的。<br>无缓冲：<br>用户程序每次调库函数做写操作都要通过系统调用写回内核。标准错误输出通常是无缓冲的，这样用户程序产生的错误信息可以尽快输出到设备。</p>
+<p>例一：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdio.h&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> <span class="built_in">printf</span>(&quot;hello world&quot;);</div><div class="line"> <span class="keyword">while</span>(<span class="number">1</span>);</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>运行这个程序，会发现hello world并没有打印到屏幕上。</p>
+<p>我们知道main函数被启动代码这样调用：exit(main(argc, argv));。main函数return时启动代码会调用exit，exit函数首先关闭所有尚未关闭的FILE *指针（关闭之前要做Flush操作），然后通过_exit系统调用进入内核退出当前进程。</p>
+<p>例二：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdio.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;unistd.h&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> <span class="built_in">printf</span>(<span class="string">"hello world"</span>);</div><div class="line"> _exit(<span class="number">0</span>);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>结果也不会把字符串打印到屏幕上，因为_exit()没做Flush操作。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-03-25T13:50:41.000Z"><a href="/2013/03/25/linux-c-01/">3月 25 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/03/25/linux-c-01/">《Linux C编程一站式学习》读书笔记(一)</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>现在编程学习基本算是转到Linux环境下了，快速学习了一些Linux下的基本操作以及编程技巧吧，之前也算是有点基础，所以看书也比较快。《Linux C编程一站式学习》一共分为3部分，有空就看看，第一部分2天也就阅读完毕，简单做个读书笔记吧，虽然有些知识自己也算是熟悉。</p>
+<p>1、在使用gcc的一个好的习惯就是打开gcc的 -Wall选项，也就是让gcc提示所有的警告信息，不管严重还是非严重的。</p>
+<p>2、Windows文本文件用\r\n做分割浮，linux\unix用\n做行分割符。</p>
+<p>3、共有三个声明：变量声明、函数声明和类型声明。</p>
+<p>4、精度：float单精度，double 双精度，long double 精度更高的浮点数，%f 表示double型。</p>
+<p>5、以下划线开头的标识符少用，往往被编译器用作一些功能的扩展，标准库里面定义了很多下划线开头的标识符。</p>
+<p>6、使用math.h 中声明的库还有一点特殊之处，gcc命令行必须加 -lm选项，因为数学函数位于libm.so库文件中(lib)，-lm选项告诉编译器，我们程序用到的数学函数要到这个库里找;大部分库如printf位于libc.so库文件中，使用libc.so中的库文件在编译时不需要加-lc选项，linux平台上最广泛使用的C函数库是glibc，多线程的C程序依赖于libpthread.so。</p>
+<p>7、隐式声明的函数返回值类型都是int。</p>
+<p>8、man 3 printf 可以查看printf函数的原型。Man Page的Section如下图所示：<strong>
+</strong></p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/201303025011.jpg" alt=""></p>
+<p>9、类型转换的规则：</p>
+<p>存储长度较短的转换为存储长度较大的，并且不丢失信息。常见的类型转换顺序：</p>
+<p>char、short - -&gt; int - -&gt; unsigned - -&gt;long int - -&gt; double  &lt;- - float (即运算中有double，则其他类型会全部转化为double类型)</p>
+<p>10、函数返回值相当于定义一个和返回i值类型相同的临时变量，并用return后面的表达式来初始化。临时变量在使用比如判断之后，就释放它，而不能往它里面存放新的值。</p>
+<p>11、递归和循环是等价的，用循环能做的事，用递归都能做，反之，亦然。（写这个文章之前，我还没意思到这个问题呢）</p>
+<p>12、在多层循环或switch嵌套的情况下，break只能跳出最内层的循环或switch。continue也只能终止最内层的循环并回到该循环的开头。</p>
+<p>13、<code>goto</code>可以从程序中的任何地方都可以无条件跳转到任何其它地方，只要在那个地方定义一个标号就行，唯一的限制是<code>goto</code>只能跳转到同一个函数中的某个标号处，而不能跳到别的函数中。</p>
+<p>14、C标准库函数<code>setjmp</code>和<code>longjmp</code>配合起来可以实现函数间的跳转，但只能从被调用的函数跳回到它的直接或间接调用者（同时从栈空间弹出一个或多个栈帧），而不能从一个函数跳转到另一个和它毫不相干的函数中。<code>setjmp/longjmp</code>函数主要也是用于出错处理，比如函数<code>A</code>调用函数<code>B</code>，函数<code>B</code>调用函数<code>C</code>，如果在<code>C</code>中出现某个错误条件，使得函数<code>B</code>和<code>C</code>继续执行下去都没有意义了，可以利用<code>setjmp/longjmp</code>机制快速返回到函数<code>A</code>做出错处理。</p>
+<p>15、结构体的成员名和变量名不在同一个命名空间中，但枚举的成员名却和变量名在同一个命名空间中。</p>
+<p>16、编译器的工作分为两个阶段，先是预处理阶段，然后才是编译阶段，用gcc的 -E选项可以看到预处理之后、编译之前的程序。</p>
+<p>$gcc -E main.c                   用cpp main.c命令也可以达到同样的效果，只做预处理而不编译。cpp表示c preprocessor 。</p>
+<p>17、indent工具可以把代码格式化成某种风格。</p>
+<p>$indent -kr -i8 main.c</p>
+<p>$cat main.c</p>
+<p>-kr 选项表示K&amp;R风格，-i8表示缩进8个空格的长度。</p>
+<p>18、在编译时要加上 -g选项，生成的可执行文件才能用gdb进行源码级调试。</p>
+<p>$gcc -g main.c -o main</p>
+<p>$gdb main</p>
+<p>-g的作用是在可执行文件中加入源代码的信息，比如可执行文件的第几条机器指令对应源代码的第几行，但并不把整个源文件嵌入到可执行文件中，所以在调试时必须保证gdb能找到源文件。</p>
+<p>19、gdb常用的命令如下图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/20130325021.jpg" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/03/20130325031.jpg" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/03/20130325041.jpg" alt=""></p>
+<p>20、如果包含了assert.h，之后定义了一个NDEBUG宏（表示no debug），就可以禁用assert.h中的assert宏定义，这样代码中的所有的assert测试都不起作用了。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-02-23T12:00:55.000Z"><a href="/2013/02/23/change-system-in-win8os/">2月 23 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/02/23/change-system-in-win8os/">将预装Win8系统的电脑重装个系统</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>昨天新入手了一个笔记本，联想的M490，商务机吧，但是用了一天感觉还是不错的。系统预装的win8，考虑到自己的需求，我将其系统换成win7+Ubuntu了。但是在把系统换成win7途中遇到一些问题，我想对于像我这种不熟悉EFI+GPT的广大网友可能也会遇到吧，这里分享下解决问题的方法。</p>
+<p>我们按照正常方法（硬盘或虚拟光驱）重装系统，在系统启动时候会遇到如下提示，Windows 启动管理器，最近的硬件或软件更改可能安装了未正确签名或损坏的文件，或者可能是来自未知源的恶意软件，状态:0xc0000428 信息:无法验证此文件的数字签名。</p>
+<p>查阅了资料发现，预装win8系统的电脑有Secure Boot，不能直接通过EFI Shell 引导装系统，不开启不能启动Win8系统，而开启了就不能安装其它系统。而且就算关闭了Secure Boot，EFI也只支持64位系统，且必须用GPT分区。而预装了win8的系统，分区是GPT，主板是EFI。所以，如果我们想像以往那样装系统的话，需要将其设置为Legacy（就是传统的bios）+ MBR形式。</p>
+<p>我们开机运行F1或者F2等进入bios，首先，将bios里面的Secure Boot 关闭，改为disabled即可。第二将其模式改为Legacy+MBR。如下图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/02/201302231948032.jpg" alt=""></p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/02/20130223194833.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>之后保存。这样就与我们平常熟悉的装系统的方法一样了。如果你想依然用EFI+GPT装系统，这也是可以的，这里我就不说了。可以参考右边的链接，<a href="http://diybbs.zol.com.cn/3/308_22291.html" target="_blank" rel="external">预装Win8系统的电脑安装Win7的方法（EFI安装Win7）</a>很详细，不过我感觉以后EFI+GPT应该是技术发展的趋势吧，应该会很快普及的。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2012-10-09T06:06:59.000Z"><a href="/2012/10/09/manual-for-pe-files-and-segments/">10月 9 2012</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2012/10/09/manual-for-pe-files-and-segments/">手工为PE文件加区段</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>手工给PE文件加个区段，看电脑太累了，还是手写舒服，计算完毕用WinHex填上十六进制数字，发现程序依然能运行，Peid查看发现多了个.arms区段。 发张图来记录当时的计算过程吧，我们在00001400处用WinHex填充200h(512)的0字节，之后，按照IMAGE_SECTION_HEADER 结构定义各块，如图所示。另外，别吐槽我的书法，好久没写字了。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121009135521.jpg" alt=""></p>
+<p>原理图如下：</p>
+<p>PE文件的框架结构：</p>
+<p><a href="http://armsword.com/wp-content/uploads/2012/10/48377.jpg" target="_blank" rel="external"><img src="http://armsword.com/wp-content/uploads/2012/10/48377.jpg" alt="" title="48377"></a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2012-10-08T12:09:33.000Z"><a href="/2012/10/08/pe-view-tools/">10月 8 2012</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2012/10/08/pe-view-tools/">模仿Stud_PE写了个PE查看工具</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>代码写的比较简单，其实主要是接上篇文章的练习之作，依然还是Win32 Console环境。由于出现了野指针，导致debug了好长时间才找出毛病。这里贴下代码吧，代码原理比较简单，上篇文章已经详细说明了。并且各大论坛和书籍都有类型的介绍或相关的代码。我们将系统自带的计算器calc.exe复制到C盘根目录下。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdio.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;windows.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdlib.h&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> FILE *fp;</div><div class="line"> <span class="keyword">char</span> ch;</div><div class="line"> <span class="keyword">int</span> i;</div><div class="line"> <span class="keyword">char</span> filename[MAX_PATH];</div><div class="line"> IMAGE_DOS_HEADER DOS_header; <span class="comment">//DOS头文件</span></div><div class="line"> IMAGE_NT_HEADERS NT_header; <span class="comment">//PE头文件</span></div><div class="line"> IMAGE_SECTION_HEADER *SN_header;</div><div class="line"> <span class="built_in">memset</span>(filename,<span class="number">0</span>,<span class="keyword">sizeof</span>(filename));</div><div class="line"></div><div class="line"> <span class="built_in">printf</span>(&quot;请输入文件名:\n&quot;);</div><div class="line"> gets(filename);</div><div class="line"> fp = fopen(filename,&quot;rb&quot;);</div><div class="line"> <span class="keyword">if</span> (fp == NULL)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;打开文件出错！\n&quot;);</div><div class="line"> <span class="built_in">exit</span>(<span class="number">0</span>);</div><div class="line"> }</div><div class="line"> <span class="built_in">printf</span>(&quot;检查当前文件%s的前两个字节是否为MZ\n&quot;,filename);</div><div class="line"> ch = fgetc(fp); <span class="comment">//使用fgets()一次判断也可以</span></div><div class="line"> <span class="keyword">if</span>(ch != <span class="string">'M'</span>)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;该文件不是有效的PE文件！\n&quot;);</div><div class="line"> <span class="built_in">exit</span>(<span class="number">0</span>);</div><div class="line"> }</div><div class="line"> <span class="keyword">else</span></div><div class="line"> {</div><div class="line"> ch = fgetc(fp); <span class="comment">//fgetc()移动指针</span></div><div class="line"> <span class="keyword">if</span> (ch != <span class="string">'Z'</span>)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;该文件不是有效的PE文件！\n&quot;);</div><div class="line"> <span class="built_in">exit</span>(<span class="number">0</span>);</div><div class="line"> }</div><div class="line"></div><div class="line">}</div><div class="line"></div><div class="line"> rewind(fp); <span class="comment">//文件指针移动到开头</span></div><div class="line"> <span class="built_in">printf</span>(&quot;\n----------------PE头文件信息------------------\n&quot;);</div><div class="line"> fread(&amp;DOS_header,<span class="keyword">sizeof</span>(<span class="keyword">struct</span> _IMAGE_DOS_HEADER),<span class="number">1</span>,fp);</div><div class="line"> <span class="built_in">printf</span>(&quot;文件头偏移：%X h\n&quot;,DOS_header.e_lfanew);<span class="comment">//e_magic、e_lfnew</span></div><div class="line"> fseek(fp,DOS_header.e_lfanew,<span class="number">0</span>); <span class="comment">//移动e_lfanew</span></div><div class="line"> fread(&amp;NT_header,<span class="keyword">sizeof</span>(<span class="keyword">struct</span> _IMAGE_NT_HEADERS),<span class="number">1</span>,fp);</div><div class="line"> <span class="keyword">if</span>(NT_header.Signature != <span class="number">0x00004550</span>)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;该文件不是有效的PE文件！\n&quot;);</div><div class="line"> fclose(fp);</div><div class="line"> <span class="built_in">exit</span>(<span class="number">0</span>);</div><div class="line"> }</div><div class="line"> <span class="built_in">printf</span>(&quot;节的个数：%x h\n&quot;,NT_header.FileHeader.NumberOfSections);</div><div class="line"> <span class="built_in">printf</span>(&quot;基地址：%xH\n&quot;,NT_header.OptionalHeader.ImageBase);</div><div class="line"> <span class="built_in">printf</span>(&quot;执行入口RVA：%x h\n&quot;,NT_header.OptionalHeader.AddressOfEntryPoint);</div><div class="line"> <span class="built_in">printf</span>(&quot;内存文件映像大小：%x h\n&quot;,NT_header.OptionalHeader.SizeOfImage);</div><div class="line"> system(&quot;pause&quot;);</div><div class="line"> system(&quot;cls&quot;);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n----------------PE节文件信息------------------\n&quot;);</div><div class="line"> SN_header = (IMAGE_SECTION_HEADER *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(IMAGE_SECTION_HEADER)*(NT_header.FileHeader.NumberOfSections));</div><div class="line"> <span class="comment">//SN_header = new IMAGE_SECTION_HEADER[NT_header.FileHeader.NumberOfSections];</span></div><div class="line"> fread(SN_header,NT_header.FileHeader.NumberOfSections*<span class="keyword">sizeof</span>(<span class="keyword">struct</span> _IMAGE_SECTION_HEADER),<span class="number">1</span>,fp);</div><div class="line"> <span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;NT_header.FileHeader.NumberOfSections;i++)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的节表名称:%s\n&quot;,i+<span class="number">1</span>,SN_header[i].Name);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的文件偏移:%X h\n&quot;,i+<span class="number">1</span>,SN_header[i].PointerToRawData);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的内存偏移:%X h\n&quot;,i+<span class="number">1</span>,SN_header[i].VirtualAddress);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的实际大小:%X h\n&quot;,i+<span class="number">1</span>,SN_header[i].Misc.VirtualSize);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节对齐后大小:%X h\n&quot;,i+<span class="number">1</span>,SN_header[i].SizeOfRawData);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的相关属性:%XH\n&quot;,i+<span class="number">1</span>,SN_header[i].Characteristics);</div><div class="line"></div><div class="line">}</div><div class="line"> fclose(fp);</div><div class="line"> getchar();</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">请输入文件名:</div><div class="line"><span class="tag">C</span>:\<span class="tag">calc</span><span class="class">.exe</span></div><div class="line">检查当前文件<span class="tag">C</span>:\<span class="tag">calc</span><span class="class">.exe</span>的前两个字节是否为<span class="tag">MZ</span></div><div class="line"></div><div class="line"><span class="tag">----------------PE</span>头文件信息<span class="tag">------------------</span></div><div class="line">文件头偏移：<span class="tag">D8</span> <span class="tag">h</span></div><div class="line">节的个数：4 <span class="tag">h</span></div><div class="line">基地址：1000000<span class="tag">H</span></div><div class="line">执行入口<span class="tag">RVA</span>：12<span class="tag">d6c</span> <span class="tag">h</span></div><div class="line">内存文件映像大小：<span class="tag">c0000</span> <span class="tag">h</span></div><div class="line"><span class="tag">----------------PE</span>节文件信息<span class="tag">------------------</span></div><div class="line"></div><div class="line">第 1 节的节表名称:<span class="class">.text</span></div><div class="line"></div><div class="line">第 1 节的文件偏移<span class="pseudo">:400</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 1 节的内存偏移<span class="pseudo">:1000</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 1 节的实际大小<span class="pseudo">:52CA1</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 1 节对齐后大小<span class="pseudo">:52E00</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 1 节的相关属性<span class="pseudo">:60000020H</span></div><div class="line"></div><div class="line">第 2 节的节表名称:<span class="class">.data</span></div><div class="line"></div><div class="line">第 2 节的文件偏移<span class="pseudo">:53200</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 2 节的内存偏移<span class="pseudo">:54000</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 2 节的实际大小<span class="pseudo">:40C0</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 2 节对齐后大小<span class="pseudo">:4200</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 2 节的相关属性<span class="pseudo">:C0000040H</span></div><div class="line"></div><div class="line">第 3 节的节表名称:<span class="class">.rsrc</span></div><div class="line"></div><div class="line">第 3 节的文件偏移<span class="pseudo">:57400</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 3 节的内存偏移<span class="pseudo">:59000</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 3 节的实际大小<span class="pseudo">:62798</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 3 节对齐后大小<span class="pseudo">:62800</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 3 节的相关属性<span class="pseudo">:40000040H</span></div><div class="line"></div><div class="line">第 4 节的节表名称:<span class="class">.reloc</span></div><div class="line"></div><div class="line">第 4 节的文件偏移<span class="pseudo">:B9C00</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 4 节的内存偏移<span class="pseudo">:BC000</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 4 节的实际大小<span class="pseudo">:3B3C</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 4 节对齐后大小<span class="pseudo">:3C00</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 4 节的相关属性<span class="pseudo">:42000040H</span></div></pre></td></tr></table></figure>
+
+<p>我们用Peid查看下该文件信息，之后我们比较下结果：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121008200753.jpg" alt=""></p>
+<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121008164836.jpg" alt=""></p>
+<p>当然我的比Peid的简单多了，因为我火候还没到呢，-_-!</p>
+<p>另外，放张图，来纪念由于自己的失误，而照成的野指针，因为费了大约2个小时来找bug，不过幸运的事，在找bug过程中，我学习了不少知识。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121008164835.jpg" alt=""></p>
+<p>图中fp = 0x00000000 ，为啥啊，因为我在判断fp是否为NULL的时候，对它赋值了。糗大了。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2012-10-08T08:46:21.000Z"><a href="/2012/10/08/learning-pe-file-format/">10月 8 2012</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2012/10/08/learning-pe-file-format/">简单学习下PE文件格式</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>PE 的意思就是 Portable Executable（可移植的执行体）。它是 Win32环境自身所带的执行体文件格式。一些特性继承自Unix的Coff(common object file format)文件格式。</p>
+<p>我们浏览下，PE文件的总体层次分布图：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121008101902.jpg" alt=""></p>
+<p>当然想查看完整的图片，也可以查看下图，不过图片太大，一般电脑显示屏幕无法完全显示。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2012/10/PE.jpg" alt=""></p>
+<p>由上图我们可以看到，所有的PE文件必须以一个简单的DOS MZ header开始。 其作用是程序运行在DOS环境中时，DOS能识别出它是有效的PE文件。然后运行紧随MZ header之后的DOS stub,DOS stub实际上是个有效的EXE，在不支持PE文件格式的操作系统中，它将简单显示一个错误提示，类似于字符串”This program requires Windows”或者根据程序员的意图自己实现。通常情况下DOS stub对我们没啥大用处，因为大多数情况下它是由汇编器/编译器自动生成的。通常，MS DOS使用中断号21H作为系统调用，简单显示字符串”This program cannot run in DOS mode”。</p>
+<p>跟在DOS stub后面的是PE header，PE header是PE相关结构 IMAGE_NT_HEADERS 的简称，其中包含了许多PE装载器用到的重要域。</p>
+<p>PE文件的真正内容划分成块，称之为section（节）。每节是一块拥有共同属性的数据，比如代码/数据、读/写等。注意的是：不必关心节中类似于”data”,”code”或其他的逻辑概念：如果数据或代码拥有相同属性，它们就可以被归入同一个节中。</p>
+<p>下面将总结一下装载一PE文件的主要步骤:<br>1.当PE文件被执行，PE装载器检查 DOS MZ header 里的 PE header 偏移量。如果找到，则跳转到 PE header。<br>2.PE装载器检查 PE header 的有效性。如果有效，就跳转到PE header的尾部。<br>3.紧跟 PE header 的是节表。PE装载器读取其中的节信息，并采用文件映射方法将这些节映射到内存，同时付上节表里指定的节属性。<br>4.PE文件映射入内存后，PE装载器将处理PE文件中类似 import table（引入表）逻辑部分。</p>
+<p>下面我们详细分析下各部分：</p>
+<p>1、DOS MZ 分析</p>
+<p>定义为：</p>
+<p>IMAGE_DOS_HEADER</p>
+<p>通常只用到量个字段：e_magic 和 e_lfnew 。</p>
+<p>e_magic：被成为“魔术数字”，表示MS DOS兼容的文件类型，值设定为0x5A4D，即ASCII字符“MZ”。</p>
+<p>e_lfnew： 指出了PE header 的文件偏移位置。</p>
+<p>2、PE header 分析</p>
+<p>定义为：</p>
+<p>IMAGE_NT_HEADERS</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_NT_HEADERS</span> </span>{</div><div class="line"> DWORD Signature; <span class="comment">//设置为0x00004550，ASCII码为&quot;PE&#92;&#48;&#92;&#48;&quot;</span></div><div class="line"></div><div class="line"> IMAGE_FILE_HEADER FileHeader;     <span class="comment">//包含PE文件的一些基本信息</span></div><div class="line"> IMAGE_OPTIONAL_HEADER OptionalHeader;</div><div class="line">} IMAGE_NT_HEADERS, *PIMAGE_NT_HEADERS;</div></pre></td></tr></table></figure>
+
+<p>IMAGE_FILE_HEADER结构定义如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_FILE_HEADER</span> </span>{</div><div class="line"> WORD Machine;   <span class="comment">//运行平台</span></div><div class="line"> WORD NumberOfSections; <span class="comment">//文件的节数目</span></div><div class="line"> DWORD TimeDateStamp;  <span class="comment">//文件创建日记和时间</span></div><div class="line"> DWORD PointerToSymbolTable;  <span class="comment">//指向符号表</span></div><div class="line"> DWORD NumberOfSymbols;         <span class="comment">//符号表中的符号常量</span></div><div class="line"> WORD SizeOfOptionalHeader; <span class="comment">//仅需关注这个字段就行</span></div><div class="line"> WORD Characteristics;      <span class="comment">//文件属性</span></div><div class="line">} IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;</div></pre></td></tr></table></figure>
+
+<p>WORD SizeOfOptionalHeader，它给出了IMAGE_OPTIONAL_HEADER结构体的大小。</p>
+<p>IMAGE_OPTIONAL_HEADER 结构体定义如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">typedef struct _IMAGE_OPTIONAL_HEADER {</div><div class="line"> <span class="preprocessor">WORD</span> Magic<span class="comment">;</span></div><div class="line"> <span class="preprocessor">BYTE</span> MajorLinkerVersion<span class="comment">;</span></div><div class="line"> <span class="preprocessor">BYTE</span> MinorLinkerVersion<span class="comment">;</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfCode<span class="comment">; //所有含代码的节的总大小</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfInitializedData<span class="comment">; //所有含已初始化数据的节的总大小</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfUninitializedData<span class="comment">; //所有含未初始化数据的节的总大小</span></div><div class="line"> <span class="preprocessor">DWORD</span> AddressOfEntryPoint<span class="comment">; //相对于基地址的偏移地址，RVA，程序执行入口</span></div><div class="line"> <span class="preprocessor">DWORD</span> BaseOfCode<span class="comment">; //代码的节的起始RVA</span></div><div class="line"> <span class="preprocessor">DWORD</span> BaseOfData<span class="comment">;  //数据的节的起始RVA</span></div><div class="line"> <span class="preprocessor">DWORD</span> ImageBase<span class="comment">; //程序的入口地址, 建议的装载地址，一般为0x00400000</span></div><div class="line"> <span class="preprocessor">DWORD</span> SectionAlignment<span class="comment">;  //内存中的节的对齐力度,一般为1000h</span></div><div class="line"> <span class="preprocessor">DWORD</span> FileAlignment<span class="comment">;      //文件中的节的对齐力度</span></div><div class="line"> <span class="preprocessor">WORD</span> MajorOperatingSystemVersion<span class="comment">; //操作系统住版本号</span></div><div class="line"> <span class="preprocessor">WORD</span> MinorOperatingSystemVersion<span class="comment">;  //操作系统副版本号</span></div><div class="line"> <span class="preprocessor">WORD</span> MajorImageVersion<span class="comment">;</span></div><div class="line"> <span class="preprocessor">WORD</span> MinorImageVersion<span class="comment">;</span></div><div class="line"> <span class="preprocessor">WORD</span> MajorSubsystemVersion<span class="comment">;</span></div><div class="line"> <span class="preprocessor">WORD</span> MinorSubsystemVersion<span class="comment">;</span></div><div class="line"> <span class="preprocessor">DWORD</span> Win32VersionValue<span class="comment">;</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfImage<span class="comment">;         //内存中整个PE映像尺寸</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfHeaders<span class="comment">;       //所有头加节表的大小</span></div><div class="line"> <span class="preprocessor">DWORD</span> CheckSum<span class="comment">;</span></div><div class="line"> <span class="preprocessor">WORD</span> Subsystem<span class="comment">;</span></div><div class="line"> <span class="preprocessor">WORD</span> DllCharacteristics<span class="comment">;</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfStackReserve<span class="comment">;  //初始化时堆栈大小</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfStackCommit<span class="comment">;   //初始化时实际提交的堆栈大小</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfHeapReserve<span class="comment">;    //初始化时保留的堆大小</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfHeapCommit<span class="comment">;     //初始化时实际提交的堆大小</span></div><div class="line"> <span class="preprocessor">DWORD</span> LoaderFlags<span class="comment">;</span></div><div class="line"> <span class="preprocessor">DWORD</span> NumberOfRvaAndSizes<span class="comment">;</span></div><div class="line"> IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES]<span class="comment">;</span></div><div class="line">} IMAGE_OPTIONAL_HEADER, *PIMAGE_OPTIONAL_HEADER<span class="comment">;</span></div></pre></td></tr></table></figure>
+
+<p>最后一个字段DataDirectory数组表示数组目录表，该目录表是定位PE文件许多重要信息的结构，其定义如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_DATA_DIRECTORY</span> </span>{</div><div class="line"> DWORD VirtualAddress; <span class="comment">//数据的RVA，输入表的RVA</span></div><div class="line"> DWORD Size; <span class="comment">//数据的大小</span></div><div class="line">} IMAGE_DATA_DIRECTORY, *PIMAGE_DATA_DIRECTORY;</div></pre></td></tr></table></figure>
+
+<p>3、IMAGE_SECTION_HEADER 分析</p>
+<p>Section Table，即区块表，它是一个IMAGE_SECTION_HEADER结构数组，每个IMAGE_SECTION_HEADER结构都包含了它所关联的区块信息，如位置、长度、属性等，该数组的数目由IMAGE_NT_HEADERS.FileHeader.NumberOfSection指出。注意：在PE中，区块大小是要对齐的，在VC中默认值是4kb，除非使用了/OPT:NOWIN98或 /ALIGN开关手动重新设置。</p>
+<p>IMAGE_SECTION_HEADER 结构定义如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">typedef struct _IMAGE_SECTION_HEADER {</div><div class="line"> <span class="preprocessor">BYTE</span> Name[IMAGE_SIZEOF_SHORT_NAME]<span class="comment">; //通常是一个8位的ASCII数组，用来定义区块名</span></div><div class="line"> union {</div><div class="line"> <span class="preprocessor">DWORD</span> PhysicalAddress<span class="comment">;</span></div><div class="line"> <span class="preprocessor">DWORD</span> VirtualSize<span class="comment">;  //代表节的大小,没有进行对齐处理前的实际大小</span></div><div class="line"> } Misc<span class="comment">;</span></div><div class="line"> <span class="preprocessor">DWORD</span> VirtualAddress<span class="comment">; //该块装载到内存中的RVA，内存节,比如.text</span></div><div class="line"> <span class="preprocessor">DWORD</span> SizeOfRawData<span class="comment">; //该块在磁盘文件中的大小</span></div><div class="line"> <span class="preprocessor">DWORD</span> PointerToRawData<span class="comment">; //该块在磁盘文件中的偏移</span></div><div class="line"> <span class="preprocessor">DWORD</span> PointerToRelocations<span class="comment">;</span></div><div class="line"> <span class="preprocessor">DWORD</span> PointerToLinenumbers<span class="comment">;</span></div><div class="line"> <span class="preprocessor">WORD</span> NumberOfRelocations<span class="comment">;</span></div><div class="line"> <span class="preprocessor">WORD</span> NumberOfLinenumbers<span class="comment">;</span></div><div class="line"> <span class="preprocessor">DWORD</span> Characteristics<span class="comment">;  //块的属性标志</span></div><div class="line">} IMAGE_SECTION_HEADER, *PIMAGE_SECTION_HEADER<span class="comment">;</span></div></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2012-10-07T12:39:06.000Z"><a href="/2012/10/07/order-of-variables-in-the-memory-allocation/">10月 7 2012</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2012/10/07/order-of-variables-in-the-memory-allocation/">变量在内存的分配顺序</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>有时候，我们想更清楚的了解变量的内存分配顺序，那全局变量、栈、堆在内存的分配顺序是不是相同？我们写个程序测试下。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> a = <span class="number">12</span>; <span class="regexp">//</span>全局变量</div><div class="line"><span class="keyword">int</span> b = <span class="number">34</span>;</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> <span class="keyword">int</span> num1 = <span class="number">56</span>; <span class="regexp">//</span>栈</div><div class="line"> <span class="keyword">int</span> num2 = <span class="number">78</span>;</div><div class="line"></div><div class="line"> <span class="keyword">int</span> *<span class="keyword">m</span>;</div><div class="line"> <span class="keyword">int</span> *n;</div><div class="line"> <span class="keyword">m</span> = (<span class="keyword">int</span> *)malloc(sizeof(<span class="keyword">int</span>));</div><div class="line"> n = (<span class="keyword">int</span> *)malloc(sizeof(<span class="keyword">int</span>));</div><div class="line"> *<span class="keyword">m</span> = <span class="number">1</span>;</div><div class="line"> *n = <span class="number">2</span>;</div><div class="line"></div><div class="line"> <span class="keyword">printf</span>(&quot;全局变量a:<span class="variable">%ld</span>\n&quot;,&amp;a);</div><div class="line"> <span class="keyword">printf</span>(&quot;全局变量b:<span class="variable">%ld</span>\n&quot;,&amp;b);</div><div class="line"> <span class="keyword">printf</span>(&quot;栈num1:<span class="variable">%ld</span>\n&quot;,&amp;num1);</div><div class="line"> <span class="keyword">printf</span>(&quot;栈num2:<span class="variable">%ld</span>\n&quot;,&amp;num2);</div><div class="line"> <span class="keyword">printf</span>(&quot;堆<span class="keyword">m</span>:<span class="variable">%ld</span>\n&quot;,<span class="keyword">m</span>);</div><div class="line"> <span class="keyword">printf</span>(&quot;堆n:<span class="variable">%ld</span>\n&quot;,n);</div><div class="line"></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>执行结果：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">全局变量<span class="tag">a</span><span class="pseudo">:4344368</span></div><div class="line">全局变量<span class="tag">b</span><span class="pseudo">:4344372</span></div><div class="line">栈<span class="tag">num1</span><span class="pseudo">:1244996</span></div><div class="line">栈<span class="tag">num2</span><span class="pseudo">:1244992</span></div><div class="line">堆<span class="tag">m</span><span class="pseudo">:6031056</span></div><div class="line">堆<span class="tag">n</span><span class="pseudo">:6031112</span></div></pre></td></tr></table></figure>
+
+<p>其实，如果打印出&amp;m,&amp;n的地址时，你会发现 &amp;m = 1244988 ,&amp;n = 1244984。<br>总结：</p>
+<p>全局变量的内存分配是从低地址向高地址分配的，即先定义的全局变量在低地址，后定义的在高地址。</p>
+<p>栈中变量指的是由编译器自动分配释放的变量，栈是从高地址向低地址分配的，所以先声明的变量在高地址，后声明的在低地址。</p>
+<p>堆的内存分配与全局变量相同，也是从低地址向高地址分配。但是你会发现堆中的内存分别是不连续的。</p>
+<p>在VC，我们F11，之后ALT+8查看下汇编代码</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">{</div><div class="line"><span class="number">00401010</span> <span class="keyword">push</span> <span class="literal">ebp</span>    <span class="comment">;保存ebp</span></div><div class="line"><span class="number">00401011</span> <span class="keyword">mov</span> <span class="literal">ebp</span>,<span class="literal">esp</span>   <span class="comment">;把esp放入ebp中</span></div><div class="line"><span class="number">00401013</span> <span class="keyword">sub</span> <span class="literal">esp</span>,<span class="number">50h</span>  <span class="comment">;把esp往下移动一个范围，等于在栈中放出一片新的空间来存局部变量</span></div><div class="line"><span class="number">00401016</span> <span class="keyword">push</span> <span class="number">ebx</span>   <span class="comment">;保存三个寄存器,ebx,esi,edi,貌似这是C里面的规范</span></div><div class="line"><span class="number">00401017</span> <span class="keyword">push</span> <span class="literal">esi</span></div><div class="line"><span class="number">00401018</span> <span class="keyword">push</span> <span class="literal">edi</span></div><div class="line"><span class="number">00401019</span> <span class="keyword">lea</span> <span class="literal">edi</span>,[<span class="literal">ebp</span>-<span class="number">50h</span>]</div><div class="line">0040101C <span class="keyword">mov</span> <span class="number">ecx</span>,<span class="number">14h</span></div><div class="line"><span class="number">00401021</span> <span class="keyword">mov</span> <span class="number">eax</span>,<span class="number">0CCCCCCCCh</span>  <span class="comment">;把局部变量区域初始化成0cccccccch，0cccccccch 实际是INT 3.这是一个中断指令。</span></div><div class="line"><span class="number">00401026</span> <span class="keyword">rep</span> stos <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">edi</span>]  <span class="comment">;因为局部变量不可能被执行，如果执行了必然程序有错，这时发生中断来提示开发者。这是VC 编译DEBUG 版本的特点。</span></div><div class="line"><span class="number">9</span>: <span class="keyword">int</span> num1 = <span class="number">56</span><span class="comment">; //栈</span></div><div class="line"><span class="number">00401028</span> <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">4</span>],<span class="number">38h</span>  //<span class="number">38h</span> = <span class="number">56</span>，在栈存储时候已数组形式，下同</div><div class="line"><span class="number">10</span>: <span class="keyword">int</span> num2 = <span class="number">78</span><span class="comment">;</span></div><div class="line">0040102F <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">8</span>],<span class="number">4Eh</span></div><div class="line"><span class="number">11</span>:</div><div class="line"><span class="number">12</span>: <span class="keyword">int</span> *m<span class="comment">;</span></div><div class="line"><span class="number">13</span>: <span class="keyword">int</span> *n<span class="comment">;</span></div><div class="line"><span class="number">14</span>: m = (<span class="keyword">int</span> *)malloc(sizeof(<span class="keyword">int</span>))<span class="comment">;</span></div><div class="line"><span class="number">00401036</span> <span class="keyword">push</span> <span class="number">4</span>  <span class="comment">;压入参数，为sizeof(int)大小</span></div><div class="line"><span class="number">00401038</span> <span class="keyword">call</span> malloc (<span class="number">00401190</span>)</div><div class="line"><span class="number">0040103D</span> <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">4</span> // <span class="comment">;堆栈平衡</span></div><div class="line"><span class="number">00401040</span> <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">0Ch</span>],<span class="number">eax</span></div><div class="line"><span class="number">15</span>: n = (<span class="keyword">int</span> *)malloc(sizeof(<span class="keyword">int</span>))<span class="comment">;</span></div><div class="line"><span class="number">00401043</span> <span class="keyword">push</span> <span class="number">4</span>   <span class="comment">;压入参数，为sizeof(int)大小</span></div><div class="line"><span class="number">00401045</span> <span class="keyword">call</span> malloc (<span class="number">00401190</span>)</div><div class="line">0040104A <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">4</span> // <span class="comment">;堆栈平衡</span></div><div class="line"><span class="number">0040104D</span> <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">10h</span>],<span class="number">eax</span></div><div class="line"><span class="number">16</span>: *m = <span class="number">1</span><span class="comment">;</span></div><div class="line"><span class="number">00401050</span> <span class="keyword">mov</span> <span class="number">eax</span>,<span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">0Ch</span>]</div><div class="line"><span class="number">00401053</span> <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="number">eax</span>],<span class="number">1</span>  <span class="comment">; *m = 1</span></div><div class="line"><span class="number">17</span>: *n = <span class="number">2</span><span class="comment">;</span></div><div class="line"><span class="number">00401059</span> <span class="keyword">mov</span> <span class="number">ecx</span>,<span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">10h</span>]</div><div class="line">0040105C <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="number">ecx</span>],<span class="number">2</span>  <span class="comment">;*n = 2</span></div><div class="line"><span class="number">18</span>: printf(&quot<span class="comment">;全局变量a:%ld\n&quot;,&amp;a);</span></div><div class="line"><span class="number">00401062</span> <span class="keyword">push</span> offset _a (00424a30)</div><div class="line"><span class="number">00401067</span> <span class="keyword">push</span> offset string &quot<span class="comment">;\xc8\xab\xbe\xd6\xb1\xe4\xc1\xbfa:%ld\n&quot; (00422068)</span></div><div class="line">0040106C <span class="keyword">call</span> printf (<span class="number">00401110</span>)  <span class="comment">;调用printf</span></div><div class="line"><span class="number">00401071</span> <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">19</span>: printf(&quot<span class="comment">;全局变量b:%ld\n&quot;,&amp;b);</span></div><div class="line"><span class="number">00401074</span> <span class="keyword">push</span> offset _b (00424a34)</div><div class="line"><span class="number">00401079</span> <span class="keyword">push</span> offset string &quot<span class="comment">;\xc8\xab\xbe\xd6\xb1\xe4\xc1\xbfb:%ld\n&quot; (00422054)</span></div><div class="line">0040107E <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line"><span class="number">00401083</span> <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">20</span>: printf(&quot<span class="comment">;栈num1:%ld\n&quot;,&amp;num1);</span></div><div class="line"><span class="number">00401086</span> <span class="keyword">lea</span> <span class="number">edx</span>,[<span class="literal">ebp</span>-<span class="number">4</span>]</div><div class="line"><span class="number">00401089</span> <span class="keyword">push</span> <span class="number">edx</span></div><div class="line">0040108A <span class="keyword">push</span> offset string &quot<span class="comment">;\xd5\xbbnum1:%ld\n&quot; (00422044)</span></div><div class="line">0040108F <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line"><span class="number">00401094</span> <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">21</span>: printf(&quot<span class="comment">;栈num2:%ld\n&quot;,&amp;num2);</span></div><div class="line"><span class="number">00401097</span> <span class="keyword">lea</span> <span class="number">eax</span>,[<span class="literal">ebp</span>-<span class="number">8</span>]</div><div class="line">0040109A <span class="keyword">push</span> <span class="number">eax</span></div><div class="line">0040109B <span class="keyword">push</span> offset string &quot<span class="comment">;\xd5\xbbnum2:%ld\n&quot; (00422034)</span></div><div class="line">004010A0 <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line">004010A5 <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">22</span>: printf(&quot<span class="comment">;堆m:%ld\n&quot;,m);</span></div><div class="line">004010A8 <span class="keyword">mov</span> <span class="number">ecx</span>,<span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">0Ch</span>]</div><div class="line">004010AB <span class="keyword">push</span> <span class="number">ecx</span></div><div class="line">004010AC <span class="keyword">push</span> offset string &quot<span class="comment">;\xb6\xd1m:%ld\n&quot; (00422028)</span></div><div class="line">004010B1 <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line">004010B6 <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">23</span>: printf(&quot<span class="comment">;堆n:%ld\n&quot;,n);</span></div><div class="line">004010B9 <span class="keyword">mov</span> <span class="number">edx</span>,<span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">10h</span>]</div><div class="line">004010BC <span class="keyword">push</span> <span class="number">edx</span></div><div class="line">004010BD <span class="keyword">push</span> offset string &quot<span class="comment">;\xb6\xd1n:%ld\n&quot; (0042201c)</span></div><div class="line">004010C2 <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line">004010C7 <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">24</span>:</div><div class="line"><span class="number">25</span>: }</div><div class="line">004010CA <span class="keyword">pop</span> <span class="literal">edi</span></div><div class="line">004010CB <span class="keyword">pop</span> <span class="literal">esi</span></div><div class="line">004010CC <span class="keyword">pop</span> <span class="number">ebx</span>  <span class="comment">;平衡</span></div><div class="line">004010CD <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">50h</span> <span class="comment">;与开始对应</span></div><div class="line">004010D0 <span class="keyword">cmp</span> <span class="literal">ebp</span>,<span class="literal">esp</span></div><div class="line">004010D2 <span class="keyword">call</span> __chkesp (<span class="number">00403110</span>)</div><div class="line">004010D7 <span class="keyword">mov</span> <span class="literal">esp</span>,<span class="literal">ebp</span></div><div class="line">004010D9 <span class="keyword">pop</span> <span class="literal">ebp</span></div><div class="line">004010DA <span class="keyword">ret</span>  <span class="comment">;堆栈平衡</span></div></pre></td></tr></table></figure>
+
+<p>读者可能惊奇，为啥全局变量里没有a,b的赋值呢？这是因为，全局变量在编译器链接时候，链接器将初始化好的全局数据放在可执行文件的数据段了。</p>
+<p>借用《加密与解密》里面的图片一张，描述下函数堆栈创建吧：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121007203655.jpg" alt=""></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+<nav id="pagination">
+  
+    <a href="/page/7/" class="alignleft prev">上一页</a>
+  
+  
+    <a href="/page/9/" class="alignright next">下一页</a>
+  
+  <div class="clearfix"></div>
+</nav></div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>说说MySQL server has gone away的几种解决办法 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="说说MySQL server has gone away的几种解决办法"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-12-23T15:57:14.000Z"><a href="/2013/12/23/mysql-has-gone-away/">12月 23 2013</a></time>
+      
+      
+  
+    <h1 class="title">说说MySQL server has gone away的几种解决办法</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>涉及到MySQL数据库的后台开发，经常会遇到一个问题，MySQL server has gone away，官网上给出一些原因和解决办法，见此处：<a href="http://dev.mysql.com/doc/refman/5.0/en/gone-away.html" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.0/en/gone-away.html</a> ，最近我的程序也遇到了这个问题，自己通过搜索以及与实验室学长讨论，简单总结下解决办法吧。</p>
+<p>1.应用程序长时间的执行批量的MYSQL语句。</p>
+<p>解决方案：</p>
+<p>在my.cnf文件中添加或者修改以下两个变量：</p>
+<p>wait_timeout=2880000</p>
+<p>interactive_timeout = 2880000</p>
+<p>2.执行一个SQL，但SQL语句过大或者语句中含有BLOB或者longblob字段。比如，图片数据的处理.</p>
+<p>解决方案：</p>
+<p>在my.cnf文件中添加或者修改以下变量：</p>
+<p>max_allowed_packet = 10M(也可以设置自己需要的大小)</p>
+<p>max_allowed_packet参数的作用是，用来控制其通信缓冲区的最大长度。</p>
+<p>3.C程序解决办法是调用 mysql_options ，将MYSQL_OPT_RECONNECT设置为1</p>
+<p>如果1、2两种方法没解决问题，依然出现”MySQL has gone away”，那么试试调用mysql_options函数：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">char</span> <span class="keyword">value</span> = <span class="number">1</span>;</div><div class="line">mysql_options(mysql, MYSQL_OPT_RECONNECT, &amp;<span class="keyword">value</span>);</div></pre></td></tr></table></figure>
+
+<p>mysql_options函数的位置在mysql_real_connect()函数之后和mysql_query()函数之前，如下所示：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">mysql_real_connect(mysql, <span class="string">"127.0.0.1"</span>, <span class="string">"root"</span>, <span class="string">"123456"</span>, <span class="string">"test"</span>, <span class="number">3306</span>, <span class="literal">NULL</span>, <span class="number">0</span>);</div><div class="line"></div><div class="line">//do something</div><div class="line"> char value = <span class="number">1</span>;</div><div class="line"> mysql_options(mysql, MYSQL_OPT_RECONNECT, &amp;value);</div><div class="line"></div><div class="line"> //do something</div><div class="line"> mysql_query(<span class="keyword">...</span>);</div></pre></td></tr></table></figure>
+
+<p>4.MySQL has gone away也可能是因为MySQL不能通过mysql.sock连接问题造成的</p>
+<p>我的程序以上三种方法问题都没解决，最后师兄说可能是mysql不能通过mysql.sock连接，于是测试了下，命令查看配置文件，</p>
+<p>cat /etc/my.cnf，查看”socket=”后面的字符串，我所在的测试机的值为”/var/lib/mysql/mysql.sock”。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mysql_real_connect(mysql, <span class="string">"127.0.0.1"</span>, <span class="string">"root"</span>, <span class="string">"123456"</span>, <span class="string">"test"</span>, <span class="number">3306</span>, <span class="keyword">NULL</span>, <span class="number">0</span>);</div></pre></td></tr></table></figure>
+
+<p>修改为</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mysql_real_connect(mysql, <span class="string">"127.0.0.1"</span>, <span class="string">"root"</span>, <span class="string">"123456"</span>, <span class="string">"test"</span>, <span class="number">3306</span>, <span class="string">"/var/lib/mysql/mysql.sock"</span>, <span class="number">0</span>);</div></pre></td></tr></table></figure>
+
+<p>问题解决。</p>
+<p>参考链接：</p>
+<p><a href="http://www.felix021.com/blog/read.php?2102" target="_blank" rel="external">http://www.felix021.com/blog/read.php?2102</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Database/">Database</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="说说MySQL server has gone away的几种解决办法" data-url="http://armsword.com/2013/12/23/mysql-has-gone-away/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

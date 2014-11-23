@@ -1,0 +1,234 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>记一次查找实验室服务器被诡异的入侵原因 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="记一次查找实验室服务器被诡异的入侵原因"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-08-30T10:34:35.000Z"><a href="/2014/08/30/find-the-invaded-reason/">8月 30 2014</a></time>
+      
+      
+  
+    <h1 class="title">记一次查找实验室服务器被诡异的入侵原因</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>刚吃完午饭，回到宿舍，就听同学说，自己实验室服务器（在实验室公司机房里）被入侵了，已经乱成一团了，他们找了很长时间，没找到原因。然后，我本来打算写完英文简历后，再去趟实验室公司看看，结果还没一会，导师就跟我打电话，让我速度去趟实验室公司，让我打车过去，我学校（从我宿舍开始）离实验室公司走路也就20分钟，我想可能导师也着急了，于是我匆忙赶往公司。</p>
+<p>师弟师妹们跟我说下情况，由于他们经验也不充足，所以描述的事情情况，让我刚开始思维走了很多弯路。他们说，Linux系统被植入木马了，MySQL表被删除了很多，也添加了很多新的数据，删不掉，删除表数据之后立马又重新出现，巴拉巴拉。。。</p>
+<p>于是我刚开始的任务就是查看Linux下的进程，端口，历史登录信息，使用了iptraf做流量检测等等，当时想既然删除表数据，又重新出现，是不是使用了定时脚本，心不在焉的找了半天，没查出原因。</p>
+<p>后来，从历史记录中发现是黑客从局域网里面一台设备（IP为192.168.3.139）登录了Linux服务器。于是大家就开始查找这台局域网IP为192.168.3.139的设备。大家把所有网线拔掉，排除法等等方式也没找到，当时，我在我的找工作群里随口问了句，什么原因能导致局域网里存在一个IP，但是确发现不了设备，大家说，应该是路由器。因为公司这边的路由器IP为192.168.2.1和192.168.3.1，与有问题的那台设备IP不同，我就困惑了，后来我在linux和window下ping那个IP，TTL值分别为64和63，我心里感觉肯定是路由有问题。</p>
+<p>后来，师弟师妹们又一起查看公司的每台设备，终于在一工位下面发现了问题，有台无线路由器，于是用iptraf做了测试，发现正是这台无线路由器被人入侵了。</p>
+<p>所以，整个过程就是，由于实验室这边的IP是固定IP，黑客入侵了公司的无线路由器，而路由器使用的是默认密码，之后通过无线路由器，扫描局域网IP，查找一些危险端口，恰巧师弟师妹这段时间在做一个Web项目，程序部署在那台Linux服务器上，此项目涉及到文件上传，图片上传等功能，而经验不丰富的师弟师妹，没有对文件上传做些漏洞检测，也没有对SQL做些过滤，于是MySQL里被塞满了SQL命令，Web文件里的Upload文件夹上传了很多后缀为PHP的jpg网页木马。之后又通过该路由对局域网其他机器进行DDos等等，所以出现断网现象。</p>
+<p>话说，现在的无线路由器越来越智能，但是也给某些人留下了有机可乘的地方，我感觉公司在对服务器做好安全防护的同时，也应该多注意下无线路由这些智能设备的配置和管理，根据最近1、2年发生的安全事件看，安全部门在互联网公司地位是越来越高了。</p>
+<p>随手记，最后说下工作情况吧，由于微软STC部门可能不怎么招人了，那就希望自己能顺利拿到阿里（杭州）的Offer吧，最好A档以上，为了保险，师兄也帮我内推了下网易游戏，找工作这事缘分也蛮重要的，目前我面试比较慢热，临场发挥不是太好，还需多锻炼下。</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/我的生活/">我的生活</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="记一次查找实验室服务器被诡异的入侵原因" data-url="http://armsword.com/2014/08/30/find-the-invaded-reason/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

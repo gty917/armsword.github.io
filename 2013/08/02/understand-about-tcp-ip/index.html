@@ -1,0 +1,256 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>记录下TCP/IP协议的一些知识点 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="记录下TCP/IP协议的一些知识点"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-08-02T13:43:41.000Z"><a href="/2013/08/02/understand-about-tcp-ip/">8月 2 2013</a></time>
+      
+      
+  
+    <h1 class="title">记录下TCP/IP协议的一些知识点</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1.bind的功能是将本地地址和端口绑定到套接字上去。</p>
+<p>2.int listen(SOCKET s,int backlog); 参数backlog是挂起连接的最大数量，它并不是在指定端口上同时可建立连接的最大值，而是排队等待应用程序接受的连接或部分连接的最大数量。</p>
+<p>它唯一的任务就是把套接字标识为监听状态，当主机收到一个连接请求时，内核会搜索监听套接字列表，查找与连接请求中目的地和端口号相匹配的那个套接字。</p>
+<p>3.connect的作用之一就是将远程实体的地址和端口绑定到本地套接字上去。</p>
+<p>4.accept负责接受已完成连接队列中的连接。</p>
+<p>5.典型的面向连接协议有三个阶段：</p>
+<p>(1)在对等实体间建立连接</p>
+<p>(2)数据传输阶段，数据在对等实体间传输</p>
+<p>(3)当对等实体完成数据传输，连接被拆除</p>
+<p>6.为了提供可靠性，TCP向基本的IP服务中添加了三项功能。首先，它为TCP段中的数据提供了校验和，这样有助于确保抵达目的地的数据在传输过程中不会被网络损坏。第二，它为每字节分配了一个序列号，这样如果数据抵达目的地时真的错序了，接收端也能够按照恰当的顺序将其重装起来。第三，TCP提供了一种确认-重传机制，以确保最终每个段都会被传送出去。</p>
+<p>7.UDP只向底层的IP协议中添加了两项功能。首先，它提供了一个可选的校验和来检测数据的损坏情况。尽管IP也有校验和，但它只对IP分组首部进行计算，所以，TCP和UDP也都提供了校验和来保护它们自己的首部和数据。UDP向IP添加的第二特征是端口的概念。</p>
+<p>分组到达时，内核会搜索其套接字列表，查找一个与组中的协议地址和端口号相匹配的套接字，如果找到了匹配的套接字，就由指定的协议来处理数据，并将这些数据提供给所有打开了匹配套接字的应用程序。</p>
+<p>8.TCP是一种流协议(stream dream)，这就意味着数据是以字节流的形式传递给接收者的，没有固定的“报文”或“报文边界”的概念，从这方面来说，读取TCP数据就像从串行端口读取数据一样——&gt;无法预先得知在一次指定的读调用中会返回多少字节。由TCP来决定需要立即发送多少数据，做这种决定的过程很复杂，取决于很多因素，比如发送窗口（当时主机能够接收的数据量），拥塞窗口（对网络拥塞的估计），路径上的最大传输单元（沿着主机之间的网络路径一次可以传输最大的数据量），以及连接的输出队列中有多少数据。</p>
+<p>TCP会记录它发送了多少字节，以及确认的字节，但它不会记录这些字节是如何分组的，实际上，有些实现在重传丢失分组的时候发送的数据可能比原来的多一些或少一些。TCP的手段主要有校验和、序列号、确认应答、重发控制、连接管理、窗口控制等。</p>
+<p>9.TCP是一个复杂的协议，在基本IP数据报服务的基础上添加了可靠性的流量控制功能，而UDP只添加了一个校验和，所以UDP可能要比TCP快一个数量级或更多。</p>
+<p>10.以太网帧最多可以装载1500B的数据，IP和TCP首部各需要20B，剩下1460B，为TCP选项另外保留20B。</p>
+<p>11.LAN提供的近乎理想的环境可以掩盖网络应用程序的性能问题，甚至是错误。记住，一个在LAN上运行良好的应用程序在WAN上很可能就会出问题。WAN上时延的增加会让在LAN上性能良好的应用程序在WAN上的性能不尽如意。</p>
+<p>12.TCP发送策略的主要目标之一是尽可能有效地利用可用带宽，如果只考虑这些问题，发送策略就很简单：根据发送窗口允许的最大值，以长度为MSS的段将所有可用的数据都发送出去。但是，我们还需要考虑其他一些与之冲突的情况。</p>
+<p>首先，拥塞控制就是一个非常重要的问题，如果TCP突然要将大量TCP段传入网络中去，路由缓冲区空间会被耗尽，造成数据报的丢失。为了避免出现拥塞，TCP不会突然同时向空闲连接上发送多个段，相反，开始它会发送一个段，然后增加网络中未经确认的段的数量，直到达到一个稳定状态为止。TCP使用了两种算法来防止拥塞，一个是慢启动算法，另一个是Nagle算法。</p>
+<p>13.TCP的写操作，从应用程序的角度来看，最好把写操作当作是一项将数据从用户空间复制到内核发送缓冲区，然后就返回的操作，实际上TCP会在什么时候传送数据，以及会立即传送多少数据出去，都取决于连接的状态，而且通常应用程序都是无法预测的。</p>
+<p>14.直到最近，大家普遍认为由于WinSock和基本上所有现代的UNIX系统都支持select，所以考虑到可移植性，应当选择select而不是poll，而poll则大多用于SysV实现中。但一些支持多条同步连接的大型服务区应用程序（比如Web服务器）却在使用poll机制，因此它能更好地使用使用大量描述符的情况。这是因为select只能局限于固定数量的描述符，限制通常是1024，但可能会更小，修改默认值需要重构内核。</p>
+<p>15.可以设置套接字选项SO_REUSEADDR，指示TCP允许我们绑定到一个已经在使用的端口上。</p>
+<p>16.使connect调用超时的方式是使套接字成为阻塞的，然后用select等待它完成。</p>
+<p>17.每个IP数据报都有TTL字段，每经过一个路由器，该字段就被减1，抵达路由器的数据报的TTL为1或0时，就会被丢弃，同时会发送一个ICMP“传输超时”错误报文给原始发送者。traceroute利用了这个特性，它首先向目的地发送一个TTL设置为1的UDP数据报。当这个UDP数据报抵达第一跳时，路由器注意到TTL为1，就会将其丢弃，并发回一个ICMP报文，从这个ICMP报文的源地址中，可以得到第一跳的IP地址，然后traceroute用gethostbyaddr来查询它的名字。为获得下一跳的标识，traceroute重复这个过程，只是把TTL设置为2，当这个数据报到达第一跳时，TTL被减为1并转发往下一跳，在那里发现TTL为1，丢弃它，并返回ICMP报文，通过不断增加TTL来重复这个过程，traceroute就可以获得从源到目的地之间的路径消息。</p>
+<p>18.lsof -i TCP:6000 （查看哪个进程正在监听这个端口）</p>
+<p>lsof -i @armsword.com （查看哪个用户在连接）</p>
+<p>19.netstat 默认情况下，绑定在INADDR_ANY的服务器的套接字是不列出来的，不过可以用 -a 选项改变默认设置。</p>
+<p>netstat -i （接口）  netstat -rn （路由表）</p>
+<p>netstat -sp udp （获取关于UDP的统计信息）</p>
+<p>参考资料：</p>
+<p>《TCP/IP高效编程》</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/计算机网络/">计算机网络</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="记录下TCP/IP协议的一些知识点" data-url="http://armsword.com/2013/08/02/understand-about-tcp-ip/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

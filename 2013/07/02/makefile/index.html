@@ -1,0 +1,251 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Makefile学习笔记 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Makefile学习笔记"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-07-02T08:00:35.000Z"><a href="/2013/07/02/makefile/">7月 2 2013</a></time>
+      
+      
+  
+    <h1 class="title">Makefile学习笔记</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>第一次用Makefile，看了一些开源的源代码的Makefile，又看了下规则，之后把自己的小程序写了个Makefile，总结下笔记。</p>
+<p>Makefile的编写规则：</p>
+<p>（1）如果这个工程没有编译过，那么我们的所有C文件都要编译并被链接。</p>
+<p>（2）如果这个工程的某几个C文件被修改，那么我们只编译被修改的C文件，并链接目标程序。</p>
+<p>（3）如果这个工程的头文件被改变了，那么我们需要编译引用了这几个头文件的C文件，并链接目标程序。</p>
+<p>target … : prerequisites …</p>
+<p>command</p>
+<p>…</p>
+<p>…</p>
+<p>target也就是一个目标文件，可以是Object File，也可以是执行文件。还可以是一个标签（Label），对于标签这种特性，在后续的“伪目标”章节中会有叙述。</p>
+<p>prerequisites就是，要生成那个target所需要的文件或是目标。</p>
+<p>command也就是make需要执行的命令，TAB键。（任意的Shell命令）</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line"><span class="type">INCLUDE</span> = ./include</div><div class="line"></div><div class="line"><span class="type">INCLUDE</span> += -<span class="type">I</span>/usr/include/mysql</div><div class="line"></div><div class="line">objects = findtopo.o looptopo.o handlesql.o readoid.o ifroute.o</div><div class="line"></div><div class="line"> ifirewall.o hostname.o</div><div class="line"></div><div class="line">findtopo : $(objects)</div><div class="line"></div><div class="line"> gcc -o findtopo $(objects) -lsnmp -lmysqlclient</div><div class="line"></div><div class="line">findtopo.o : findtopo.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> findtopo.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">looptopo.o : looptopo.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> looptopo.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">handlesql.o : handlesql.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> handlesql.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">readoid.o : readoid.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> readoid.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">ifroute.o : ifroute.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> ifroute.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">ifirewall.o : ifirewall.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> ifirewall.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">hostname.o : hostname.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> hostname.<span class="type">C</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">.<span class="type">PHONY</span> : clean</div><div class="line"></div><div class="line">clean:</div><div class="line"></div><div class="line"> rm findtopo findtopo.o looptopo.o handlesql.o readoid.o</div><div class="line"></div><div class="line"> ifroute.o ifirewall.o hostname.o</div></pre></td></tr></table></figure>
+
+<p>“$&lt;”表示所有的依赖目标集，.PHONY意思表示clean是一个“伪目标”。向make说明，不管是否有这个文件，这个目标就是“伪目标”。</p>
+<p>.PHONY : clean</p>
+<p>只要有这个声明，不管是否有“clean”文件，要运行“clean”这个目标，只有“make clean”这样。</p>
+<p>make是如何工作的</p>
+<p>在默认的方式下，也就是我们只输入make命令。那么，</p>
+<p>1、make会在当前目录下找名字叫“Makefile”或“makefile”的文件。</p>
+<p>2、如果找到，它会找文件中的第一个目标文件（target），在上面的例子中，他会找到“findtopo”这个文件，并把这个文件作为最终的目标文件。</p>
+<p>3、如果findtopo文件不存在，或是findtopo所依赖的后面的 .o 文件的文件修改时间要比findtopo这个文件新，那么，它就会执行后面所定义的命令来生成findtopo这个文件。</p>
+<p>4、如果findtopo所依赖的.o文件也存在，那么make会在当前文件中找目标为.o文件的依赖性，如果找到则再根据那一个规则生成.o文件。</p>
+<p>5、当然，你的C文件和H文件是存在的啦，于是make会生成 .o 文件，然后再用 .o 文件生命make的终极任务，也就是执行文件findtopo了。</p>
+<p>参考文献：</p>
+<p>《跟我一起写Makefile》</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/C-C/">C/C++</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="Makefile学习笔记" data-url="http://armsword.com/2013/07/02/makefile/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

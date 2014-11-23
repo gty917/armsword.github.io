@@ -1,0 +1,743 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>第 3 页 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-04-20T15:07:52.000Z"><a href="/2014/04/20/redis-dict-analyze/">4月 20 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/04/20/redis-dict-analyze/">Redis里dict源码剖析</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>Redis全名叫做Remote Dictionary Server，从全称就可以看出dict是Redis里重要的数据结构，看了下dict.c里的源码，简单分析下。</p>
+<p>dict.c主要是实现了哈希功能，实际上实现哈希（字典）常见的方法有几种：</p>
+<p>&lt;1&gt;比如我们数据结构课上学的数组和链表法，但是这种方法适用于元素个数不多的情况下</p>
+<p>&lt;2&gt;使用复杂的平衡树(B-等等)，性能比较不错，比如MySQL里的索引就使用了这种方法</p>
+<p>&lt;3&gt;哈希表，兼顾了高效和简单性，Redis选择了这种方法。</p>
+<p>我们就解读下dict.c里源码里的数据结构吧，我们知道hash表的性能由hash表的大小和解决冲突的方法决定。Redis里使用了两个哈希表(ht[0])和哈希表(ht[1])，hash[0]是字典主要使用的hash表，而hash[1]主要对0号哈希表进行rehash时才使用。读者可能不明白这个地方啥意思？其实就是，程序每次申请几个字节（默认为4字节），当key/value数量达到规定时，程序申请的4字节就翻一倍（这里使用了慢迁移），那什么时候rehash呢？我们知道size == used（根据下面的dictht结构体）时，达到最理想状态，所以当used/size &gt; 1时，就进行rehash。我们先看看dict.h里定义的几个结构体吧：</p>
+<p>dict:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dict</span> </span>{</div><div class="line">    dictType *type;  <span class="comment">//哈希表节点指针数组(俗称桶，bucket)hash表的类型，可以是string，list等</span></div><div class="line">    <span class="keyword">void</span> *privdata; <span class="comment">//该hash表的一些private数据</span></div><div class="line">    dictht ht[<span class="number">2</span>];</div><div class="line">    int rehashidx; <span class="comment">/* rehashidx记录的实际上是rehash进行到的索引，比如如果rehash进行到第10个元素，那么rehashidx的值就为9。如果没有在进行rehash，rehashidex的值就为-1.*/</span></div><div class="line">    int iterators; <span class="comment">/* number of iterators currently running */</span></div><div class="line">} dict;</div></pre></td></tr></table></figure>
+
+<p>dictType:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//每种hash table的类型，里面既有成员函数，又有成员变量，模拟的C++类，每个函数带有的privdata均为预留参数</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictType {</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> (*hashFunction)(<span class="keyword">const</span> <span class="keyword">void</span> *key); <span class="comment">//要采用的hash函数</span></div><div class="line">    <span class="keyword">void</span> *(*keyDup)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *key); <span class="comment">//对key进行拷贝</span></div><div class="line">    <span class="keyword">void</span> *(*valDup)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *obj); <span class="comment">//对value进行拷贝</span></div><div class="line">    <span class="keyword">int</span> (*keyCompare)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *key1, <span class="keyword">const</span> <span class="keyword">void</span> *key2); <span class="comment">//key比较器</span></div><div class="line">    <span class="keyword">void</span> (*keyDestructor)(<span class="keyword">void</span> *privdata, <span class="keyword">void</span> *key); <span class="comment">//销毁key，一般为释放空间</span></div><div class="line">    <span class="keyword">void</span> (*valDestructor)(<span class="keyword">void</span> *privdata, <span class="keyword">void</span> *obj); <span class="comment">//销毁value，一般为释放空间</span></div><div class="line">} dictType;</div></pre></td></tr></table></figure>
+
+<p>dictht:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* This is our hash table structure. Every dictionary has two of this as we</span></div><div class="line"> * implement incremental rehashing, for the old to the new table. */</div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictht {</div><div class="line">    dictEntry **table; <span class="comment">//hash表中的数据，以key/value形式，通过单链表保存</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> size; <span class="comment">//桶个数</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> sizemask; <span class="comment">//size - 1，方便定位</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> used; <span class="comment">//实际保存的元素数</span></div><div class="line">} dictht;</div></pre></td></tr></table></figure>
+
+<p>dictEntry:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//hash表中每一项key/value，若key的映射值，以单链表的形式保存</span></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span> </span>{</div><div class="line">    <span class="keyword">void</span> *key;</div><div class="line">    union {</div><div class="line">        <span class="keyword">void</span> *val;</div><div class="line">        uint64_t u64;</div><div class="line">        int64_t s64;</div><div class="line">    } v;</div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span> *next;</span></div><div class="line">} dictEntry;</div></pre></td></tr></table></figure>
+
+<p>dict.h一共有这四种结构，每个结构体里的每个变量的用途，我都已经注释出来。</p>
+<p>根据程序分析出整个字典结构如图所示（此时的状态为dictadd，且未出现rehash和rehash也未在进行中）：<br><img src="http://armsword.com/wp-content/uploads/2014/04/2014042001.png" alt=""></p>
+<p>我们之后再说下程序的执行流程吧：</p>
+<p>首先是dict初始化，init_hash_dict —&gt; dictCreate —&gt; _dictInit —&gt; _dictRest</p>
+<p>上面流程代码都很简单，就是把dict结构体和dictht里面的数据都初始化。</p>
+<p>然后是添加键值到字典，这个地方比较难懂，也是重点，因为它包括的操作比较多，分为三种情况：</p>
+<p>&lt;1&gt;如果字典为未初始化（也即字典的0号哈希表的table属性为空），那么程序需要对0号哈希表进行初始化。</p>
+<p>&lt;2&gt;如果在插入时发生了键碰撞，处理碰撞，链表法</p>
+<p>&lt;3&gt;如果插入新元素使得字典满足了rehash条件，那么启动相应的rehash程序(used / size &gt; 1)。</p>
+<p>这里有个需要注意的地方，如果rehash正在进行中(ht[0]数据—&gt;ht[1])，那么选择ht[1]作为新键值对的添加目标，否则ht[0]作为新键值对的添加目标。</p>
+<p>本来想长篇大论呢，但是学校网速真的是太卡了，不写了，看看其他的吧。</p>
+<p>参考资料：</p>
+<p><a href="http://origin.redisbook.com/en/latest/" target="_blank" rel="external">《Redis设计与实现》</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-04-09T08:54:14.000Z"><a href="/2014/04/09/letter-combinations-of-a-phone-number/">4月 9 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/04/09/letter-combinations-of-a-phone-number/">Letter Combinations of a Phone Number</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>由于这个月还没写博客，找道题应付下吧，主要原因是自己现在太忙了，得准备找工作啊，唉，弱的惨不忍睹。好吧，不抱怨了，进入正题，<a href="http://oj.leetcode.com/problems/letter-combinations-of-a-phone-number/" target="_blank" rel="external">LeetCode</a>上面的一道题，题目描述为：</p>
+<p>Given a digit string, return all possible letter combinations that the number could represent.</p>
+<p>A mapping of digit to letters (just like on the telephone buttons) is given below.</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/04/200px-Telephone-keypad2.svg_.png" alt=""></p>
+<p><pre><strong>Input:</strong>Digit string “23”<br><strong>Output:</strong> [“ad”, “ae”, “af”, “bd”, “be”, “bf”, “cd”, “ce”, “cf”].<br><strong><br>Note:</strong><br>Although the above answer is in lexicographical order, your answer could be in any order you want.</pre><br>其实就是组合问题，如下图所示：<br><img src="http://armsword.com/wp-content/uploads/2014/04/Combo.jpg" alt=""></p>
+<p>如图所示，遍历完 1，2，3，就把a,d (g,h,i)遍历完了，之后回溯到e，就是个DFS搞定。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include &lt;iostream&gt;;</span></div><div class="line"><span class="comment">#include &lt;vector&gt;;</span></div><div class="line"><span class="comment">#include &lt;string&gt;;</span></div><div class="line"></div><div class="line"><span class="keyword">using</span> namespace std;</div><div class="line">class <span class="type">Solution</span></div><div class="line">{</div><div class="line">public:</div><div class="line"> vector&lt;<span class="type">string</span>&gt; letterCombinations(<span class="type">string</span> digits)</div><div class="line"> {</div><div class="line"> <span class="type">int</span> len = digits.size();</div><div class="line"> <span class="literal">result</span>.clear();</div><div class="line"> num[<span class="number">2</span>] = &quot;abc&quot;;</div><div class="line"> num[<span class="number">3</span>] = &quot;def&quot;;</div><div class="line"> num[<span class="number">4</span>] = &quot;ghi&quot;;</div><div class="line"> num[<span class="number">5</span>] = &quot;jkl&quot;;</div><div class="line"> num[<span class="number">6</span>] = &quot;mno&quot;;</div><div class="line"> num[<span class="number">7</span>] = &quot;pqrs&quot;;</div><div class="line"> num[<span class="number">8</span>] = &quot;tuv&quot;;</div><div class="line"> num[<span class="number">9</span>] = &quot;wxyz&quot;;</div><div class="line"> solve(digits,<span class="number">0</span>,len);</div><div class="line"> <span class="keyword">return</span> <span class="literal">result</span>;</div><div class="line"> }</div><div class="line"></div><div class="line"> <span class="type">void</span> solve(<span class="type">string</span> &amp;digits,<span class="type">int</span> i,<span class="type">int</span> len)</div><div class="line"> {</div><div class="line"> <span class="keyword">if</span>(i == len)</div><div class="line"> {</div><div class="line"> str[len] = '&<span class="comment">#92;&#48;';</span></div><div class="line"> <span class="type">string</span> temp = str;</div><div class="line"> <span class="literal">result</span>.push_back(temp);</div><div class="line"> <span class="keyword">return</span>;</div><div class="line"> }</div><div class="line"> unsigned <span class="type">int</span> j;</div><div class="line"> <span class="type">int</span> index = digits[i] - '<span class="number">0</span>';</div><div class="line"> <span class="keyword">for</span>(j = <span class="number">0</span>; j &lt; num[index].size(); j++)</div><div class="line"> {</div><div class="line"> str[i] = num[index][j];</div><div class="line"> solve(digits,i+<span class="number">1</span>,len);</div><div class="line"> }</div><div class="line"> }</div><div class="line">private:</div><div class="line"> vector&lt;<span class="type">string</span>&gt; <span class="literal">result</span>;</div><div class="line"> <span class="type">string</span> num[<span class="number">10</span>];</div><div class="line"> <span class="type">char</span> str[<span class="number">1000</span>];</div><div class="line">};</div><div class="line"></div><div class="line"><span class="type">int</span> main()</div><div class="line">{</div><div class="line"> <span class="type">Solution</span> solution;</div><div class="line"> <span class="type">string</span> p;</div><div class="line"> p = &quot;<span class="number">23</span>&quot;;</div><div class="line"> vector&lt;<span class="type">string</span>&gt; p1;</div><div class="line"> p1 = solution.letterCombinations(p);</div><div class="line"> vector&lt;<span class="type">string</span>&gt;::<span class="keyword">iterator</span> iter;</div><div class="line"></div><div class="line"> <span class="keyword">for</span>(iter=p1.begin();iter != p1.<span class="keyword">end</span>();iter++)</div><div class="line"> {</div><div class="line"> cout&lt;&lt;*iter&lt;&lt;endl;</div><div class="line"> }</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>最近开始集中精力做OJ了，唯一的感觉就是自己好弱，算法准备的有点晚了，有点找不上工作的节奏。算法也不是一朝一夕就能提高的，自己好好努力吧，即使实习拿不到dream offer，到正式找工作（9月份）还有时间努力，集中精力弥补自己弱点就可以了。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-03-31T10:53:39.000Z"><a href="/2014/03/31/python-in-crawler/">3月 31 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/03/31/python-in-crawler/">使用python编写简单网络爬虫技巧总结</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>使用python写过几个小玩具，基本上都与爬虫、Web相关的，自己也积累了下经验，也看过很多文章，一直想总结下，可惜现在要忙于找工作，实验室活也比较多，也就落下了。感觉如果时间长不记录，也就懒散了，并且许多东西我写完过个两天，我自己都记不住当时怎么想的了。</p>
+<p>0、HTTP协议</p>
+<p>基本上常见的Web开发里，Web内容都是通过HTTP协议进行传输的（虽然咱不懂Web开发，但是基本的计算机网络知识还是了解的），通过TCP连接服务器的80端口，爬虫其实质就是通过模拟浏览器发送HTTP请求，至于HTTP请求相关知识，点击<a href="http://zh.wikipedia.org/wiki/%E8%B6%85%E6%96%87%E6%9C%AC%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE" target="_blank" rel="external">这里</a>。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">HTTP通常通过创建到服务器<span class="number">80</span>端口的TCP连接进行通信</div><div class="line">HTTP协议的内容包括请求方式（<span class="function"><span class="keyword">method</span>）, <span class="title">url</span>，<span class="title">header</span>，<span class="title">body</span>，通常以纯文本方式发送</span></div><div class="line"><span class="title">HTTP</span>返回内容包括状态码，<span class="title">header</span>，<span class="title">body</span>，通常以纯文本方式返回</div><div class="line"><span class="title">header</span>以及<span class="title">body</span>间以<span class="title">CRLF</span><span class="params">(\r\n)</span>分割</div></pre></td></tr></table></figure>
+
+<p>1、最基础的抓取网站内容</p>
+<p>使用python编写一个网络爬虫是非常简单的，如下例所示：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> urllib2</div><div class="line">content = urllib2.urlopen(<span class="string">'http://armsword.com'</span>).<span class="keyword">read</span>()</div></pre></td></tr></table></figure>
+
+<p>但是实际工作中，这样肯定是不行的，你会遇到各种各样的问题，如下：</p>
+<ul>
+<li>网络出现错误，任何错误都可能。例如机器宕了，网线断了，域名出错了，网络超时了，页面没有了，网站跳转了，服务被禁了，主机负载不够了…</li>
+<li>服务器加上了限制，只让常见浏览器访问</li>
+<li>需要登录才能抓取数据</li>
+<li>IP被封掉或者IP访问次数受到限制</li>
+<li>服务器加上了防盗链的限制</li>
+<li>某些网站不管你HTTP请求里有没有Accept-Encoding头部，也不管你头部具体内容是什么，反正总给你发gzip后的内容</li>
+<li>URL链接千奇百怪，带汉字的也罢了，有的甚至还有回车换行</li>
+<li>某些网站HTTP头部里有一个Content-Type，网页里有好几个Content-Type，更过分的是，各个Content-Type还不一样，最过分的是，这些Content-Type可能都不是正文里使用的Content-Type，从而导致乱码</li>
+<li>需要抓取的数据很多，怎么提高抓取效率</li>
+<li>网站内容通过AJAX请求加载的</li>
+<li>需要验证码识别<br>至于怎么解决上述问题，我们一一道来。</li>
+</ul>
+<p>2、网络或网站出现错误等处理</p>
+<p>之前我搞过百度音乐的爬虫，因为当时百度音乐有个bug，就是可以任何人都下载百度音乐的无损、高品质音乐，我就写了个爬虫，开了几十个进程抓取下载地址（抓包解析JSON串数据）存储到数据库里，虽然百度无ip访问限制这些麻烦事，但是程序无任何错误处理的情况下，依然出现各自异常错误，所以我们只需要捕捉异常，处理异常就可以了。我们可以根据urlopen的返回值，读取它的HTTP状态码。除此之外，我们在urlopen的时候，也需要设置timeout参数，以保证处理好超时。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">import urllib2</div><div class="line">import <span class="keyword">socket</span></div><div class="line"></div><div class="line">try:</div><div class="line"> f = urllib2.urlopen(<span class="string">'http://armsword'</span>, timeout = <span class="number">10</span>)</div><div class="line"> code = f.getcode()</div><div class="line"> <span class="keyword">if</span> code &<span class="keyword">lt</span>; <span class="number">200</span> <span class="keyword">or</span> code &<span class="keyword">gt</span>;= <span class="number">300</span>:</div><div class="line"> <span class="comment">#你自己的HTTP错误处理</span></div><div class="line">except Exception, e:</div><div class="line"> <span class="keyword">if</span> isinstance(e, urllib2.HTTPError):</div><div class="line"> <span class="keyword">print</span> <span class="string">'http error: {0}'</span>.<span class="keyword">format</span>(e.code)</div><div class="line"> elif isinstance(e, urllib2.URLError) <span class="keyword">and</span> isinstance(e.reason, <span class="keyword">socket</span>.timeout):</div><div class="line"> <span class="keyword">print</span> <span class="string">'url error: socket timeout {0}'</span>.<span class="keyword">format</span>(e.__str_<span class="number">_</span>())</div><div class="line"> <span class="keyword">else</span>:</div><div class="line"> <span class="keyword">print</span> <span class="string">'error: '</span> + e.__str_<span class="number">_</span>()</div></pre></td></tr></table></figure>
+
+<p>3、服务器做了限制</p>
+<p>3.1、防盗连限制</p>
+<p>某些站点有所谓的反盗链设置，其实说穿了很简单，就是检查你发送请求的header里面，referer站点是不是他自己，我们只要把headers的referer改成该网站即可，以V2EX的领取每日奖励地址为例：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="variable">header =</span> {'Referer':'http://www.v2ex.com/signin'}</div><div class="line"><span class="variable">req =</span> urllib2.Request('http://www.v2ex.com',<span class="variable">headers =</span> header)</div><div class="line"><span class="variable">response =</span> urllib2.urlopen(<span class="variable">url =</span> req,<span class="variable">timeout =</span> <span class="number">10</span>).read</div><div class="line"><span class="comment">#response = urllib2.urlopen(req)).read()</span></div></pre></td></tr></table></figure>
+
+<p>3.2、限制浏览器登录，需伪装成浏览器</p>
+<p>某些网站做了限制，进制爬虫的访问，此时我们可以更改HTTP的header，与3.1相似：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="variable">header =</span> {&quot;User-Agent&quot;:&quot;Mozilla/<span class="number">5.0</span> (X11; Linux i686) AppleWebKit/<span class="number">537.36</span></div><div class="line">(KHTML, like Gecko) Ubuntu Chromium/<span class="number">31.0</span>.<span class="number">1650.63</span> Chrome/<span class="number">31.0</span>.<span class="number">1650.63</span> Safari/<span class="number">537.36</span>&quot;}</div><div class="line"><span class="variable">req =</span> urllib2.Request(url,<span class="variable">headers=</span>header)</div></pre></td></tr></table></figure>
+
+<p>3.3、IP访问次数受到限制</p>
+<p>如果IP被封掉、或者访问次数受到限制，使用代理服务器比较有用，代理IP可以自己抓取一些代理网站的数据：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> urllib2</div><div class="line">proxy_ip = urllib2.ProxyHandler({<span class="symbol">'htt</span>p':<span class="symbol">'http</span>:<span class="comment">//XX.XX.XX.XX:XXXX'}) #XX为代理IP和端口</span></div><div class="line">opener = urllib2.build_opener(proxy_ip, urllib2.HTTPHandler)</div><div class="line">urllib2.install_opener(opener)</div><div class="line">content = urllib2.urlopen(<span class="symbol">'http</span>:<span class="comment">//XXXX.com').read()</span></div></pre></td></tr></table></figure>
+
+<p>4、需要登录才能抓取数据</p>
+<p>4.1、表单的处理</p>
+<p>抓包，Chrome或者Firefox+Httpfox浏览器插件就能办到，查看POST数据，模拟表单就可以了，这里不再细说，这里主要注意，在GET/POST一些数据的时候，需要对GET/POST的数据做些编码，即使用urlencode()，我们以北邮校园网关登录为例：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">postdata = {</div><div class="line"> <span class="string">'DDDDD'</span>: uname, <span class="comment">#用户名</span></div><div class="line"> <span class="string">'upass'</span>: u_pass, <span class="comment">#密码</span></div><div class="line"> <span class="string">'R1'</span>: <span class="number">0</span>, <span class="comment">#其他参数</span></div><div class="line"> <span class="string">'R2'</span>: <span class="number">1</span>,</div><div class="line"> <span class="string">'para'</span>: <span class="number">00</span>,</div><div class="line"> <span class="string">'0MKKey'</span>: <span class="number">123456</span></div><div class="line"> }</div><div class="line"></div><div class="line">en_url = urllib.urlencode(postdata)</div></pre></td></tr></table></figure>
+
+<p>4.2、Cookie处理</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#获取一个cookie对象</span></div><div class="line">cookie = cookielib.CookieJar()</div><div class="line"><span class="preprocessor">#构建cookie处理器</span></div><div class="line">cookie_p = urllib2.HTTPCookieProcessor(cookie)</div><div class="line"><span class="preprocessor">#装载cookie</span></div><div class="line">opener = urllib2.build_opener(cookie_p)</div><div class="line"><span class="preprocessor">#注意此处后面的install_opener(opener),安装不同的opener对象作为urlopen() 使用的全局URL opener</span></div><div class="line">urllib2.install_opener(opener)</div><div class="line">content = urllib2.urlopen(<span class="string">'http://armsword.com'</span>).read()</div></pre></td></tr></table></figure>
+
+<p>如果同时需要代理和Cookie，这样就可以：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">opener </span>=<span class="string"> urllib2.build_opener(proxy_ip, cookie_p, urllib2.HTTPHandler)</span></div></pre></td></tr></table></figure>
+
+<p>如果上面未使用install_opener(opener)，则使用：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">response = opener.<span class="keyword">open</span>(url).<span class="keyword">read</span>()</div></pre></td></tr></table></figure>
+
+<p>以V2EX每日签到为例，把上面的流程走一遍：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#全局变量装载Cookie省略</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">login</span><span class="params">()</span>:</span></div><div class="line"> <span class="string">'''</span></div><div class="line"> once值每次登录都不一样，在页面上可以看到</div><div class="line"> 也必需有http header</div><div class="line"> '''</div><div class="line"> req = urllib2.Request(url_login)</div><div class="line"> once = get_info(req,<span class="string">'name'</span>,<span class="string">'once'</span>)[<span class="string">'value'</span>] <span class="comment">#省略</span></div><div class="line"> postdata = {</div><div class="line"> <span class="string">'u'</span>:username,</div><div class="line"> <span class="string">'p'</span>:password,</div><div class="line"> <span class="string">'once'</span>:once,</div><div class="line"> <span class="comment">#'next':&quot;/&quot;</span></div><div class="line"> }</div><div class="line"></div><div class="line"> header = {<span class="string">'Host'</span>:<span class="string">'www.v2ex.com'</span>,<span class="string">'Origin'</span>:<span class="string">'http://www.v2ex.com'</span>,</div><div class="line"><span class="string">'Referer'</span>:<span class="string">'http://www.v2ex.com/signin'</span>,</div><div class="line"><span class="string">'User-Agent'</span>:&quot;Mozilla/<span class="number">5.0</span> (X11; Linux i686) AppleWebKit/<span class="number">537.36</span></div><div class="line">(KHTML, like Gecko) Ubuntu Chromium/<span class="number">32.0</span><span class="number">.1700</span><span class="number">.107</span> Chrome/<span class="number">32.0</span><span class="number">.1700</span><span class="number">.107</span> Safari/<span class="number">537.36</span>&quot;}</div><div class="line"></div><div class="line"> data = urllib.urlencode(postdata)</div><div class="line"></div><div class="line"> req = urllib2.Request(url_login,data,header)</div><div class="line"> response = opener.open(req)</div></pre></td></tr></table></figure>
+
+<p>5、gzip/deflate支持</p>
+<p>某些网站不管你请求头带不带Accept-Encoding:gzip，它返回的都是gzip压缩的内容，urlopen不会处理gzip压缩的内容，所以得到的就是乱码，以下为解决方法：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="variable">f =</span> urllib2.urlopen(url)</div><div class="line"><span class="variable">headers =</span> f.info()</div><div class="line"><span class="variable">rawdata =</span> f.read()</div><div class="line"><span class="keyword">if</span> ('Content-Encoding' <span class="keyword">in</span> headers <span class="constant">and</span> headers['Content-Encoding']) <span class="constant">or</span> \</div><div class="line"> ('content-encoding' <span class="keyword">in</span> headers <span class="constant">and</span> headers['content-encoding']):</div><div class="line"> <span class="built_in">import</span> gzip</div><div class="line"> <span class="built_in">import</span> StringIO</div><div class="line"> <span class="variable">data =</span> StringIO.StringIO(rawdata)</div><div class="line"> <span class="variable">gz =</span> gzip.GzipFile(<span class="variable">fileobj=</span>data)</div><div class="line"> <span class="variable">rawdata =</span> gz.read()</div><div class="line"> gz.close()</div></pre></td></tr></table></figure>
+
+<p>6、URL编码和网页编码处理<br>如果URL里含有中文，要对相应的中文进行编码，可以使用urllib.quote(‘要编码的字符串’)，如下所示：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">http</span>://www.google.com/<span class="comment">#newwindow=1&amp;q=你好</span></div><div class="line">query = urllib.<span class="constant">quote</span>(<span class="string">'你好'</span>)</div><div class="line">url = <span class="string">'http://www.google.com/#newwindow=1&amp;q='</span>+query</div><div class="line">response = urllib.urlopen(url).<span class="built_in">read</span>()</div></pre></td></tr></table></figure>
+
+<p>至于处理网页编码，按照一般浏览器的处理流程，判断网页的编码首先是根据HTTP服务器发过来的HTTP响应头部中Content-Type字段，例如text/html; charset=utf-8就表示这是一个HTML网页，使用的是utf8编码。如果HTTP头部中没有，或者网页内容的head区中有charset属性或者其http-equiv属性为Content-Type的meta元素，如果有charset属性，则直接读取这个属性，如果是后者，则读取这个元素的content属性。但是实际情况是许多网页不按照规矩出牌，首先，HTTP响应里不一定有Content-Type头部，其次某些网页里可能没有Content-Type或者有多个Content-Type(例如百度搜索的缓存页面)。所以，我的经验基本是自己多猜测几次吧。其实GBK、UTF-8占了绝大部分，使用xx.decode(‘gbk’,’ignore’).encode(‘utf-8’) （或相反）试试，其中ignore是指忽略非法字符。</p>
+<p>7、AJAX</p>
+<p>AJAX 是一种用于创建快速动态网页的技术。<br>通过在后台与服务器进行少量数据交换，AJAX 可以使网页实现异步更新。这意味着可以在不重新加载整个网页的情况下，对网页的某部分进行更新。<br>传统的网页（不使用 AJAX）如果需要更新内容，必需重载整个网页面。</p>
+<p>AJAX依然是HTTP请求，只是来自页面发起的另一个HTTP请求。我之前做百度音乐的时候，在chrome下的network选项分析每一个选项，找到对应的ajax数据，分析json，在正则、查找之类的。</p>
+<p>当然，也可以通过selenium、phantomjs、mechanize等模拟浏览器引擎构建一个真实的浏览器执行JS、渲染页面（在写这篇文章时，我还没用到过这些），这应该算是终极大招了吧。</p>
+<p>8、效率</p>
+<p>目前使用过多线程、多进程，多进程注意下僵尸进程。</p>
+<p>异步：用twisted进行异步I/O抓取，tornado（如果拿到实习offer后，我可能会抽出几天时间学习这个，我感觉我应该学习下web编程，纠结了下flask还是tornado，其实无论哪个一周完全可以入门了，python你懂的。）</p>
+<p>9、验证码</p>
+<p>图像识别方面的知识，好吧，等我学会后再写吧。。。</p>
+<p>根据我的经验，网络爬虫里网络带宽是主要瓶颈，上文只说了抓取，其实网页抽取依然有很多知识要做的，我现在会的都是些皮毛，要学的还很多，等拿到dream 公司的实习offer后，有空继续折腾下，现在主要精力是弥补自己的一些知识缺点和面试长考的问题。</p>
+<p>参考链接：</p>
+<p><a href="http://blog.binux.me/2013/09/howto-crawl-web/" target="_blank" rel="external">http://blog.binux.me/2013/09/howto-crawl-web/</a></p>
+<p><a href="http://blog.raphaelzhang.com/2012/03/issues-in-python-crawler/" target="_blank" rel="external">http://blog.raphaelzhang.com/2012/03/issues-in-python-crawler/</a></p>
+<p><a href="http://yxmhero1989.blog.163.com/blog/static/112157956201311821444664/" target="_blank" rel="external">http://yxmhero1989.blog.163.com/blog/static/112157956201311821444664/</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-03-07T09:33:18.000Z"><a href="/2014/03/07/linux-io-multiplexing/">3月 7 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/03/07/linux-io-multiplexing/">Linux IO复用—select poll 和 epoll</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>在Socket编程时，为了处理大量客户的连接请求，需要使用非阻塞I/O和端口复用，select、poll和epoll是Linux API提供的I/O复用方式。其实在*nix下的网络并发方法向来不缺，比如典型的Apache模型（Process Per Connection，简称PPC），TPC（Thread Per Connection）模型，这两种模型思想类似，就是利用了多进程、多线程概念，让进来的每一个连接去干别的事情去。但是连接多了以后，首先需要较大的内存，且进程/线程切换开销会非常大，因此这类模型能接受的最大连接数都不会太高。</p>
+<p>Linux 2.6中加入了epoll之后（据说Windows下使用的是IOCP，但是我没使用过），在高性能服务器领域中得到广泛的应用，主要原因就是高效。在讲epoll之前，我们先总结下select、poll，因为epoll其实也就是他们的增强版本，比如select是一个系统调用，而epoll是个模块，由三个系统调用组成，内核中由文件系统实现。</p>
+<p>&lt;1&gt; select</p>
+<p>select的第一个参数为fdset集合中最大描述符值加1，select对应于内核中的sys_select调用，sys_select首先将第二三四个参数指向的fd_set拷贝到内核，然后对每个被SET的描述符进行poll，并记录在临时结果中(fdset)，如果有事件发生，select会将临时结果写到用户空间并返回，当轮询一遍后没有任何事件发生，如果指定了超时时间，则select会睡眠到超时，睡眠结束后再进行下一次轮询，并将临时结果写到用户空间，然后返回。select返回后，需要逐一检查关注的描述符是否被SET（事件是否发生）。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> <span class="keyword">select</span>(<span class="keyword">int</span> nfds, fd_set* readfds, fd_set* writefds, fd_set* exceptfds, <span class="keyword">struct</span> timeval* timeout);</div></pre></td></tr></table></figure>
+
+<p><code>参数                  描述
+nfds             sets的文件描述符的最大值
+readfds          fd_set type 类型，只读的描述符集 
+writefds         fd_set type 类型，只写的描述符集 
+errorfds         fd_set type 类型，错误的描述符集 
+timeout          超时等待时间</code><br>为了维护fd_set类型的参数，会使用下面四个宏：FD_SET(), FD_CLR(), FD_ZERO() 和 FD_ISSET()。</p>
+<p>`<br>typedef struct fd_set<br>{<br>u_int fd_count;<br>int fd_array[FD_SETSIZE];<br>}<br>//fd_array可SIZE*8个socket</p>
+<p>int FD_ISSET(int fd,fd_set *fdset);<br>//返回值：若fd在描述符集中则返回非0值，否则返回0</p>
+<p>void FD_CLR(int fd,fd_set <em>fdset); //fd指描述符<br>void FD_SET(int fd,fd_set </em>fdset);<br>void FD_ZERO(fd_set *fdset);</p>
+<p>`<br>select 函数监视的文件描述符分3类，分别是writefds，readfds、和exceptfds。调用后 select 函数会阻塞，直到有描述符就绪（有数据可读、可写、或者except）、或者超时（timeout指定等待的时间，timeout== NULL表示永远等待，timeout == 0表示不等待、立即返回，其他表示等待的时间）。当 select 函数返回后，可以通过遍历 fdset ，来找到就绪的描述符。</p>
+<p>select 的一个优点就是跨平台，缺点就是单个进程能够监视的文件描述符的数量存在最大限制，linux下一般为1024，Windows下好像无此限制，虽然可以修改这一限制，但是这样也会造成效率低下。</p>
+<p>运行过程：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">int sock;</div><div class="line">FILE *fp;</div><div class="line">struct fd_set fds;</div><div class="line">struct timeval timeout={<span class="number">3</span>,<span class="number">0</span>}; //select等待<span class="number">3</span>秒，<span class="number">3</span>秒轮询，要非阻塞就置<span class="number">0</span></div><div class="line">char buffer[<span class="number">256</span>]={<span class="number">0</span>}; //<span class="number">256</span>字节的接收缓冲区</div><div class="line">//假定已经建立UDP连接，具体过程不写，简单，当然TCP也同理，主机ip和port都已经给定，要写的文件已经打开</div><div class="line">sock=socket(<span class="keyword">...</span>);</div><div class="line">bind(<span class="keyword">...</span>);</div><div class="line">fp=fopen(<span class="keyword">...</span>);</div><div class="line"><span class="keyword">while</span>(<span class="number">1</span>)</div><div class="line">{</div><div class="line"> FD_ZERO(&amp;fds); //每次循环都要清空集合，否则不能检测描述符变化</div><div class="line"> FD_SET(sock,&amp;fds); //添加描述符</div><div class="line"> FD_SET(fp,&amp;fds); //同上</div><div class="line"> maxfdp=sock&gt;fp?sock+<span class="number">1</span>:fp+<span class="number">1</span>; //描述符最大值加<span class="number">1</span></div><div class="line"></div><div class="line">// <span class="keyword">for</span>(int i =<span class="number">0</span> ;i &lt; maxfds; i++) <span class="keyword">if</span>(FD_ISSET()) { }</div><div class="line"> <span class="keyword">switch</span>(select(maxfdp,&amp;fds,&amp;fds,<span class="literal">NULL</span>,&amp;timeout)) //select使用</div><div class="line"> {</div><div class="line"></div><div class="line">case -<span class="number">1</span>: exit(-<span class="number">1</span>);<span class="keyword">break</span>; //select错误，退出程序</div><div class="line"> case <span class="number">0</span>:<span class="keyword">break</span>; //再次轮询</div><div class="line"> default:</div><div class="line"> <span class="keyword">if</span>(FD_ISSET(sock,&amp;fds)) //测试sock是否可读，即是否网络上有数据</div><div class="line"> {</div><div class="line"> recvfrom(sock,buffer,<span class="number">256</span>,.....);//接受网络数据</div><div class="line"> <span class="keyword">if</span>(FD_ISSET(fp,&amp;fds)) //测试文件是否可写</div><div class="line"> fwrite(fp,buffer...);//写入文件</div><div class="line"> ......</div><div class="line"> }</div><div class="line"> }</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>注意：每次select 有数据要遍历全部socket，每次select之前要重置fds的值。</p>
+<p>&lt;2&gt; poll</p>
+<p>poll函数类似于 select，可用于任何类型的文件描述符，与 select 不同，poll不是为每个状态（可读性、可写性和异常状态）构造一个描述符集，而是构造一个pollfd 结构数组向内核传递需要关注的事件，故没有描述符个数的限制，每个数组元素指定一个描述符编号以及对其所关心的状态，pollfd中的events字段和revents字段分别用于标示关注的事件和发生的事件。</p>
+<p>poll的实现机制与select类似，其对应内核中的sys_poll，只不过poll向内核传递pollfd数组，然后对pollfd中的每个描述符进行poll，poll返回后，需要对pollfd中的每个元素检查其revents值，来判断事件是否发生。</p>
+<p>返回值：</p>
+<p>-1：有错误产生<br>0：超时时间到，而且没有描述符有状态变化<br>&gt;0：有状态变化的描述符个数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> poll(<span class="keyword">struct</span> pollfd fdarray[],nfds_t nfds,<span class="keyword">int</span> timeout);</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> pollfd{</div><div class="line"> <span class="keyword">int</span> fd; <span class="comment">//需要检查的文件描述符</span></div><div class="line"> <span class="keyword">short</span> events; <span class="comment">//等待的需要测试事件</span></div><div class="line"> <span class="keyword">short</span> revents; <span class="comment">//实际发生了的事件，也就是返回结果</span></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>应将每个数组元素的events成员设置为下图所示的值。通过这些值告诉内核我们对该描述符关心的是什么。返回时，内核设置revents成员，以说明对于该描述符已经发生了什么事件。（注意，poll没有更改events成员，这与select不同，select修改其参数以指示哪一个描述符已准备好了。）</p>
+<p>poll的events和revents标志：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/03/20140307205917.jpg" alt=""><br><code>timeout == -1 永远等待。当所指定的描述符中的一个已准备好，或捕捉到一个信号时则返回。如果捕捉到一个信号，则poll返回-1，errno设置为EINTR 
+timeout == 0 不等待
+timeout &gt; 0 等待timeout毫秒，如果已超时但是还没有一个描述符准备好，则返回值是0。</code><br>运行过程（与select相似）：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">struct pollfd fds[IN_FILES];</div><div class="line">char buf[MAX_BUFFER_SIZE];</div><div class="line"><span class="keyword">int</span> i,res,real_read, maxfd;</div><div class="line">fds[<span class="number">0</span>].fd = <span class="number">0</span>;</div><div class="line"><span class="keyword">if</span>((fds[<span class="number">1</span>].fd=<span class="keyword">open</span>(&quot;data1&quot;,O_RDONLY|O_NONBLOCK)) &<span class="keyword">lt</span>; <span class="number">0</span>)</div><div class="line">{</div><div class="line"> fprintf(stderr,&quot;<span class="keyword">open</span> data1 error:<span class="variable">%s</span>&quot;,strerror(errno));</div><div class="line"> <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line">}</div><div class="line"><span class="keyword">if</span>((fds[<span class="number">2</span>].fd=<span class="keyword">open</span>(&quot;data2&quot;,O_RDONLY|O_NONBLOCK)) &<span class="keyword">lt</span>; <span class="number">0</span>)</div><div class="line">{</div><div class="line"> fprintf(stderr,&quot;<span class="keyword">open</span> data2 error:<span class="variable">%s</span>&quot;,strerror(errno));</div><div class="line"> <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line">}</div><div class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &<span class="keyword">lt</span>; IN_FILES; i++)</div><div class="line">{</div><div class="line"> fds[i].events = POLLIN;</div><div class="line">}</div><div class="line"><span class="keyword">while</span>(fds[<span class="number">0</span>].events || fds[<span class="number">1</span>].events || fds[<span class="number">2</span>].events)</div><div class="line">{</div><div class="line"> <span class="keyword">if</span> (poll(fds, IN_FILES, TIME_DELAY) &<span class="keyword">lt</span>;= <span class="number">0</span>)</div><div class="line"> {</div><div class="line"> <span class="keyword">printf</span>(&quot;Poll error\n&quot;);</div><div class="line"> <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line"> }</div><div class="line"> <span class="keyword">for</span> (i = <span class="number">0</span>; i&<span class="keyword">lt</span>; IN_FILES; i++)</div><div class="line"> {</div><div class="line"> <span class="keyword">if</span> (fds[i].revents)</div><div class="line"> {</div><div class="line"> memset(buf, <span class="number">0</span>, MAX_BUFFER_SIZE);</div><div class="line"> real_read = <span class="keyword">read</span>(fds[i].fd, buf, MAX_BUFFER_SIZE);</div><div class="line"> <span class="keyword">if</span> (real_read &<span class="keyword">lt</span>; <span class="number">0</span>)</div><div class="line"> {</div><div class="line"> <span class="keyword">if</span> (errno != EAGAIN)</div><div class="line"> {</div><div class="line"> <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line"> }</div><div class="line"> }</div><div class="line"> <span class="keyword">else</span> <span class="keyword">if</span> (!real_read)</div><div class="line"> {</div><div class="line"> <span class="keyword">close</span>(fds[i].fd);</div><div class="line"> fds[i].events = <span class="number">0</span>;</div><div class="line"></div><div class="line">......</div><div class="line"></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>&lt;3&gt; epoll</p>
+<p>epoll通过epoll_create创建一个用于epoll轮询的描述符，通过epoll_ctl添加/修改/删除事件，通过epoll_wait 检查事件，epoll_wait 的第二个参数用于存放结果。</p>
+<p>epoll与select、poll不同，首先，其不用每次调用都向内核拷贝事件描述信息，在第一次调用后，事件信息就会与对应的epoll描述符关联起来。另外epoll不是通过轮询，而是通过在等待的描述符上注册回调函数，当事件发生时，回调函数负责把发生的事件存储在就绪事件链表中，最后写到用户空间。</p>
+<p>epoll返回后，该参数指向的缓冲区中即为发生的事件，对缓冲区中每个元素进行处理即可，而不需要像poll、select那样进行轮询检查。</p>
+<p>系统调用：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//创建一个epoll的句柄，size用来告诉内核这个监听的数目一共有多大。</span></div><div class="line"><span class="keyword">int</span> epoll_create(<span class="keyword">int</span> <span class="keyword">size</span>);</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">epoll的事件注册函数，它与select()是在监听事件时告诉内核要监听什么类型的事件不同，而是在这里先注册要监听的事件类型。第一个参数是epoll_create()的返回值，第二个参数表示动作，用三个宏来表示：</div><div class="line">EPOLL_CTL_ADD：注册新的fd到epfd中；</div><div class="line">EPOLL_CTL_MOD：修改已经注册的fd的监听事件；</div><div class="line">EPOLL_CTL_DEL：从epfd中删除一个fd；</div><div class="line">第三个参数是需要监听的fd，第四个参数是告诉内核需要监听什么事。</div><div class="line">*/</div><div class="line"><span class="keyword">int</span> epoll_ctl(<span class="keyword">int</span> epfd, <span class="keyword">int</span> op, <span class="keyword">int</span> fd, <span class="keyword">struct</span> epoll_event *<span class="keyword">event</span>);</div></pre></td></tr></table></figure>
+
+<p>struct epoll_event结构如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> union epoll_data {</div><div class="line"> <span class="keyword">void</span> *ptr;</div><div class="line"> int fd;</div><div class="line"> __uint32_t u32;</div><div class="line"> __uint64_t u64;</div><div class="line">} epoll_data_t;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span></span></div><div class="line">{</div><div class="line"> __uint32_t events; <span class="comment">//Epoll events</span></div><div class="line"> epoll_data_t data; <span class="comment">//User data variable</span></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>`<br>events可以是以下几个宏的集合：<br>EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；<br>EPOLLOUT：表示对应的文件描述符可以写；<br>EPOLLPRI：表示对应的文件描述符有紧急的数据可读（这里应该表示有带外数据到来）；<br>EPOLLERR：表示对应的文件描述符发生错误；<br>EPOLLHUP：表示对应的文件描述符被挂断；<br>EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。<br>EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">等待事件的产生，类似于select()调用，参数events用来从内核得到事件的集合，maxevents告之内核这个events有多大，这个maxevents的值不能大于创建epoll_create()时的size，参数timeout是超时时间（毫秒，0会立即返回，-1将不确定，也有说法是永久阻塞），该函数返回需要处理的事件数目</div><div class="line">*/</div><div class="line"><span class="keyword">int</span> epoll_wait(<span class="keyword">int</span> epfd, <span class="keyword">struct</span> epoll_event * events, <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout);</div></pre></td></tr></table></figure>
+
+<p>运行过程：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> (n = <span class="number">0</span>; n &lt; nfds; ++n) {</div><div class="line"> <span class="keyword">if</span> (events[n].data.fd == listener) { <span class="comment">// 如果是主socket的事件的话，则表示</span></div><div class="line"> <span class="comment">// 有新连接进入了，进行新连接的处理。</span></div><div class="line"> client = accept(listener, (<span class="keyword">struct</span> sockaddr *) &amp;local, &amp;addrlen);</div><div class="line"> <span class="keyword">if</span> (client &lt; <span class="number">0</span>){</div><div class="line"> perror(&quot;accept&quot;);</div><div class="line"> <span class="keyword">continue</span>;</div><div class="line"> }</div><div class="line"> setnonblocking(client); <span class="comment">// 将新连接置于非阻塞模式</span></div><div class="line"> ev.events = EPOLLIN | EPOLLET; <span class="comment">// 并且将新连接也加入EPOLL的监听队列。</span></div><div class="line"> <span class="comment">// 注意，这里的参数EPOLLIN | EPOLLET并没有设置对写socket的监听，</span></div><div class="line"> <span class="comment">// 如果有写操作的话，这个时候epoll是不会返回事件的，如果要对写操作</span></div><div class="line"> <span class="comment">// 也监听的话，应该是EPOLLIN | EPOLLOUT | EPOLLET</span></div><div class="line"> ev.data.fd = client;</div><div class="line"> <span class="keyword">if</span> (epoll_ctl(kdpfd, EPOLL_CTL_ADD, client, &amp;ev) &lt; <span class="number">0</span>) {</div><div class="line"> <span class="comment">// 设置好event之后，将这个新的event通过epoll_ctl加入到epoll的监听队列里面，</span></div><div class="line"> <span class="comment">// 这里用EPOLL_CTL_ADD来加一个新的epoll事件，通过EPOLL_CTL_DEL来减少一个</span></div><div class="line"> <span class="comment">// epoll事件，通过EPOLL_CTL_MOD来改变一个事件的监听方式。</span></div><div class="line"> fprintf(stderr, &quot;epoll <span class="keyword">set</span> insertion error: fd=%d0, client);</div><div class="line"> <span class="keyword">return</span> -<span class="number">1</span>;</div><div class="line"> }</div><div class="line"> } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">event</span>[n].events &amp; EPOLLIN) { <span class="comment">// 如果是已经连接的用户，并且收到数据，</span></div><div class="line"> <span class="comment">// 那么进行读入</span></div><div class="line"> <span class="keyword">int</span> sockfd_r;</div><div class="line"> <span class="keyword">if</span> ((sockfd_r = <span class="keyword">event</span>[n].data.fd) &lt; <span class="number">0</span>)</div><div class="line"> <span class="keyword">continue</span>;</div><div class="line"> read(sockfd_r, buffer, MAXSIZE);</div><div class="line"> <span class="comment">// 修改sockfd_r上要处理的事件为EPOLLOUT</span></div><div class="line"> ev.data.fd = sockfd_r;</div><div class="line"> ev.events = EPOLLOUT | EPOLLET;</div><div class="line"> epoll_ctl(epfd, EPOLL_CTL_MOD, sockfd_r, &amp;ev)</div><div class="line"> } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">event</span>[n].events &amp; EPOLLOUT) { <span class="comment">// 如果有数据发送</span></div><div class="line"> <span class="keyword">int</span> sockfd_w = events[n].data.fd;</div><div class="line"> write(sockfd_w, buffer, <span class="keyword">sizeof</span>(buffer));</div><div class="line"> <span class="comment">// 修改sockfd_w上要处理的事件为EPOLLIN</span></div><div class="line"> ev.data.fd = sockfd_w;</div><div class="line"> ev.events = EPOLLIN | EPOLLET;</div><div class="line"> epoll_ctl(epfd, EPOLL_CTL_MOD, sockfd_r, &amp;ev)</div><div class="line"> }</div><div class="line"> do_use_fd(events[n].data.fd);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>可简单归结为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> fd = epoll_create(xxA); <span class="comment">//xxA可监听的socket</span></div><div class="line"><span class="keyword">struct</span> epoll_event events[xxxB];<span class="comment">//可返回的事件数</span></div><div class="line"><span class="keyword">while</span>(<span class="number">1</span>){</div><div class="line"> <span class="keyword">int</span> nfds = epoll_wait( ); <span class="comment">//wait event occur</span></div><div class="line"> <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;nfds; i++){</div><div class="line"> …. }<span class="comment">//end for</span></div><div class="line"></div><div class="line">}<span class="comment">//end while</span></div></pre></td></tr></table></figure>
+
+<p>epoll_wait返回的都是有效数据，可直接从struct epoll_events[]中获取事件，效率高。每次取事件后，要重新注册此socket的事件epoll(epoll_ctl)。</p>
+<p>参考资料：</p>
+<p>《UNIX环境高级编程》</p>
+<p><a href="http://zh.wikipedia.org/wiki/Select_(Unix" target="_blank" rel="external">http://zh.wikipedia.org/wiki/Select_(Unix</a>)</p>
+<p><a href="http://zh.wikipedia.org/wiki/Epoll" target="_blank" rel="external">http://zh.wikipedia.org/wiki/Epoll</a></p>
+<p><a href="http://www.cnblogs.com/xuxm2007/archive/2011/08/15/2139809.html" target="_blank" rel="external">http://www.cnblogs.com/xuxm2007/archive/2011/08/15/2139809.html</a></p>
+<p><a href="http://www.cnblogs.com/bigwangdi/p/3182958.html" target="_blank" rel="external">http://www.cnblogs.com/bigwangdi/p/3182958.html</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-03-06T15:13:09.000Z"><a href="/2014/03/06/socket-concurrency/">3月 6 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/03/06/socket-concurrency/">常用的socket并发方法总结</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>套接字相关函数默认是采用阻塞方式操作，而大多数情况下，程序不仅仅只拥有一个套接字。因此当进程以阻塞方式操作其中之一时，必将导致不能使用其他套接字。如果用户希望这些套接字同时工作，就必须设计并发打套接字程序，即在一个套接字读写的同时保证另一个套接字也能正常操作。</p>
+<p>以下几种方法是常用的并发模型：</p>
+<p>1.非阻塞并发模型</p>
+<p>I/O阻塞是影响进程并发的重要原因，进程一旦进入阻塞，就不能再执行任何操作。比如进程调用输入函数后，在默认情况下就必需一直阻塞直到产生满足条件的数据为止。</p>
+<p>套接字也是一种I/O设备，它有四类阻塞，分别是输入类（read，recv和recvfrom等）、输出类（write和send）、连接申请类（connect）和连接处理（accept），其中UDP协议数据发送函数sendto不产生阻塞。</p>
+<p>当套接字调用以上函数时，将导致进程阻塞。因此把套接字函数的阻塞模式更改为非阻塞模式，是实现并发套接字程序的一种方法。</p>
+<p>函数fcntl设置套接字描述符的O_NONBLOCK标志后，即可将I/O方式更改为非阻塞方式。此时如果输入函数（read、recv、recvfrom）、输出函数（write、send）或者连接处理函数（accept）的成功条件不满足，将立即返回-1并置errno为EAGAIN错误，如果连接申请函数（connect）的成功条件不满足，将返回-1并置errno为EINPROGRESS错误。</p>
+<p>如：将套接字描述符nSock设置为非阻塞方式：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> nType;</div><div class="line">nType = <span class="keyword">fcntl</span>(nSock,F_GETFL,<span class="number">0</span>);</div><div class="line"><span class="keyword">fcntl</span>(nSock,F_SETFL,nType|O_NONBLOCK);</div></pre></td></tr></table></figure>
+
+<p>首先读取了描述符的信息，然后在此基础上增加了非阻塞标志。</p>
+<p>2.信号驱动模型</p>
+<p>Windows下有消息驱动的概念，在<em>nix环境下也存在着类似的机制，不过不是消息去驱动方式，而是信号驱动I/O模式。在这种模式下，进程可以一边做其他的事，一边等待信号。当文件描述符就绪时，</em>inx内核会向进程发送SIGIO信号（某些系统是SIGPOLL信号），进程获取该信号并调用预先准备的处理函数执行I/O操作。当函数调用完毕后，进程回到接收信号前的代码处继续工作。</p>
+<p>在一个套接字上实现信号驱动的步骤如下：</p>
+<p>（1）为信号SIGIO设计处理函数并捕获信号</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void <span class="func"><span class="keyword">func</span><span class="params">(int sig)</span></span> <span class="comment">//信号处理函数</span></div><div class="line">{</div><div class="line"> ......</div><div class="line"> signal(<span class="type">SIGIO</span>,<span class="func"><span class="keyword">func</span></span>);</div><div class="line">}</div><div class="line"></div><div class="line">......</div><div class="line">signal(<span class="type">SIGIO</span>,<span class="func"><span class="keyword">func</span></span>); <span class="comment">//捕获信号SIGIO</span></div></pre></td></tr></table></figure>
+
+<p>（2）设定套接字的归属主，设置接收SIGIO信号的进程或进程组</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function">fcntl</span>(nSock,F_SETOWN,<span class="function">getpid</span>()); <span class="comment">//设置接收信号的进程</span></div><div class="line">或者</div><div class="line"><span class="function">fcntl</span>(nSock,F_SETOWN,<span class="function">getpgrp</span>()); <span class="comment">//设置接收信号的进程组</span></div></pre></td></tr></table></figure>
+
+<p>（3）设置套接字的异步I/O属性</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> nType;</div><div class="line">nType = <span class="keyword">fcntl</span>(nSock,F_GETFL,<span class="number">0</span>);</div><div class="line"><span class="keyword">fcntl</span>(nSock,F_SETFL,nType|O_ASYNC);</div></pre></td></tr></table></figure>
+
+<p>套接字信号驱动的设置非常简单，但在实践中却难以实现。因为UNIX内核并不仅仅在套接字有输入时才发送SIGIO信号，在套接字连接、输出、错误和其他状态变化时均发送该信号，这样就直接导致了进程在接收信号后无法正确地判断下一步的行为。</p>
+<p>3.超时并发模型</p>
+<p>超时也是防止阻塞的一种手段，它可以保证进程不被永远挂起。阻塞函数的超时时间长度决定了进程的并发程序，超时时间越小，并发度越高，超时时间越大，则并发度越低。</p>
+<p>（1）通过套接字选项设置超时</p>
+<p>可以通过套接字选项SO_SNDTIMEO和SO_RCVTIMEO分别设置套接字描述符上的写入和读取操作的超时时间。但本方法有如下缺陷：</p>
+<p>&lt;1&gt;只能设置套接字描述符上的读取和写入操作的超时时间，不能设置connect和accept等连接操作的超时。</p>
+<p>&lt;2&gt;某些版本的*nix不支持这两个套接字选项。</p>
+<p>（2）通过信号SIGALRM设置超时</p>
+<p>在*nix下的阻塞函数一般都有在进程接收到任意信号后中断返回的传统，套接字函数也不例外，利用这个特性使用定时器信号SIGALRM实现套接字的超时处理。</p>
+<p>步骤如下：</p>
+<p>&lt;1&gt;定义超时标志。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> nTimeOut = <span class="number">0</span>;</div></pre></td></tr></table></figure>
+
+<p>静态整型变量nTimeOut代表函数超时，默认取值为0表示没有超时，取值为1时表示已经超时。</p>
+<p>&lt;2&gt;为信号SIGALRM设计处理函数。</p>
+<p>进程捕获定时器信号SIGALRM后将调用函数OnTimeOut进行处理：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> OnTimeout(<span class="keyword">int</span> nSignal)</div><div class="line">{</div><div class="line"> <span class="keyword">signal</span>(nSignal,SIG_IGN); <span class="comment">//超时一次后就忽略信号SIGALARM，防止循环超时</span></div><div class="line"> nTimeOut = <span class="number">1</span>; <span class="comment">//设置超时标识为“已超时”</span></div><div class="line"> <span class="keyword">return</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>&lt;3&gt;捕获信号SIGALRM并设置定时器。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function">signal</span>(SIGALRM,OnTimeOut); <span class="comment">//捕获信号SIGALRM</span></div><div class="line"><span class="function">alarm</span>(TIMEOUT); <span class="comment">//TIMEOUT秒后发送定时器信号SIGALRM</span></div></pre></td></tr></table></figure>
+
+<p>&lt;4&gt;调用套接字阻塞处理函数，比如套接字接收（recv、read、recvfrom）、发送（send、write）、连接申请（connect）或接收连接（accept）。</p>
+<p>&lt;5&gt;取消定时器并忽略信号SIGALRM</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">alarm(<span class="number">0</span>);</div><div class="line">signal(SIGALRM,SIG_IGN);</div><div class="line"><span class="keyword">if</span>(nTimeOut == <span class="number">1</span>) <span class="comment">//超时处理</span></div><div class="line"><span class="keyword">else</span> <span class="comment">//非超时处理</span></div></pre></td></tr></table></figure>
+
+<p>（3）通过信号SIGALRM与跳转设置超时</p>
+<p>&lt;1&gt;定义超时标志和跳转结构</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> nTimeOut = <span class="number">0</span>;</div><div class="line">jmp_buf env;</div></pre></td></tr></table></figure>
+
+<p>&lt;2&gt;为信号SIGALRM设置处理函数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//在处理函数中除了更改超时标志外，还增加了跳转语句，如函数OnTimeOut所示：</span></div><div class="line"><span class="keyword">void</span> OnTimeout(<span class="keyword">int</span> nSignal)</div><div class="line">{</div><div class="line"> <span class="keyword">signal</span>(nSignal,SIG_IGN); <span class="comment">//超时一次后就忽略信号SIGALARM，防止循环超时</span></div><div class="line"> nTimeOut = <span class="number">1</span>; <span class="comment">//设置超时标识为“已超时”</span></div><div class="line"> longjmp(env,<span class="number">1</span>); <span class="comment">//语句跳转</span></div><div class="line"> <span class="keyword">return</span>; <span class="comment">//本句实际上已经不会执行了</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>&lt;3&gt;记录跳转点</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">setjmp(<span class="keyword">env</span>);</div></pre></td></tr></table></figure>
+
+<p>&lt;4&gt;超时判断</p>
+<p>&lt;5&gt;捕获信号SIGALRM并设置定时器</p>
+<p>&lt;6&gt;调用套接字阻塞处理函数，比如套接字接收（recv、read、recvfrom）、发送（send、write）、连接申请（connect）或接收连接（accept）等。</p>
+<p>&lt;7&gt;取消定时器并忽略信号SIGALRM。</p>
+<p>4.多路复用并发模型</p>
+<p>如select，多路复用函数把一些文件描述符集合在一起，如果某个文件描述符的状态发生变化，比如进入“写就绪”或者“读就绪”状态，函数select会立即返回，并且通知进程读取或写入数据，如果没有I/O到达，进程将进入阻塞，直到函数select超时退出为止。</p>
+<p>select/poll/epoll是Socket并发常用的方法，等有空再总结吧。</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-02-13T17:05:21.000Z"><a href="/2014/02/14/tcp-and-udp-note/">2月 14 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/02/14/tcp-and-udp-note/">记录下传输层协议TCP和UDP的一些特性</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>在TCP/IP中能够实现传输层功能的、具有代表性的协议是TCP和UDP。</p>
+<p>一、TCP：</p>
+<p>TCP是面向连接的、可靠的流协议。流就是指不间断的数据结构，你可以把它想象成排水道中的水流。当应用程序采用TCP发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。TCP充分地实现了数据传输时各种控制功能，可以进行丢包时的重发控制，还可以对次序乱掉的分包进行顺序控制。而这些在UDP中都没有。此外，TCP作为一种面向有连接的协议，只有在确认通信对端存在时才会发送数据，从而可以控制通信流量的浪费。根据TCP的这些机制，在IP这种无连接的网络上也能够实现高可靠性的通信。</p>
+<p>TCP为提供可靠性传输，实行“顺序控制”或“重发控制”机制。此外还具备“流控制（流量控制）”、“拥塞控制”、提供网络利用率等众多功能。</p>
+<p>TCP通过检验和、序列号、确认应答、重发控制、连接管理以及窗口控制等机制实现可靠性传输。</p>
+<p>(1)通过序列号与确认应答提高可靠性</p>
+<p>在TCP中，当发送端的数据到达接收主机时，接收端主机会返回一个已收到消息的通知。这个消息叫做确认应答（ACK）。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140214001551.jpg" alt=""></p>
+<p>TCP通过肯定的确认应答（ACK）实现可靠的数据传输。当发送端将数据发出之后会等待对端的确认应答。如果有确认应答，说明数据已经成功到达对端。反之，则数据丢失的可能性很大。在一定时间内没有等到确认应答，发送端就可以认为数据已经丢失，并进行重发。由此，即使产生了丢包，仍然能够保证数据能够到达对端，实现可靠传输。未收到确认应答并不意味着数据一定丢失。也有可能是数据对方已经收到，只是返回的确认应答在途中丢失。这种情况也会导致发送端因没有收到确认应答，而认为数据没有到达目的地，从而进行重新发发送。</p>
+<p>上述这些确认应答处理、重发控制以及重复控制等功能都可以通过序列号实现。序列号是按顺序给发送数据的每一个字节（8位字节）都标上号码的编号。接收端查询接收数据TCP首部中的序列号和数据的长度，将自己下一步应该接收的序号作为确认应答返送回去。就这样，通过序列号和确认应答号，TCP可以实现可靠传输。</p>
+<p>(2)重发超时如何确实</p>
+<p>重发超时是指在重发数据之前，等待确认应答到来的那个特定时间间隔。如果超过了这个时间仍未收到确认应答，发送端将进行数据重发。那么这个重发超时的具体时间长度又是如何确定的呢？</p>
+<p>最理想的是，找到一个最小时间，它能保证“确认应答一定能在这个时间内返回”。然而这个时间长短随着数据包途径的网络环境的不同而有所变化。例如在高速的LAN中时间相对较短，而在长距离的通信当中应该比LAN要长一些。即使是在同一个网络中，根据不同时段的网络堵塞程度时间的长短也会发生变化。TCP要求不论处在何种网络环境下都要提供高性能通信，并且无论网络拥堵情况发生何种变化，都必须保持这一特性。为此，它在每次发包时都会计算往返时间及其偏差。将这个往返时间和偏差相加重发超时的时间，就是比这个总和要稍大一点的值。</p>
+<p>在BSD的Unix以及Windows系统中，超时都以0.5秒为单位进行控制，因此重发超时都是0.5秒的整数倍。不过，由于最初的数据包还不知道往返时间，所以其重发超时一般设置为6秒左右。数据被重发之后若还是收不到确认应答，则进行再次发送。此时，等待确认应答的时间将会以2倍、4倍的指数函数延长。此外，数据也不会被无限、反复地重发。达到一定重发次数之后，如果仍没有任何确认应答返回，就会判断为网络或对端主机发生了异常，强制关闭连接。并且通知应用通信异常强行终止。</p>
+<p>(3)连接管理</p>
+<p>UDP是一种面向无连接的通信协议，因此不检查对端是否可以通信，直接将UDP包发送出去。TCP与此相反，它会在数据通信之前，通过TCP首部发送一个SYN包作为建立连接的请求等待确认应答。如果对端发来确认应答，则认为可以进行数据通信。如果对端的确认应答未能到达，就不会进行数据通信。此外，在通信结束时会进行断开连接的处理（FIN包）。</p>
+<p>可以使用TCP首部用于控制的字段来管理TCP连接。一个连接的建立与断开，正常过程至少需要来回发送7个包才能完成。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140214001552.jpg" alt=""></p>
+<p>(4)TCP以段为单位发送数据</p>
+<p>在建立TCP连接的同时，也可以确认发送数据包的单位，我们也可以称其为“最大消息长度”（MSS：Maximum Segment Size）。最理想的情况是，最大消息长度正好是IP中不会被分片处理的最大数据长度。</p>
+<p>TCP在传送大量数据时，是以MSS的大小将数据进行分割发送。进行重发时也是以MSS为单位。</p>
+<p>MSS是在三次握手的时候，在两端主机之间被计算得出。两端的主机在发出建立连接的请求时，会在TCP首部中写入MSS选项，告诉对方自己的接口能够适应MSS的大小。然后会在两者之间选择一个较小的值投入使用。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140214001553.jpg" alt=""></p>
+<p>(5)利用窗口控制提高速度</p>
+<p>TCP以1个段为单位，每发一个段进行一次确认应答的处理，这样的传输方式有一个缺点，那就是，包的往返时间越长通信性能就越低。</p>
+<p>为解决这个问题，TCP引入了窗口这个概念。即使在往返时间较长的情况下，它也能控制网络性能的下降。确认应答不再是以每个分段，而是以更大的单位进行确认时，转发时间将会大幅度的缩短。也就是说，发送端主机，在发送了一个段以后不必要一直等待确认应答，而是继续发送。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140214001554.jpg" alt=""></p>
+<p>窗口大小就是无需等待确认应答而可以继续发送数据的最大值，如上，窗口大小为4个段。这个机制实现了使用大量的缓冲区，通过对多个段同时进行确认应答的功能。</p>
+<p>收到确认应答的情况下，将窗口滑动到确认应答中的序列号的位置。这样可以顺序地将多个段同时发送提高通信性能。这种机制也被成为滑动窗口控制。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140214001555.jpg" alt=""></p>
+<p>(6)流控制</p>
+<p>发送端根据自己的实际情况发送数据。但是，接收端可能收到的是一个毫无关系的数据包又可能会在处理其他问题上花费一些时间。因此在为这个数据包做其他处理时会耗费一些时间，甚至在高负荷的情况下无法接收任何数据。如此一来，如果接收端将本应该接收的数据丢弃的话，就又会触发重发机制，从而导致网络流量的无端浪费。</p>
+<p>为了防止这种现象的发生，TCP提供一种机制可以让发送端根据接收端的实际接收能力控制发送的数据量。这就是所谓的流控制。它的具体操作是，接收端主机向发送端主机通知自己可以接收数据的大小，于是发送端会发送不超过这个限度的数据。该大小限度就被称作窗口大小。</p>
+<p>TCP首部中，专门有一个字段用来通知窗口大小。接收主机将自己可以接收的缓冲区大小放入这个字段中通知给发送端。这个字段的值越大，说明网络的吞吐量越高。</p>
+<p>不过，接收端的这个缓冲区一旦面临数据溢出时，窗口大小的值也会随之被设置为一个更小的值通知给发送端，从而控制数据发送量。也就是说，发送端主机会根据接收端主机的指示，对发送数据的量进行控制。这也就形成了一个完整的TCP流控制（流量控制）。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140214114741.jpg" alt=""></p>
+<p>(7)拥塞控制</p>
+<p>有了TCP的窗口控制，收发主机之间即使不再以一个数据段为单位发送确认应答，也能够连续发送大量数据包。然而，如果在通信刚开始时就发送大量数据，也可能会引发其他问题。在网络出现堵塞时，如果突然发送一个较大量的数据，极有可能导致整个网络的瘫痪。TCP为了防止该问题的出现，在通信一开始时就会通过一个叫做慢启动的算法得出的数值，对发送数据量进行控制。</p>
+<p>首先，为了在发送端调节所要发送数据的量，定义了一个叫做“拥塞窗口”的概念。于是在慢启动的时候，将这个拥塞窗口的大小设置为1个数据段（1MSS）发送数据，之后每收到一次确认应答（ACK），拥塞窗口的值就加1.在发送数据包时，将拥塞窗口的大小与接收端主机通知的窗口大小做比较，然后按照它们当中较小的那个值，发送比其还要小的数据量。</p>
+<p>(8)提高网络利用率的规范</p>
+<p>Nagle算法：</p>
+<p>TCP中为了提高网络的利用率，经常使用一个叫做Nagle的算法。该算法是指发送端即使还有应该发送的数据，但如果这部分数据很少的话，则进行延迟发送的一种处理机制。具体来说，就是仅在下列任意一种条件下才能发送数据。如果两个条件都不满足，那么暂时等待一段时间以后再进行数据发送。</p>
+<p>1&gt;已发送的数据都已经收到确认应答时</p>
+<p>2&gt;可以发送最大段长度（MSS）的数据时</p>
+<p>延迟确认应答：</p>
+<p>当某个接收端收到这个小窗口的通知以后，会以它为上限发送数据，从而又降低了网络的利用率。为此，引入了一个方法，那就是收到数据以后并不立即返回确认应答，而是延迟一段时间的机制。</p>
+<p>捎带应答：</p>
+<p>捎带应答是指在同一个TCP包中既发送数据又发送确认应答的一种机制。由此，网络的利用率会提高，计算机的负荷也会减轻。不过，确认应答必须得等到应用处理完数据并将作为回执的数据返回为止，才能进行捎带应答。</p>
+<p>二、UDP：</p>
+<p>UDP是User Datagram Protocol的缩写。UDP是不具有可靠性的数据报协议。细微的处理它会交给上层的应用去完成。在UDP的情况下，虽然可以确保发送消息的大小，却不能保证消息一定会到达。因此，应用有时会根据自己的需要进行重发处理。</p>
+<p>UDP不提供复杂的控制机制，利用IP提供面向无连接的通信服务。并且它是将应用程序发来的数据在收到的那一刻，立即按照原样发送到网络上的一种机制。</p>
+<p>即使是出现网络堵塞的情况下，UDP也无法进行流量控制等避免网络拥塞的行为。此外，传输途中即使出现丢包，UDP也不负责重发。甚至当出现包的到达顺序乱掉时也没有纠正的功能。如果需要这些细节控制，那么不得不交由采用UDP的应用程序去处理。UDP有点类似于用户说什么听什么的机制，但是需要用户充分考虑好上层协议类型并制作相应的应用程序。因此，也可以说，UDP按照“制造程序的那些用户的指示行事”。</p>
+<p>由于UDP面向无连接，它可以随时发送数据。再加上UDP本身的处理既简单又高效，因此经常用于以下几个方面：</p>
+<p>1&gt;包总量较少的通信（DNS、SNMP等）</p>
+<p>2&gt;视频、音频等多媒体通信（即时通信）</p>
+<p>3&gt;限定于LAN等特定网络中的应用通信</p>
+<p>4&gt;广播通信（广播、多播）</p>
+<p>可能有人会认为，鉴于TCP是可靠的传输协议，那么它一定优于UDP。其实不然。TCP与UDP的优缺点无法简单地、绝对地去做比较。那么，对这两种协议应该如何加以区分使用呢？下面，我就对此问题做一简单说明。</p>
+<p>TCP用于在传输层有必要实现可靠的情况。由于它是面向有连接并具备顺序控制、重发控制等机制的，所以它可以为应用提供可靠传输。</p>
+<p>而UDP主要用于那些对高速传输和实时性有较高要求的通信或广播通信。我们拿通过IP电话进行通话作为例子。如果使用TCP，数据在传送途中如果丢失会重发，但这样无法刘畅地传输通话人的声音，会导致无法进行正常交流。而采用UDP，它不会进行重发处理。从而也就不会有声音大幅度延迟到达的问题。即使有部分数据丢失，也只是会影响某一小部分的通话。此外，在多播与广播通信中也使用UDP而不是TCP。RIP、DHCP等基于广播的协议也要依赖于UDP。因此，TCP和UDP应该根据应用的目的按需使用。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-02-13T08:34:57.000Z"><a href="/2014/02/13/osi-model-communicate-example/">2月 13 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/02/13/osi-model-communicate-example/">OSI参考模型通信处理举例</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>我们以生活中最常见的发送邮件作为例子。假定用户A要给用户B发送一封内容为“早上好”邮件。网络究竟会进行哪些处理呢？我们由上至下进行分析。</p>
+<p>应用层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/201402131508201.jpg" alt=""></p>
+<p>用户A在主机上新建一封电子邮件，指定收件人为B，并输入邮件内容为“早上好”。收发邮件的这款软件从功能上可以分为两大类：一部分是与通信相关的，另一部分是与通信无关的。例如用户A从键盘输入“早上好”的这一部分就属于与通信无关的功能，而将“早上好”的内容发送给收件人B 则是其与通信相关的功能。因此，此处的“输入电子邮件内容后发送给目标地址”也就相当于应用层。</p>
+<p>从用户输入完所要发送的内容并点击“发送”按钮的那一刻开始，就进入了应用层协议的处理。该协议会在所要传送数据的前端附加一个首部（标签）信息。该首部标明了邮件内容为“早上好”和收件人为“B”。这一附有首部信息的数据传送给主机B以后由该主机上的收发邮件软件通过“收信”功能获取内容。主机B 上的应用收到主机A发过来的数据后，分析其数据首部与数据正文，并将邮件保存到硬盘或是其他非易失性存储器以备进行相应的处理。如果主机B 上收件人的邮箱空间已满无法接收新的邮件，则会返回一个错误给发送方。对这类异常的处理也正属于应用层需要解决的问题。</p>
+<p>表示层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150820.jpg" alt=""></p>
+<p>表示层的“表示”有“表现”、“演示”的意思，因此更关注数据的具体表现形式。此外，所使用的应用软件本身的不同也会导致数据的表现形式截然不同。例如有的字处理软件创建的文件只能由该字处理厂商所提供的特定版本的软件才来打开读取。</p>
+<p>那么，电子邮件中如果遇到此类问题该如何解决呢？如果用户A与用户B所使用的邮件客户端软件完全一致，就能够顺利收取和阅读邮件，不会遇到类似的问题。但是这在现实生活当中是不大可能的。让所有用户千篇一律地使用同一款客户端软件对使用者来说也是极不方便的一件事情。</p>
+<p>解决这类问题有以下几种方法。首先是利用表示层，将数据从“某个计算机特定的数据格式”转换为“网络通用的标准数据格式”后再发送出去。接收端主机收到数据以后将这些网络标准格式的数据恢复为“该计算机特定的数据格式”，然后再进行相应的处理。</p>
+<p>在前面这个例子中，由于数据被转换为通用标准的格式后再进行处理，使得异构的机型之间也能保持数据的一致性。这也正是表示层的作用所在。即表示层是进行“统一的网络数据格式”与“某一台计算机或某一款软件特有的数据格式”之间相互转换的分层。</p>
+<p>此例中的“早上好”这段文字根据其编码格式被转换成为了“统一的网络数据格式”。即便是一段简单的文字流，也可以有众多复杂的编码格式。就拿文字来说，有UTF-8、UTF-16 ISO-XXX等很多编码格式。如果未能按照特定格式编码，那么在接收端就是收到邮件也可能会是乱码。表示层与表示层之间为了识别编码格式也会附加首部信息，从而将实际传输的数据转交给下一层去处理。</p>
+<p>会话层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150821.jpg" alt=""></p>
+<p>下面，我们来分析在两端主机的会话层之间是如何高效地进行数据交互、采用何种方法传输数据的。</p>
+<p>假定用户A新建了5封电子邮件准备发给用户B。这5封邮件的发送顺序可以有很多种。例如，可以每发一封邮件时建立一次连接，随后断开连接。还可以一经建立好连接后就将5封邮件连续发送给对方。甚至可以同时建立好5个连接，将5封邮件同时发送给对方。决定采用何种连接方法是会话层的主要责任。</p>
+<p>会话层也像应用层或表示层那样，在其收到的数据前端附加首部或标签信息后再转发给下一层。而这些首部或标签中记录着数据传送顺序的信息。</p>
+<p>到此为止，我们通过例子说明了在应用层写入的数据会经由表示层格式化编码、再由会话层标记发送顺序后才被发送出去的大致过程。然而，会话层只对何时建立连接、何时发送数据等问题进行管理，并不具有实际传输数据的功能。真正负责在网络上传输具体数据的是会话层以下各层。</p>
+<p>传输层：</p>
+<p>主机A确保与主机B之间的通信并准备发送数据。这一过程叫做“建立连接”。有了这个通信连接就可以使主机A发送的电子邮件到达主机B中，并由主机B 的邮件处理程序获取最终数据。此外，当通信传输结束后，有必要将连接断开。</p>
+<p>如上，进行建立连接或断开连接的处理，在两个主机之间创建逻辑上的通信连接即是传输层的主要作用。此外，传输层为确保所传输的数据到达目标地址，会在通信两端的计算机之间进行确认，如果数据没有到达，它会负责进行重发。</p>
+<p>例如，主机A将“早上好”这一数据发送给主机B。期间可能会因为某些原因导致数据被破坏，或由于发生某种网络异常致使只有一部分数据到达目标地址。假设主机B只收到了“早上”这一部分数据，那么它会在收到数据后将自己没有收到“早上”之后那部分数据的事实告知主机A，主机A得知这个情况后会将后面的“好”重发给主机B，并再次确认对端是否收到。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150822.jpg" alt=""></p>
+<p>由此可见，保证数据传输的可靠性是传输层的一个重要作用。为了确保可靠性，在这一层也会为所要传输的数据附加首部以识别这一分层的数据。然而，实际上将数据传输给对端的处理是由网络层来完成的。</p>
+<p>网络层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150823.jpg" alt=""></p>
+<p>网络层的作用是在网络与网络相互连接的环境中，将数据从发送端主机发送到接收端主机。两端主机之间虽然有众多数据链路，但能够将数据从主机A送到主机B也都是网络层的功劳，如下图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150824.jpg" alt=""></p>
+<p>在实际发送数据时，目的地址至关重要。这个地址是进行通信的网络中唯一指定的序号。也可以把它想象为我们日常生活中使用的电话号码。只要这个目的地址确定了，就可以在众多计算机中选出该目标地址所对应的计算机发送数据。基于这个地址，就可以在网络层进行数据包的发送处理。而有了地址和网络层的包发送处理，就可以将数据发送到世界上任何一台互联设备。网络层中也会将其从上层收到的数据和地址信息等一起发送给下面的数据链路层，进行后面的处理。</p>
+<p>数据链路层、物理层：</p>
+<p>通信传输实际上是通过物理的传输介质实现的。数据链路层的作用就是在这些通过传输介质互联的设备之间进行数据处理。物理层中，将数据的0、1转换为电压和脉冲光传输给物理的传输介质，而相互直连的设备之间使用地址实现传输。而这种地址被成为MAC地址，也可称为物理地址或硬件地址。采用MAC地址，目的是为了识别连接到同一个传输介质上的设备。因此，在这一分层中将包含MAC地址信息的首部附加到从网络层转发过来的数据上，将其发送到网络。网络层与数据链路层都是基于目标地址将数据发送给接收端的，但是网络层负责将整个数据发送给最终目标地址，而数据链路层则只负责发送一个分段内的数据。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150825.jpg" alt=""></p>
+<p>主机B 端的处理：</p>
+<p>接收端主机B 上的处理流程正好与主机A相反，它从物理层开始将接收到的数据逐层发给上一分层进行处理，从而使用户B 最终在主机B 上使用邮件客户端软件接收用户A 发送过来的邮件，并可以读取相应内容为“早上好”。</p>
+<p>参考文献：</p>
+<p>《图解TCP/IP：第5版》</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+<nav id="pagination">
+  
+    <a href="/page/2/" class="alignleft prev">上一页</a>
+  
+  
+    <a href="/page/4/" class="alignright next">下一页</a>
+  
+  <div class="clearfix"></div>
+</nav></div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

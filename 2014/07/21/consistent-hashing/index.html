@@ -1,0 +1,258 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>一致性哈希算法 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="一致性哈希算法"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-07-21T14:04:29.000Z"><a href="/2014/07/21/consistent-hashing/">7月 21 2014</a></time>
+      
+      
+  
+    <h1 class="title">一致性哈希算法</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>一致性hash算法在分布式系统里面使用比较广，我也只是听说过这个概念，今天看到一个<a href="http://www.codeproject.com/Articles/56138/Consistent-hashing" target="_blank" rel="external">一致性hash开源库</a>，随手写篇文章，记录下吧。</p>
+<p>假如我们使用普通的哈希方式来处理负载均衡，到目标机器的映射使用的算法为：</p>
+<p>hash(o) mod n (n表示机器的总数)</p>
+<p>如果需要增加或减少一台机器的时候，算法就变为 hash(o) mod (n + 1) / hash(o) mod (n - 1)</p>
+<p>不仅需要重新编写代码，当服务器做了大量变更，大量的o会重定向不同的服务器而导致了缓冲不被命中，所以此时，就提出了一致性hash算法。</p>
+<h3 id="一致性哈希算法：">一致性哈希算法：</h3>
+<p>简单的说，哈希函数将o映射到 0 ~ 2^32 - 1的值区间，将这些数字头尾相连，然后将它们组织成一个闭合的圆环。如图一所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/07/2014721circle.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>要实现一致性哈希算法，思路就是下面2个步骤：</p>
+<h4 id="&lt;1&gt;将数据通过一定的hash算法映射到环上：">&lt;1&gt;将数据通过一定的hash算法映射到环上：</h4>
+<p><img src="http://armsword.com/wp-content/uploads/2014/07/2014721object.jpg" alt=""></p>
+<p>hash(object1) = key1;</p>
+<p>。。。</p>
+<p>hash(object4) = key4;</p>
+<h4 id="&lt;2&gt;将机器通过哈希算法映射到环上">&lt;2&gt;将机器通过哈希算法映射到环上</h4>
+<p><img src="http://armsword.com/wp-content/uploads/2014/07/2014721cache.jpg" alt=""></p>
+<p>假如有三台cache机器，A，B，C，一般情况下hash计算是采用机器的IP或者机器唯一的别名作为输入值。</p>
+<p>hash(cache A) = key A;</p>
+<p>。。。</p>
+<p>hash(cache B) = key C;</p>
+<p>然后顺时针方向计算，将所有object（数据）存储到离自己最近的机器上。</p>
+<p>如上图所示：object1将存储到 cache A，object2和object3将会存储到 cache C，object4将会存储到 cache B。</p>
+<h4 id="添加或删除机器：">添加或删除机器：</h4>
+<p>假如B 机器被移走或者坏掉了，根据顺时针存储到最近的机器的特性，之前存储到B机器的objects（数据）将会转到C机器（因为顺时针离C最近），如下所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/07/2014721remove.jpg" alt=""></p>
+<p>同样添加了新机器也是同理。</p>
+<h4 id="虚拟节点：">虚拟节点：</h4>
+<p>一致性哈希算法在服务节点太少或不均匀时，容易造成数据倾斜问题，导致平衡性问题。hash算法不能保证平衡的，在一致性哈希算法中，为了尽可能的满足平衡性，引入了虚拟节点。</p>
+<p>虚拟节点是实际节点（机器）在hash空间的复制品，一个实际节点对应了若干了虚拟节点，当我们增加一个机器时，我们在环里增加几个其虚拟节点，当我们移掉它时，我们把其虚拟节点从环中一块移除掉。实际上就是对一个机器节点计算多次哈希，每个计算结果位置都放置一个此服务节点，成为虚拟节点，具体做法可以在机器IP或主机名的后面添加编号来实现，如Node1-1，Node1-2。</p>
+<p>例如，有两台机器A和C，引入了虚拟节点后，就会有4个节点，分布更均匀，如下图所示所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/07/2014721virtual.jpg" alt=""></p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/算法-数据结构/">算法/数据结构</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="一致性哈希算法" data-url="http://armsword.com/2014/07/21/consistent-hashing/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

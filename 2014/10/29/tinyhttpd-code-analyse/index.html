@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>tinyhttpd源码剖析 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="tinyhttpd源码剖析"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-10-28T16:46:18.000Z"><a href="/2014/10/29/tinyhttpd-code-analyse/">10月 29 2014</a></time>
+      
+      
+  
+    <h1 class="title">tinyhttpd源码剖析</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>喊了几天学习Web开发，为了毕业论文，今晚上计划也是看看CSS呢，但是实在是没忍住，读了下经典的tinyhttp的源代码，这款代码还是颇有名气的，网上这么评论的：</p>
+<blockquote>
+<p>tinyhttpd是一个超轻量型Http Server，使用C语言开发，全部代码只有500、600行，附带一个简单的Client，可以通过阅读这段代码理解一个Http Server的本质。</p>
+</blockquote>
+<p>其实，代码颇简单，适合刚学习Web Server的童鞋学习，因为我之前写过CGI Server，所以，我还是认为此代码写的一般，并且我在Ubuntu下编译遇到了不少错误，我都懒得写详细分析了，所以随便写下吧，后面的Github地址里有详细的分析。</p>
+<p>源码下载地址：<a href="http://sourceforge.net/projects/tinyhttpd/" title="tinyhttpd源码分析" target="_blank" rel="external">http://sourceforge.net/projects/tinyhttpd/</a></p>
+<p>make编译后会有不少错误和警告，我这里说下怎么改正错误：</p>
+<p>1、Makefile文件里的：gcc -W -Wall -lsocket -lpthread -o httpd httpd.c ，修改为：</p>
+<p>gcc -W -Wall -o httpd httpd.c -lpthread</p>
+<p>2、481行的 int client_name_len 改为 socklen_t client_name_len</p>
+<p>3、436行 改动与上面相似，改为socklen_t类型即可。</p>
+<p>4、34行改为void <em>accept_request(void </em>);  所以下面的实现也要修改下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> *accept_request(<span class="keyword">void</span>* client1)</div><div class="line">{</div><div class="line"><span class="keyword">int</span> client = *(<span class="keyword">int</span> *)client1;</div><div class="line"><span class="keyword">char</span> buf[<span class="number">1024</span>];</div><div class="line"></div><div class="line"><span class="comment">// 省略</span></div><div class="line"></div><div class="line">同时注意此函数<span class="number">77</span> 和<span class="number">129</span>行改为<span class="keyword">return</span> <span class="keyword">NULL</span>;</div><div class="line"></div><div class="line"><span class="number">497</span>行改为<span class="keyword">if</span> (pthread_create(&amp;newthread , <span class="keyword">NULL</span>, accept_request, (<span class="keyword">void</span>*)client_sock) != <span class="number">0</span>)</div></pre></td></tr></table></figure>
+
+<p>之后再make，程序就OK了。</p>
+<p>简单说下程序的逻辑吧：</p>
+<p>一个无限循环，一个请求，创建一个线程，之后线程处理函数处理每个请求，然后解析HTTP请求，然后做一些判断处理，之后判断文件是否可执行，不可执行，打开文件，输出给客户端（浏览器）呗，可执行就创建管道，父子进程通信。</p>
+<p>整个流程就这么简单，程序主要处理2种HTTP请求方式：GET和POST，懒得说了，上传两张图片，自己分析吧，图片原始出处不清楚，电脑里存了好久了,。</p>
+<p>GET：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/10/2014102901.png" alt=""></p>
+<p>POST：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/10/2014102902.png" alt=""></p>
+<p>&nbsp;</p>
+<p>其实这个源码里有一个地方比较难懂，就是那个解析HTTP每一行的那个get_line函数里的recv的MSG_PEEK参数，详细解释可以参考此<a href="http://www.blogbus.com/gcoder-logs/220779725.html" target="_blank" rel="external">链接</a>。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 读取socket，判断换行，CRLF标志，之后以"\n"换行，并在字符串后添加'\0'</span></div><div class="line"><span class="keyword">int</span> get_line(<span class="keyword">int</span> sock, <span class="keyword">char</span> *buf, <span class="keyword">int</span> <span class="keyword">size</span>)</div><div class="line">{</div><div class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</div><div class="line">    <span class="keyword">char</span> c = <span class="string">'&#92;&#48;'</span>;</div><div class="line">    <span class="keyword">int</span> n;</div><div class="line"></div><div class="line">    <span class="keyword">while</span> ((i &lt; <span class="keyword">size</span> - <span class="number">1</span>) &amp;&amp; (c != <span class="string">'\n'</span>))</div><div class="line">    {</div><div class="line">        <span class="comment">// 一个字符一个字符的读取</span></div><div class="line">        n = recv(sock, &c, <span class="number">1</span>, <span class="number">0</span>);</div><div class="line">         <span class="comment">/* DEBUG printf("%02X\n", c); */</span></div><div class="line">        <span class="keyword">if</span> (n &gt; <span class="number">0</span>)</div><div class="line">        {</div><div class="line">            <span class="keyword">if</span> (c == <span class="string">'\r'</span>)</div><div class="line">            {</div><div class="line">                <span class="comment">/*</span></div><div class="line">                 * 注意MSG_PEEK参数，表示TCP Buffer不删除之前队列数据，从队列里接收数据</div><div class="line">                 */</div><div class="line"></div><div class="line">                n = recv(sock, &amp;c, <span class="number">1</span>, MSG_PEEK);</div><div class="line">                <span class="comment">/* DEBUG printf(&quot;%02X\n&quot;, c); */</span></div><div class="line">                <span class="keyword">if</span> ((n &gt; <span class="number">0</span>) &amp;&amp; (c == <span class="string">'\n'</span>))</div><div class="line">                    recv(sock, &amp;c, <span class="number">1</span>, <span class="number">0</span>);</div><div class="line">                <span class="keyword">else</span></div><div class="line">                    c = <span class="string">'\n'</span>;</div><div class="line">            }</div><div class="line">            buf[i] = c;</div><div class="line">            i++;</div><div class="line">        }</div><div class="line">        <span class="keyword">else</span></div><div class="line">            c = <span class="string">'\n'</span>;</div><div class="line">    }</div><div class="line">    buf[i] = <span class="string">'&#92;&#48;'</span>;</div><div class="line"></div><div class="line">    <span class="keyword">return</span>(i);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>这代码，没啥写头，很多功能都没实现，请求只实现了GET和POST，Header里只用了第一行，CGI里全局变量只定义了几个，并且我验证程序，发现CGI功能好像是有些问题的，但是因为我CGI水平比较水，懒得检测原因了，总体来说，程序比我之前的那个CGI Server要简单些，功能要稍微弱些吧。</p>
+<p>下面放出我Github里的详细中文注释，欢迎指正，谢谢：</p>
+<p><a href="https://github.com/armsword/Source/tree/master/tinyhttpd" title="tinyhttpd源码剖析" target="_blank" rel="external">https://github.com/armsword/Source/tree/master/tinyhttpd</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/C-C/">C/C++</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="tinyhttpd源码剖析" data-url="http://armsword.com/2014/10/29/tinyhttpd-code-analyse/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,688 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>第 6 页 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-08-25T08:21:02.000Z"><a href="/2013/08/25/linux-algrind-check-memory/">8月 25 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/08/25/linux-algrind-check-memory/">Linux下使用Valgrind做内存泄漏检查</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>在Windows下经常编程的同学肯定知道这款软件，Visual Leak Detector（VLD），这个是用于Visual C++的内存泄漏检测工具。同样，在Linux下也有一款与此功能相似的工具，它的名字叫做Valgrind。</p>
+<p>Vlagrind是一款用来定位C/C++程序中内存使用方面的错误，它运行在Linux环境下，主要检测包括：内存泄漏、使用未初始化的内存、读/写已释放的内存、读/写内存越界、使用malloc/new/new[]和free/delete/delete[]不匹配，甚至可以检测死锁，竞争，还可以做性能分析等等。</p>
+<p>Valgrind的官方网站下载地址：<a href="http://valgrind.org/downloads/current.html" target="_blank" rel="external">http://valgrind.org/downloads/current.html</a> ，安装时候直接 configure，make，make install 这些步骤就可以使用了。</p>
+<p>使用方法：</p>
+<p>用法: valgrind [valgrind-option] program [program-args]</p>
+<p>-tool=&lt;name&gt; 最常用的选项，运行 valgrind中名为toolname的工具，默认memcheck。<br>-trace-children=no|yes 跟踪子线程<br>-track-fds=no|yes 跟踪打开的文件描述<br>-time-stamp=no|yes 增加时间戳到LOG信息<br>-log-file=&lt;file&gt; 将输出的信息写入到文件里</p>
+<p>还有一些其他功能，我们现在用不到，就先不说了。那么具体的使用方法为：</p>
+<p>结果输出到显示屏上：</p>
+<p>valgrind —tool=memcheck —leak-check=full ./test</p>
+<p>valgrind —leak-check=full —track-fds=yes ./test 程序参数  //省略了tool = memcheck</p>
+<p>如果想把结果输出到日志文件上：</p>
+<p>valgrind —log-file=valgrind_log —leak-check=full —track-fds=yes ./test 参数 (注意有二个 -)</p>
+<p>检查内存错误要在上面的输出中看两个关键字：ERROR SUMMARY 和 LEAK SUMMARY。<br>```<br>==6135== Memcheck, a memory error detector<br>==6135== Copyright (C) 2002-2011, and GNU GPL’d, by Julian Seward et al.<br>==6135== Using Valgrind-3.7.0 and LibVEX; rerun with -h for copyright info<br>==6135== Command: ./findtopo<br>==6135== Parent PID: 5969<br>==6135==<br>==6135== Conditional jump or move depends on uninitialised value(s)<br>==6135== at 0x80497D6: handlesql (handlesql.c:34)<br>==6135== by 0x8049415: looptopo (looptopo.c:145)<br>==6135== by 0x8048E9E: main (findtopo.c:51)<br>Valgrind太强大了，搜索了下原理：valgrind在开始之前总会先取得对你的程序的控制权，从可执行关联库里读取调试信息。然后在valgrind核心提供的虚拟CPU上运行程序，valgrind会根据选择的工具来处理代码，该工具会向代码中加入检测代码，并把这些代码作为最终代码返回给valgrind核心，最后valgrind核心运行这些代码。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-08-04T07:22:57.000Z"><a href="/2013/08/04/redis-source/">8月 4 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/08/04/redis-source/">准备看下Redis的源代码</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>Redis是一个开源，BSD授权，高性能的key-value数据库，使用ANSI C编写。Redis的出现很大程度补偿了memcached这类key-value存储的不足，因为：</p>
+<p>Memcached基本只支持简单的key-value存储，不支持枚举，不支持持久化和复制能功能。</p>
+<p>Redis除key-value之外，还支持list,set,sorted set,hash等众多数据结构，提供了KEYS进行枚举操作，但不能在线上使用，如果需要枚举线上数据，Redis提供了工具可以直接扫描其dump文件，枚举出所有数据，Redis还同时提供了持久化和复制等功能。</p>
+<p>如果简单地比较Redis与Memcached的区别，大多数都会得到以下观点：</p>
+<ul>
+<li>Redis不仅仅支持简单的k/v类型的数据，同时还提供list，set，hash等数据结构的存储。</li>
+<li>Redis支持数据的备份，即master-slave模式的数据备份。</li>
+<li>Redis支持数据的持久化，可以将内存中的数据保持在磁盘中，重启的时候可以再次加载进行使用。<br>Redis和memcached不同之处还在以下方面：1.网络IO模型 2.内存管理方面 3.数据一致性问题 4.存储方式及其它方面（上文提到了）等等，这里不在细说。</li>
+</ul>
+<p>数据模型：</p>
+<p>Redis 的外围由一个键、值映射的字典构成。与其他非关系型数据库主要不同在于：Redis 中值的类型不仅限于字符串，还支持如下抽象数据类型：<br>1.字符串列表<br>2.无序不重复的字符串集合<br>3.有序不重复的字符串集合<br>4.键、值都为字符串的哈希表<br>值的类型决定了值本身支持的操作。Redis 支持不同无序、有序的列表，无序、有序的集合间的交集、并集等高级服务器端原子操作。</p>
+<p>持久化：</p>
+<p>Redis 通常将全部的数据存储在内存中。2.4版本后可配置为使用虚拟内存，一部分数据集存储在硬盘上，但这个特性废弃了。<br>目前通过两种方式实现持久化：<br>使用快照，一种半持久耐用模式。不时的将数据集以异步方式从内存以 RDB 格式写入硬盘。<br>1.1版本开始使用更安全的 AOF 格式替代，一种只能追加的日志类型。将数据集修改操作记录起来。Redis 能够在后台对只可追加的记录作修改来避免无限增长的日志。</p>
+<p>同步：</p>
+<p>Redis支持主从同步。数据可以从主服务器向任意数量的从服务器上同步，从服务器可以是关联其他从服务器的主服务器。这使得 Redis 可执行单层树复制。从盘可以有意无意的对数据进行写操作。由于完全实现了发布/订阅机制，使得从数据库在任何地方同步树时，可订阅一个频道并接收主服务器完整的消息发布记录。同步对读取操作的可扩展性和数据冗余很有帮助。</p>
+<p>性能：</p>
+<p>当数据依赖不再需要，Redis 这种基于内存的性质，与在执行一个事务时将每个变化都写入硬盘的数据库系统相比就显得执行效率非常高。写与读操作速度没有明显差别。</p>
+<p>上面东西，是从维基百科摘抄下来的，只是更好的了解此数据库。关于源码解读，发现有热心网友专门写了源码剖析，见下面链接：</p>
+<p><a href="http://www.redisbook.com/en/latest/" target="_blank" rel="external">Redis设计与实现</a></p>
+<p>打算边看源码边看下此剖析。</p>
+<h1 id="Installation">Installation</h1>
+<p>Download, extract and compile Redis with:<br><code>$ wget http://redis.googlecode.com/files/redis-2.6.14.tar.gz
+$ tar xzf redis-2.6.14.tar.gz
+$ cd redis-2.6.14
+$ make</code><br>The binaries that are now compiled are available in the <code>src</code> directory. Run Redis with:<br>$ src/redis-server</p>
+<p>You can interact with Redis using the built-in client:<br><code>$ src/redis-cli
+redis&amp;gt; set foo bar
+OK
+redis&amp;gt; get foo
+&quot;bar&quot;</code></p>
+<p>tutorial:<br><a href="http://try.redis.io/" target="_blank" rel="external">http://try.redis.io/</a></p>
+<p>参考连接：</p>
+<p><a href="http://zh.wikipedia.org/wiki/Redis" target="_blank" rel="external">http://zh.wikipedia.org/wiki/Redis</a></p>
+<p><a href="http://www.redis.io/" target="_blank" rel="external">http://www.redis.io/</a></p>
+<p><a href="http://simple-is-better.com/news/684" target="_blank" rel="external">http://simple-is-better.com/news/684</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-08-02T13:43:41.000Z"><a href="/2013/08/02/understand-about-tcp-ip/">8月 2 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/08/02/understand-about-tcp-ip/">记录下TCP/IP协议的一些知识点</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1.bind的功能是将本地地址和端口绑定到套接字上去。</p>
+<p>2.int listen(SOCKET s,int backlog); 参数backlog是挂起连接的最大数量，它并不是在指定端口上同时可建立连接的最大值，而是排队等待应用程序接受的连接或部分连接的最大数量。</p>
+<p>它唯一的任务就是把套接字标识为监听状态，当主机收到一个连接请求时，内核会搜索监听套接字列表，查找与连接请求中目的地和端口号相匹配的那个套接字。</p>
+<p>3.connect的作用之一就是将远程实体的地址和端口绑定到本地套接字上去。</p>
+<p>4.accept负责接受已完成连接队列中的连接。</p>
+<p>5.典型的面向连接协议有三个阶段：</p>
+<p>(1)在对等实体间建立连接</p>
+<p>(2)数据传输阶段，数据在对等实体间传输</p>
+<p>(3)当对等实体完成数据传输，连接被拆除</p>
+<p>6.为了提供可靠性，TCP向基本的IP服务中添加了三项功能。首先，它为TCP段中的数据提供了校验和，这样有助于确保抵达目的地的数据在传输过程中不会被网络损坏。第二，它为每字节分配了一个序列号，这样如果数据抵达目的地时真的错序了，接收端也能够按照恰当的顺序将其重装起来。第三，TCP提供了一种确认-重传机制，以确保最终每个段都会被传送出去。</p>
+<p>7.UDP只向底层的IP协议中添加了两项功能。首先，它提供了一个可选的校验和来检测数据的损坏情况。尽管IP也有校验和，但它只对IP分组首部进行计算，所以，TCP和UDP也都提供了校验和来保护它们自己的首部和数据。UDP向IP添加的第二特征是端口的概念。</p>
+<p>分组到达时，内核会搜索其套接字列表，查找一个与组中的协议地址和端口号相匹配的套接字，如果找到了匹配的套接字，就由指定的协议来处理数据，并将这些数据提供给所有打开了匹配套接字的应用程序。</p>
+<p>8.TCP是一种流协议(stream dream)，这就意味着数据是以字节流的形式传递给接收者的，没有固定的“报文”或“报文边界”的概念，从这方面来说，读取TCP数据就像从串行端口读取数据一样——&gt;无法预先得知在一次指定的读调用中会返回多少字节。由TCP来决定需要立即发送多少数据，做这种决定的过程很复杂，取决于很多因素，比如发送窗口（当时主机能够接收的数据量），拥塞窗口（对网络拥塞的估计），路径上的最大传输单元（沿着主机之间的网络路径一次可以传输最大的数据量），以及连接的输出队列中有多少数据。</p>
+<p>TCP会记录它发送了多少字节，以及确认的字节，但它不会记录这些字节是如何分组的，实际上，有些实现在重传丢失分组的时候发送的数据可能比原来的多一些或少一些。TCP的手段主要有校验和、序列号、确认应答、重发控制、连接管理、窗口控制等。</p>
+<p>9.TCP是一个复杂的协议，在基本IP数据报服务的基础上添加了可靠性的流量控制功能，而UDP只添加了一个校验和，所以UDP可能要比TCP快一个数量级或更多。</p>
+<p>10.以太网帧最多可以装载1500B的数据，IP和TCP首部各需要20B，剩下1460B，为TCP选项另外保留20B。</p>
+<p>11.LAN提供的近乎理想的环境可以掩盖网络应用程序的性能问题，甚至是错误。记住，一个在LAN上运行良好的应用程序在WAN上很可能就会出问题。WAN上时延的增加会让在LAN上性能良好的应用程序在WAN上的性能不尽如意。</p>
+<p>12.TCP发送策略的主要目标之一是尽可能有效地利用可用带宽，如果只考虑这些问题，发送策略就很简单：根据发送窗口允许的最大值，以长度为MSS的段将所有可用的数据都发送出去。但是，我们还需要考虑其他一些与之冲突的情况。</p>
+<p>首先，拥塞控制就是一个非常重要的问题，如果TCP突然要将大量TCP段传入网络中去，路由缓冲区空间会被耗尽，造成数据报的丢失。为了避免出现拥塞，TCP不会突然同时向空闲连接上发送多个段，相反，开始它会发送一个段，然后增加网络中未经确认的段的数量，直到达到一个稳定状态为止。TCP使用了两种算法来防止拥塞，一个是慢启动算法，另一个是Nagle算法。</p>
+<p>13.TCP的写操作，从应用程序的角度来看，最好把写操作当作是一项将数据从用户空间复制到内核发送缓冲区，然后就返回的操作，实际上TCP会在什么时候传送数据，以及会立即传送多少数据出去，都取决于连接的状态，而且通常应用程序都是无法预测的。</p>
+<p>14.直到最近，大家普遍认为由于WinSock和基本上所有现代的UNIX系统都支持select，所以考虑到可移植性，应当选择select而不是poll，而poll则大多用于SysV实现中。但一些支持多条同步连接的大型服务区应用程序（比如Web服务器）却在使用poll机制，因此它能更好地使用使用大量描述符的情况。这是因为select只能局限于固定数量的描述符，限制通常是1024，但可能会更小，修改默认值需要重构内核。</p>
+<p>15.可以设置套接字选项SO_REUSEADDR，指示TCP允许我们绑定到一个已经在使用的端口上。</p>
+<p>16.使connect调用超时的方式是使套接字成为阻塞的，然后用select等待它完成。</p>
+<p>17.每个IP数据报都有TTL字段，每经过一个路由器，该字段就被减1，抵达路由器的数据报的TTL为1或0时，就会被丢弃，同时会发送一个ICMP“传输超时”错误报文给原始发送者。traceroute利用了这个特性，它首先向目的地发送一个TTL设置为1的UDP数据报。当这个UDP数据报抵达第一跳时，路由器注意到TTL为1，就会将其丢弃，并发回一个ICMP报文，从这个ICMP报文的源地址中，可以得到第一跳的IP地址，然后traceroute用gethostbyaddr来查询它的名字。为获得下一跳的标识，traceroute重复这个过程，只是把TTL设置为2，当这个数据报到达第一跳时，TTL被减为1并转发往下一跳，在那里发现TTL为1，丢弃它，并返回ICMP报文，通过不断增加TTL来重复这个过程，traceroute就可以获得从源到目的地之间的路径消息。</p>
+<p>18.lsof -i TCP:6000 （查看哪个进程正在监听这个端口）</p>
+<p>lsof -i @armsword.com （查看哪个用户在连接）</p>
+<p>19.netstat 默认情况下，绑定在INADDR_ANY的服务器的套接字是不列出来的，不过可以用 -a 选项改变默认设置。</p>
+<p>netstat -i （接口）  netstat -rn （路由表）</p>
+<p>netstat -sp udp （获取关于UDP的统计信息）</p>
+<p>参考资料：</p>
+<p>《TCP/IP高效编程》</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-07-02T08:00:35.000Z"><a href="/2013/07/02/makefile/">7月 2 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/07/02/makefile/">Makefile学习笔记</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>第一次用Makefile，看了一些开源的源代码的Makefile，又看了下规则，之后把自己的小程序写了个Makefile，总结下笔记。</p>
+<p>Makefile的编写规则：</p>
+<p>（1）如果这个工程没有编译过，那么我们的所有C文件都要编译并被链接。</p>
+<p>（2）如果这个工程的某几个C文件被修改，那么我们只编译被修改的C文件，并链接目标程序。</p>
+<p>（3）如果这个工程的头文件被改变了，那么我们需要编译引用了这几个头文件的C文件，并链接目标程序。</p>
+<p>target … : prerequisites …</p>
+<p>command</p>
+<p>…</p>
+<p>…</p>
+<p>target也就是一个目标文件，可以是Object File，也可以是执行文件。还可以是一个标签（Label），对于标签这种特性，在后续的“伪目标”章节中会有叙述。</p>
+<p>prerequisites就是，要生成那个target所需要的文件或是目标。</p>
+<p>command也就是make需要执行的命令，TAB键。（任意的Shell命令）</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line"><span class="type">INCLUDE</span> = ./include</div><div class="line"></div><div class="line"><span class="type">INCLUDE</span> += -<span class="type">I</span>/usr/include/mysql</div><div class="line"></div><div class="line">objects = findtopo.o looptopo.o handlesql.o readoid.o ifroute.o</div><div class="line"></div><div class="line"> ifirewall.o hostname.o</div><div class="line"></div><div class="line">findtopo : $(objects)</div><div class="line"></div><div class="line"> gcc -o findtopo $(objects) -lsnmp -lmysqlclient</div><div class="line"></div><div class="line">findtopo.o : findtopo.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> findtopo.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">looptopo.o : looptopo.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> looptopo.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">handlesql.o : handlesql.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> handlesql.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">readoid.o : readoid.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> readoid.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">ifroute.o : ifroute.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> ifroute.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">ifirewall.o : ifirewall.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> ifirewall.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">hostname.o : hostname.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> hostname.<span class="type">C</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">.<span class="type">PHONY</span> : clean</div><div class="line"></div><div class="line">clean:</div><div class="line"></div><div class="line"> rm findtopo findtopo.o looptopo.o handlesql.o readoid.o</div><div class="line"></div><div class="line"> ifroute.o ifirewall.o hostname.o</div></pre></td></tr></table></figure>
+
+<p>“$&lt;”表示所有的依赖目标集，.PHONY意思表示clean是一个“伪目标”。向make说明，不管是否有这个文件，这个目标就是“伪目标”。</p>
+<p>.PHONY : clean</p>
+<p>只要有这个声明，不管是否有“clean”文件，要运行“clean”这个目标，只有“make clean”这样。</p>
+<p>make是如何工作的</p>
+<p>在默认的方式下，也就是我们只输入make命令。那么，</p>
+<p>1、make会在当前目录下找名字叫“Makefile”或“makefile”的文件。</p>
+<p>2、如果找到，它会找文件中的第一个目标文件（target），在上面的例子中，他会找到“findtopo”这个文件，并把这个文件作为最终的目标文件。</p>
+<p>3、如果findtopo文件不存在，或是findtopo所依赖的后面的 .o 文件的文件修改时间要比findtopo这个文件新，那么，它就会执行后面所定义的命令来生成findtopo这个文件。</p>
+<p>4、如果findtopo所依赖的.o文件也存在，那么make会在当前文件中找目标为.o文件的依赖性，如果找到则再根据那一个规则生成.o文件。</p>
+<p>5、当然，你的C文件和H文件是存在的啦，于是make会生成 .o 文件，然后再用 .o 文件生命make的终极任务，也就是执行文件findtopo了。</p>
+<p>参考文献：</p>
+<p>《跟我一起写Makefile》</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-24T02:12:08.000Z"><a href="/2013/06/24/use-snmp-find-topo/">6月 24 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/24/use-snmp-find-topo/">利用SNMP发现网络拓扑信息</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>看了一些资料包括一些论文，没发现特别好的方法，并且我发现很多论文里面竟然还有错误。不过总体思路就是利用SNMP查询获取MIB管理信息库。那有什么办法区分网络里面的路由器、防火墙还有交换机呢？</p>
+<p>其实，我认为这个很难区分，传统的路由器应该属于网络层，交换机属于数据链路层，但是现在的路由器包含交换机，交换机也都有三层、四次交换机并且包括路由功能，所以，很难完全区分开来。</p>
+<p>传统的方法是这样的：</p>
+<p>通过SNMP协议（我用的开源的net-snmp库）获取网络设备MIB中的ipForwarding（OID：.1.3.6.1.2.1.4.1.0）对象值，如果该值为1，就表示此硬件为路由器。如果该值为2，则进一步获取MIB中的sysServices（OID：.1.3.6.1.2.1.1.7.0）对象值，如果该值为78，说明网络设备工作在链路层，类型为交换机，如果该值为76（实际我测试结果为6），说明网络设备没有工作在链路层，类型为个人计算机。查询ipRouteType（OID：.1.3.6.1.2.1.4.21.1.8）字段的值，若该值为3（direct）表明为直接路由，若该值为4（indirect）则为间接路由。</p>
+<p>但是，我实际测试的时候是这样的：</p>
+<p>当sysSerices为78时确实为路由器，但是4也是路由器（即判断syservices为78或4），6为交换机（即判断sysService为76或6），但是当硬件为防火墙或主机时候，sysServices可能为空也可能为72，所以，这个是无法分辨出其到底为防火墙还是主机。并且，ipForwarding的值无论是路由还是防火墙其值都为1，注意主机的MIB下的IP是无值的，因为此处是一些路由信息。对于此问题，我是用这种方法解决的：</p>
+<p>因为一个网络里面，防火墙的品牌毕竟是有限的，其实多说也就几种，所以我们可以查询sysName（OID：.1.3.6.1.2.1.1.5.0）来辨别是不是指定的值（主机的值与其值相同的概率肯定会非常低吧^_^），比如当sysName的值为“TopsesOS”时，其就是天融信防火墙。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-23T09:16:21.000Z"><a href="/2013/06/23/note-effective-cpp/">6月 23 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/23/note-effective-cpp/">《Effective C++》读书笔记</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>据传，Lippman把程序员分为看过Effective C++的和没看过的两大类。其实，与C++经典书籍如《C++ Primer》（基础知识）和《Thinking in C++》（进阶）比起来要薄很多。这本书又有个名字叫做改善程序和设计的55个做法，所以从这可以看出其基本是面向工程的，简单做个读书笔记。</p>
+<p><em>1. 让自己习惯c++</em></p>
+<p>1.初始化是给予对象初值的过程，对用户自定义类型的对象而言，初始化由构造函数执行。默认构造函数是一个可被调用而不带任何实参者，这样的构造函数要不没有参数，要不就是每个参数都有缺省值。</p>
+<p>如下就为默认构造函数：</p>
+<p>class B{</p>
+<p>public:</p>
+<p>explicit B(int x=0,bool b=true);</p>
+<p>};</p>
+<p>构造函数被声明为explicit，可阻止它们被用来执行隐式类型转换，但它们仍可被用来执行显示类型转换。它们禁止编译器执行非预期的类型转换，鼓励使用。</p>
+<p>2.copy构造函数（拷贝构造函数）被用来“以同型对象初始化自我对象”，copy assignment操作符（拷贝赋值操作符）被用来“从另一个同型对象中拷贝其值到自我对象”。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">class Widget {</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="title">Widget</span>(); <span class="comment">//default构造函数</span></div><div class="line"> Widget(<span class="keyword">const</span> Widget& rhs); <span class="comment">//copy 构造函数</span></div><div class="line"> Widget& <span class="keyword">operator</span>=(<span class="keyword">const</span> Widget& rhs); <span class="comment">//copy assignment 操作符</span></div><div class="line"> ...</div><div class="line">};</div><div class="line">Widget wl; <span class="comment">//调用default 构造函数</span></div><div class="line">Widget w2 (wl) ; <span class="comment">//调用copy 构造函数</span></div><div class="line">wl = w2; <span class="comment">//调用copy assignment 操作符</span></div></pre></td></tr></table></figure>
+
+<p>当看到赋值符号时请小心，因为“=”语法也可用来调用copy构造函数：</p>
+<p>Widget w3 = w2;  //调用copy构造函数！</p>
+<p>幸运的是“copy构造”很容易和“copy赋值”区别。如果一个新对象被定义（例如上面的w3），一定会有个构造函数被调用，不可能调用赋值操作。如果没有新对象被定义（如前述的“w1=w2”语句），就不会有构造函数被调用，那么当然就是赋值操作符被调用。</p>
+<p><em>条款01：视c++ 为一个语言联邦</em></p>
+<p><em>条款02：尽量以const, enum, inline替换 #define</em></p>
+<p><em>1.这个条款可以改为“宁可以编译器替换预处理器”比较好。</em></p>
+<p><em>2.为了将常量的作用域限制于class内，你必须让它成为class的一个成员，而为确保此常量至多只有一份实体，必须让它成为一个static成员：</em></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">GanmePlayer</span></span>{</div><div class="line"><span class="keyword">private</span>:</div><div class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> NumTurns = <span class="number">5</span>; <span class="comment">//常量声明式</span></div><div class="line"><span class="comment">//或者 enum{NumTurns = 5}; //enum结构体定义的是常量，但并不是在预编译的时候进行替换，而是在运行时，从enum定义的常量存储区取定义的常量值。</span></div><div class="line"><span class="keyword">int</span> socres[NumTurns]; <span class="comment">//使用该常量</span></div><div class="line">...</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>所以：</p>
+<p>对于单纯常量，最好以const对象或enums替换#define。</p>
+<p>对于形似函数的宏(macros)，最好改用inline函数替换#define。</p>
+<p><em>条款03：尽可能使用const</em></p>
+<p>1.const语法：如果关键字const出现在星号左边，表示被指物是常量；如果出现在星号右边，表示指针是常量；如果出现在星号两边，表示被指物和指针都是常量。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">char</span>* p = greeting;</div><div class="line"></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span> *p = greeting ; <span class="comment">//non-const pointer,const data</span></div><div class="line"></div><div class="line"><span class="keyword">char</span>* <span class="keyword">const</span> p = greeting; <span class="comment">//const pointer,non-const data</span></div><div class="line"></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="keyword">const</span> p = greeting; <span class="comment">//const pointer,const data</span></div></pre></td></tr></table></figure>
+
+<p>2. STL迭代器系以指针为根据塑模出来，所以迭代器的作用就像个T<em>指针。声明迭代器为const就像声明指针为const一样（即声明一个T</em> const指针），表示这个迭代器不得不指向不同的东西，但它所指的东西的值是可以改动的。如果希望迭代器所指的东西不可被改动（即希望STL模拟一个const T* 指针），需要的是const_iterator。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">std::vector&lt;<span class="type">int</span>&gt; vec;</div><div class="line">...</div><div class="line"><span class="keyword">const</span> std::vector&lt;<span class="type">int</span>&gt;::<span class="keyword">iterator</span> iter = vec.begin( ); //iter的作用像个T* <span class="keyword">const</span></div><div class="line">*iter = <span class="number">10</span>; //没问题，改变iter 所指物</div><div class="line">++iter; //错误! iter 是<span class="keyword">const</span></div><div class="line">std::vector&lt;<span class="type">int</span>&gt;::<span class="keyword">const</span> <span class="keyword">iterator</span> clter = vec.begin( ); //cIter的作用像个<span class="keyword">const</span> T*</div><div class="line">*clter = <span class="number">10</span>; //错误! *cIter是<span class="keyword">const</span></div><div class="line">++clter; //没问题，改变cIter</div><div class="line"></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>3.在C++中，mutable是为了突破const的限制而设置的，被mutable修饰的变量，将永远处于可变的状态，即使在一个const函数中。比如在const成员函数中，不能改变成员变量的值，使用mutable解决。</p>
+<p><em>条款04：确定对象被使用前已先被初始化</em></p>
+<p>1.为内置对象进行手工初始化，因为C++不保证初始化它们。</p>
+<p>2.构造函数最好使用成员初值列，而不要在构造函数本体内使用赋值操作。初值列列出的成员变量，其排列次序应该和它们在class中的声明次序相同。</p>
+<p>3.为免除“跨编译单元之初始化次序”问题，请以local static 对象替换non-local static 对象。</p>
+<p><em>2. 构造/析构/赋值运算</em></p>
+<p><em>条款05：了解c++ 默默编写并调用哪些函数</em></p>
+<p>1.编译器可以暗自为class创建default构造函数、copy构造函数、copy assignment操作符，以及析构函数。</p>
+<p>如果你写下：</p>
+<p>class Empty();</p>
+<p>这就好像你写下这样的代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class Empty {</div><div class="line">public:</div><div class="line">Empty() { <span class="keyword">...</span> } //default构造函数</div><div class="line">Empty(const Empty& rhs) { <span class="keyword">...</span> ) //copy构造函数</div><div class="line">~Empty( ) { <span class="keyword">...</span> } //析构函数</div><div class="line">Empty& operator=(const Empty& rhs) { <span class="keyword">...</span> } //copy assignment操作符</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p><em>条款06：若不想使用编译器自动生成的函数，就该明确拒绝</em></p>
+<p><em>条款07：为多态基类声明virtual析构函数</em></p>
+<p>1.任何类只要带有虚函数都几乎确定应该也有一个虚析构函数。</p>
+<p>2.欲实现出virtual函数，对象必须携带某些信息，主要用来在运行期决定哪一个虚函数该被调用。这份信息通常是由一个所谓vptr(virtual table pointer)指针指出。vptr指向一个由函数指针构成的数组，称为vtbl(virtual table)，每一个带有virtual函数的class都有一个相应的vtbl。当对象调用某一virtual函数，实际被调用的函数取决于该对象的vptr所指的那个vtbl——编译器在其中寻找适当的函数指针。</p>
+<p>带多态性质的base classes应该声明一个virtual析构函数，如果class带有任何virtual函数，它就应该拥有一个virtual析构函数。</p>
+<p>3.Classes的设计目的如果不是作为base classes使用，或不是为了具备多态性，就不该声明virtual析构函数。</p>
+<p><em>条款08：别让异常逃离析构函数</em></p>
+<p><em>条款09：绝不在构造和析构过程中调用virtual函数</em></p>
+<p><em>条款10：令operator= 返回一个reference to *this</em></p>
+<p><em>条款11：在operator= 中处理“自我赋值”</em></p>
+<p><em>条款12：复制对象时勿忘其每一个成分</em></p>
+<p><em>3. 资源管理</em></p>
+<p>C++程序中最常使用的资源就是动态内存分配，但内存只是必须管理的众多资源之一。其他常见的资源还包括文件描述符、互斥锁、图形界面中的字型和笔刷、数据库连接以及网络sockets。不论哪一种资源，重要的是，当你不再使用它时，必须将它还给系统。</p>
+<p><em>条款13：以对象管理资源</em></p>
+<p>两个常被使用的RAII classes 分别是tr1::shared_ptr和auto_ptr。前者通常是较佳选择，因为其copy行为比较直观。若选择auto_ptr，复制动作会使它（被复制物）null。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">void f()</div><div class="line">{</div><div class="line">std::auto_ptr&lt;Investment&gt; pInv(createInvestment());</div><div class="line"> //调用factory函数</div><div class="line"> //一如以往地使用pInv</div><div class="line"><span class="keyword">...</span> //经由auto_ptr的析构函数自动删除pInv</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void f()</div><div class="line">{</div><div class="line"><span class="keyword">...</span></div><div class="line">std::tr1::shared_ptr&lt;Investment&gt;</div><div class="line">pInv(createInvestment()); //调用factory函数</div><div class="line"> //使用pInv一如以往</div><div class="line"><span class="keyword">...</span> //经由shared_ptr的析构函数自动删除pInv</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p><em>条款14：在资源管理类中小心coping行为指向</em></p>
+<p><em>条款15：在资源管理类中提供对原始资源的访问</em></p>
+<p><em>条款16：成对使用new和delete时要采取相同形式</em></p>
+<p>当你对着一个指针使用delete，唯一能够让delete知道内存中是否存在一个“数组大小记录”的办法就是：由你来告诉它。如果你使用delete时加上中括号(方括号)，delete便认定指针指向一个数组，否则它便认定指针指向单一对象。</p>
+<p><em>条款17：以独立语句将newed对象置入智能指针</em></p>
+<p>以独立语句将new对象存储于(置入)智能指针内，如果不这样做，一旦异常被抛出，有可能导致</p>
+<p><em>4. 设计与声明</em></p>
+<p><em>条款18：让接口容易被正确使用，不易被误用</em></p>
+<p>tr1::shared_ptr支持定制型删除器，这可防范DLL问题，可被用来自动解除互斥锁等等。</p>
+<p><em>条款19：设计class犹如设计type</em></p>
+<p><em>条款20：宁以pass-by-reference-to-const替换pass-by-value</em></p>
+<p>1.缺省情况下C++以by value方式（一个继承自C的方式）传递对象至（或来自）函数。除非你另外指定，否则函数参数都是以实际实参的复件（副本）为初值，而调用端所获得亦是函数返回值的一个复件。</p>
+<p>2.尽量以pass-by-reference-to-const替换pass-by-value，前者通常比较高效，并可避免切割问题（slicing problem），以上规则并不适用于内置类型，以及STL的迭代器和函数对象。对它们而言，pass-by-value往往比较恰当。</p>
+<p><em>条款21：必须返回对象时，别妄想返回其reference</em></p>
+<p>1.绝不要返回pointer或reference指向一个local stack对象或返回reference指向一个heap-allocated对象（delete操作是根据不同的类型调用不同的析构函数），或返回pointer或reference指向一个local static对象而有可能同时需要多个这样的对象(多线程)。</p>
+<p><em>条款22：将成员变量声明为private</em></p>
+<p><em>条款23：宁以non-member、non-friend替换member函数</em></p>
+<p><em>条款24：若所有参数皆需类型转换，请为此采用non-member函数</em></p>
+<p><em>条款25：考虑写出一个不抛异常的swap函数</em></p>
+<p><em>5. 实现</em></p>
+<p>太快定义变量可能造成效率上的拖延：过度使用转型(casts)可能导致代码变慢又难维护，又招来微妙难解的错误；返回对象“内部数据之号码牌（handles）”可能会破坏封装并留给客户虚吊号码牌（dangling handles）；未考虑异常带来的冲击则可能导致资源泄漏和数据败坏；过度热心地inlining可能引起代码膨胀；过度耦合（coupling）则可能导致让人不满意的冗长建置时间（build times）。</p>
+<p><em>条款26：尽可能延后变量定义式的出现时间</em></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">std::string encryptPassword(const std::string& password)</div><div class="line">{</div><div class="line"> using namespace std;</div><div class="line"> string encrypted;</div><div class="line"> <span class="keyword">if</span>(password.length() &lt; MinimumPasswordLength)</div><div class="line"> {</div><div class="line"> throw logic_error(<span class="string">"Password is too short"</span>);</div><div class="line"> }</div><div class="line"> <span class="keyword">...</span></div><div class="line"> <span class="keyword">return</span> encrypted;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>对象encrypted在此函数中并非完全未使用，但如果有个异常被丢出，它就真的没被使用。也就是说如果函数encryptPassword丢出异常，你仍得付出encrypted的构造成本和析构成本。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">std::string encryptPassword(const std::string& password)</div><div class="line">{</div><div class="line"> using namespace std;</div><div class="line"> <span class="keyword">if</span>(password.length() &lt; MinimumPasswordLength)</div><div class="line"> {</div><div class="line"> throw logic_error(<span class="string">"Password is too short"</span>);</div><div class="line"> }</div><div class="line"> string encrypted;</div><div class="line"> <span class="keyword">...</span></div><div class="line"> <span class="keyword">return</span> encrypted;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p><em>条款27：尽量少做转型动作</em></p>
+<p>1.const_cast通常被用来将对象的常量性转除（cast away the constness）。它也是唯一有此能力的C++-style转型操作符。<br>2.dynamic_cast主要用来执行“安全向下转型”(safe downcasting)，也就是用来决定某对象是否归属继承体系中的某个类型。它是唯一无法由旧式语法执行的动作，也是唯一可能耗费重大运行成本的转型动作。<br>3.reinterpret_cast意图执行低级转型，实际动作（及结果）可能取决于编译器，这也就表示它不可移植。例如将一个pointer to int 转型为一个int，这一类转型在低级代码以外很少见。<br>4.static_cast用来强迫隐式转换（implicit conversions），例如将non-const对象转为const对象，或将int转为double等等。它也可以用来执行上述多种转换的反向转换，例如将oid*指针转为typed指针，将pointer-to-base转为pointer-to-derived，但无法将const转为non-const ——这个只有const_cast才办得到。</p>
+<p><em>条款28：避免返回handles指向对象内部成分</em></p>
+<p><em>条款29：为“异常安全”而努力是值得的</em></p>
+<p><em>条款30：透彻了解inlining的里里外外</em></p>
+<p>1.inline造成的代码膨胀亦会导致额外的换页行为（paging），降低指令高速缓存装置的击中率（instruction cache hit rate），以及伴随这些而来的效率损失。</p>
+<p>2.inline函数无法随着程序库的升级而升级，换句话说如果f是程序库内的一个inline函数，客户将“f函数本体”编进其程序中，一旦程序库设计者决定改变f，所有用到f的客户端程序都必须重新编译，因为inline执行在编译阶段。</p>
+<p><em>条款31：将文件间的编译依存关系降至最低</em></p>
+<p><em>6. 继承与面向对象设计</em></p>
+<p>虚函数意味“接口必须被继承”，non-virtual函数意味“接口和实现都必须被继承”。</p>
+<p><em>条款32：确定你的public继承塑模出is-a关系</em></p>
+<p>1.公开继承意味”is-a”(是一种)的关系。如果你令class D(“Derived”)以public形式继承class B(“Base”)，你便是告诉C++编译器，每一个类型为D的对象同时也是一个类型为B的对象，反之不成立。</p>
+<p><em>条款33：避免遮掩继承而来的名称</em></p>
+<p>derived classes内的名称会遮掩base classes内的名称，为了让被遮掩的名称再见天日，可使用using声明式。</p>
+<p><em>条款34：区分接口继承和实现继承</em></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">class Shape{</div><div class="line">public:</div><div class="line"> virtual void draw() const = <span class="number">0</span>;</div><div class="line"> virtual void error(const std::string& msg);</div><div class="line"> int objectID() const;</div><div class="line"> <span class="keyword">...</span></div><div class="line">};</div><div class="line"></div><div class="line">class Rectangle:public Shape{ <span class="keyword">...</span> };</div><div class="line">class Ellipse:public Shape{ <span class="keyword">...</span> };</div></pre></td></tr></table></figure>
+
+<p>1.声明一个pure virtual函数的目的是为了让derived classes只继承函数接口，pure virtual 函数有两个最突出的特性：它们必须被任何“继承了它们”的具象class重新声明，而且它们在抽象class中通常没有定义。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">Shape<span class="subst">*</span> ps <span class="subst">=</span> <span class="literal">new</span> Shape; <span class="comment">//错误!Shape是抽象的</span></div><div class="line">Shape<span class="subst">*</span> ps1 <span class="subst">=</span> <span class="literal">new</span> Rectangle; <span class="comment">//没问题</span></div><div class="line">ps1<span class="subst">-&gt;</span>draw(); <span class="comment">//调用Rectangle::draw</span></div><div class="line">Shape<span class="subst">*</span> ps2 <span class="subst">=</span> <span class="literal">new</span> Ellipse; <span class="comment">//没问题</span></div><div class="line">ps2<span class="subst">-&gt;</span>draw(); <span class="comment">//调用Ellipse::draw</span></div><div class="line">ps1<span class="subst">-&gt;</span>Shape<span class="tag">::draw</span>(); <span class="comment">//调用Shape::draw</span></div><div class="line">ps2<span class="subst">-&gt;</span>Shape<span class="tag">::draw</span>(); <span class="comment">//调用Shape::draw</span></div></pre></td></tr></table></figure>
+
+<p>2.简朴的 impure virtual函数背后的故事和 pure virtual 函数有点不同。一如往常，derived classes 继承其函数接口，但 impure virtual 函数会提供一份实现代码，derived classes 可能覆写(override)它。声明简朴的（非纯）impure virtual 函数的目的，是让derived classes 继承该函数的接口和缺省实现。<br>3.如果成员函数是个non-virtual函数，意味是它并不打算在derived classes中有不同的行为。声明non-virtual函数的目的是为了令derived classes 继承函数的接口及一份强制性实现。</p>
+<p><em>条款35：考虑virtual函数以外的其他选择</em></p>
+<p><em>条款36：绝不重新定义继承而来的non-virtual函数</em></p>
+<p><em>条款37：绝不重新定义继承而来的缺省参数值</em></p>
+<p>1.只能继承两种函数：virtual和non-virtual函数，然后重新定义一个继承而来的non-virtual函数永远是错误的。<br>2.不能重新定义一个继承而来的缺省参数值，因为缺省参数值都是静态绑定，而virtual函数——唯一应该覆写的东西—<br>—却是动态绑定。</p>
+<p><em>条款38：通过复合塑模出has-a或”根据某物实现出”</em></p>
+<p><em>条款39：明智而审慎地使用private继承</em></p>
+<p>1.通常C++官方勒令默默安插一个char到空对象内，然而齐位要求（alignment）可能造成编译器为类似HoldsAnInt这样的class加上一些衬垫（padding），所以有可能HoldsAnInt对象不只获得一个char大小，也许实际上被放大到足够又存放一个int。</p>
+<p><em>条款40：明智而审慎地使用多重继承</em></p>
+<p><em>7. 模板与泛型编程</em></p>
+<p><em>条款41：了解隐式接口和编译期多态</em></p>
+<p><em>条款42：了解typename的双重意义</em></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span>&lt;class T&gt; class <span class="type">Widget</span>; //使用<span class="string">"class"</span></div><div class="line"><span class="keyword">template</span>&lt;typename T&gt; class <span class="type">Widget</span>; //使用<span class="string">"typename"</span></div></pre></td></tr></table></figure>
+
+<p>这两种没有什么不同，然后C++并不总是把class和typename视为等价，有时候你一定得使用typename。</p>
+<p><em>条款43：学习处理模板化基类内的名称</em></p>
+<p><em>条款44：将与参数无关的代码抽离templates</em></p>
+<p><em>条款45：运用成员函数模板接受所有兼容类型</em></p>
+<p><em>条款46：需要类型转换时请为模板定义非成员函数</em></p>
+<p><em>条款47：请使用traits classes表现类型信息</em></p>
+<p><em>条款48：认识template元编程</em></p>
+<p><em>8. 定制new和delete</em></p>
+<p><em>条款49：了解new-handler的行为</em></p>
+<p>1.set_new_handler允许客户指定一个函数，在内存分配无法获得满足时被调用。</p>
+<p><em>条款50：了解new和delete的合理替换时机</em></p>
+<p><em>条款51：编写new和delete时需固守常规</em></p>
+<p><em>条款52：写了placement new也要写placement delete</em></p>
+<p><em>9. 杂项讨论</em></p>
+<p><em>条款53：不要轻忽编译器的警告</em></p>
+<p><em>条款54：让自己熟悉包括TR1在内的标准程序库</em></p>
+<p><em>条款55：让自己熟悉Boost</em></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-19T12:22:29.000Z"><a href="/2013/06/19/install-vim-and-plugins/">6月 19 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/19/install-vim-and-plugins/">常用的VIM配置及其插件安装</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>首先，我们先看下自己的VIM都安装了什么插件，命令：:scriptnames</p>
+<p>首先，我们先配置下vimrc文件，vim ~/.vimrc ，我们先设置让其显示行号和高亮代码，添加如下代码：</p>
+<p>set nu!  “显示行号<br>syntax enable   “语法高亮<br>syntax on</p>
+<p>1.TagList</p>
+<p>功能：有点像VC里面的工作区，里面列出了当前文件的所有的宏，全局变量，函数名等。CTRL+W 连续2下可以左右切换。</p>
+<p>下载taglist压缩包, 下载地址：<a href="http://www.vim.org/scripts/script.php?script_id=273" target="_blank" rel="external">http://www.vim.org/scripts/script.php?script_id=273</a>，然后把解压的两个文件taglist.vim 和 taglist.txt 分别放到$HOME/.vim/plugin 和 $HOME/.vim/doc 目录中。</p>
+<p>之后在～/.vimrc中添加如下几条命令：</p>
+<p>let Tlist_Auto_Open = 1<br>let Tlist_Ctags_Cmd = ‘/usr/bin/ctags’<br>let Tlist_Show_One_File = 1<br>let Tlist_Exit_OnlyWindow = 1</p>
+<p>此时，我们打开一个.c文件查看，发现左边多出一个workspace，当不想出现此工作区时，使用:Tlist可以关闭和打开。</p>
+<p>2.Ctags</p>
+<p>功能：ctags的作用是为系统头文件及自己的程序头文件建立索引，有了这个索引后，就可以使用其它VIM插件来实现相应的功能，比如我需要的功能就是代码提示，那就需要用omnicppcomplete插件，但该插件是依赖于ctags的。VIM默认已安装此插件。</p>
+<p>sudo apt-get install exuberant-ctags</p>
+<p>我们在源代码的最上层目录下使用此命令：</p>
+<p>ctags -R —c++-kinds=+p 或者ctags -R —c-types=+p+x</p>
+<p>再在VIM中运行此命令：</p>
+<p>:set tags=/home/linuxer/source/tags 该命令将tags文件加入到vim中，也可以加入到~/.vimrc中。</p>
+<p>使用方法：</p>
+<p>我们把光标移动到函数上，按下CTRL+]，VIM会自动切换到意义的函数处。返回时，我们输入CTRL+t。</p>
+<p>vim“找到 tag: 1/? 或更多” 其他定义的查看方法:</p>
+<p>:tselect 显示列表</p>
+<p>:tn和:tp 显示后一个tag和前一个tag</p>
+<p>或者g] 就可以了。</p>
+<p>3.WinManager</p>
+<p>功能：作用是一个文件管理器，能列出当前目标中的文件，可以通过这个浏览工程中的源文件。当光标停在某个文件或文件夹的时候，回车可以打开该文件或文件夹。</p>
+<p>在说这个插件之前，我们先说下netrw.vim插件，这个插件在安装VIM时候就已经安装到系统里了，我们打开VIM输入:e /home/linuxer/source 就可以显示出该文件夹里面的文件，我们的插件其实原理就是由这个插件实现的。</p>
+<p>使用方法：</p>
+<p><a href="http://www.vim.org/scripts/script.php?script_id=95" target="_blank" rel="external">http://www.vim.org/scripts/script.php?script_id=95</a> ，将对应的plugin和doc放入 ~/.vim 文件夹下对应的plugin和doc文件夹下。</p>
+<p>在~/.vimrc下添加以下两行：</p>
+<p>let g:winManagerWindowLayout=’FileExplorer|TagList’</p>
+<p>或者 let g:winManagerWindowLayout=’FileExplorer’   “这2个显示方式不一样，读者选择自己喜欢的吧，一个是左右两列，一个是上下2列</p>
+<p>nmap wm :WMToggle&lt;cr&gt;</p>
+<p>在正常情况下输入wm（无:号）可以开启和打开，注意：第一种会把Taglist也关闭，此时用:Tlist可以重新打开。本人倾向第二种，使用时候用wm开启就可已了。</p>
+<p>4.C/C++自动补全插件：clang complete</p>
+<p>这个插件需要clang编译器的支持，我们先安装下：</p>
+<p>sudo apt-get install clang</p>
+<p>之后下载clang complete：<a href="http://www.vim.org/scripts/script.php?script_id=3302" target="_blank" rel="external">http://www.vim.org/scripts/script.php?script_id=3302</a></p>
+<p>方法：vim clang_complete.vmb -c ‘so %’ -c ‘q’</p>
+<p>之后在~/.vimrc里添加 <code>set</code> <code>completeopt=longest</code></p>
+<p>配合CTRL+N函数、变量补全基本就差不多了。</p>
+<p>上传了一份目前我使用的Vimrc配置到github，主要是为了方便你我使用，点击下面链接进入，<a href="https://github.com/armsword/vim-depoly" target="_blank" rel="external">我的Vimrc设置</a>。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+<nav id="pagination">
+  
+    <a href="/page/5/" class="alignleft prev">上一页</a>
+  
+  
+    <a href="/page/7/" class="alignright next">下一页</a>
+  
+  <div class="clearfix"></div>
+</nav></div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

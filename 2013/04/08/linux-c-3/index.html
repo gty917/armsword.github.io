@@ -1,0 +1,258 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>《Linux C编程一站式学习》读书笔记(三) | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="《Linux C编程一站式学习》读书笔记(三)"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-08T14:43:29.000Z"><a href="/2013/04/08/linux-c-3/">4月 8 2013</a></time>
+      
+      
+  
+    <h1 class="title">《Linux C编程一站式学习》读书笔记(三)</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1、所有的I/O操作最终都是在内核中做的，以前我们用的C标准I/O库函数最终也是通过系统调用把I/O操作从用户空间传给内核，然后让内核去做I/O操作。</p>
+<p>2、ebx 文件描述符</p>
+<p>edx 文件输出的字节</p>
+<p>ecx 输出缓冲区的首地址</p>
+<p>3、open、read、write、close等系统函数成为无缓冲区I/O（unbuffered I/O）函数，因为它们位于C标准库的I/O缓冲区的底层。用户程序在读写文件时既可以调用C标准I/O库函数，也可以直接调用底层的unbuffered I/O函数，但unbuffered I/O函数每次读写都要进内核，调一个系统调用比调一个用户空间的函数要慢得多，所以在用户空间开辟I/O缓冲区还是必要的，用标准I/O库函数就比较方便，省去了自己管理I/O缓冲区的麻烦。</p>
+<p>但是，unix的传统是Eerything is a file。I/O不仅用于读写常规文件，也便于读写设备，比如终端或网络设备。在读写设备时通常是不希望有缓冲区的，例如向代表网络设备的文件写数据就是希望数据通过网络设备发送出去，而不希望只写到缓冲区里就算完事儿了，当网络设备接收到数据时应用程序也希望第一时间被通知到，所以网络编程通常直接调用unbuffered I/O 函数。</p>
+<p>4、读常规文件不会阻塞的，不管读多少字节，read一定会在有限的时间内返回，从终端设备或网络读则不一定。如果从终端输入的数据没有换行符，调用read读终端设备就会阻塞，如果网络上没有接收到数据包，调用read从网络读就会阻塞。至于阻塞多长时间也是不确定的，如果一直没有数据到达就一直阻塞在那里，同样，写常规文件是不会阻塞的，而向终端设备或网络设备写则不一定。当进程调用一个阻塞的系统函数时，该进程被至于睡眠状态，这时内核调用其它进程运行，直到该进程等待的事件发生了（比如网络上接收到数据包，或者调用sleep指定的睡眠时间到了）它才有可能继续运行，与睡眠状态相对的是运行（Running）状态，在linux内核中，处于运行状态的进程分为两种情况：正在被调度执行，就绪状态。</p>
+<p>5、可以用strace命令执行程序，跟踪该程序执行过程中用到的所有系统调用的参数及返回值。</p>
+<p>6、在shell命令下可以运行一个命令，是因为shell进程在读取用户输入的命令之后会调用fork复制出一个新的shell进程，然后新的shell进程调用exec执行新的程序。</p>
+<p>7、子进程中fork的返回值是0，而父进程中fork的返回值则是子进程的id。</p>
+<p>fork的另一个特性是所有由父进程打开的描述符都被复制到子进程中。父、子进程中相同编号的文件描述符在内核中指向同一个file结构体，也就是说，file结构体的引用计数要增加。用gdb调试多进程的程序会遇到困难，gdb只能跟踪一个进程（默认是跟踪父进程），而不能同时跟踪多个进程，但可以设置gdb在fork之后跟踪父进程还是子进程。</p>
+<p>set follow-fork-mode child 命令设置gdb在fork之后跟踪子进程。set follow-fork-mode parent 则是跟踪父进程。</p>
+<p>8、子进程往往要调用一种exec函数以执行另一个程序，当进程调用一种exec函数时，该进程的用户空间代码和数据完全被新程序替换，从新程序的启动例程开始执行，调用exec并不创建新进程，所以调用exec前后该进程的id并未改变。</p>
+<p>9、一个进程在终止时会关闭所有文件描述符，释放在用户空间分配的内存，但它的pcb还保留着，内核在其中保存一些信息；如果是正常终止，则保存着退出状态，如果是异常终止，则保存着导致该进程终止的信号是哪个。</p>
+<p>10、每个进程各自有不同的用户地址空间，任何一个进程的全局变量在另一个进程中都看不到，所以进程之间要交换数据必须通过内核，在内核中开辟一块缓冲区，进程1把数据从用户空间拷到内核缓冲区，进程2再从内核缓冲区把数据读走，内核提供的这种机制称为进程间通信（IPC，Inter Process Communication）</p>
+<p>11、FIFO和Unix Domain Socket 这2种IPC机制都是利用文件系统中的特殊文件来标识的。</p>
+<p>12、默认是不允许产生core文件的，因为core文件中可能包含用户密码等敏感信息，不安全。在开发调试阶段可以用ulimit命令改变这个限制，允许产生core文件。首先用ulimit命令改变shell进程的Resource Limit，允许core文件最大为1024k，$ ulimit -c 1024</p>
+<p>13、sig_atomic_t 类型的变量应该总是加上volatile限定符，因为要使用sig_atomic_t 类型的理由也真是要加volatile限定符的理由。</p>
+<p>14、Shell分前后台来控制的不是进程而是作业（Job）或者进程组（Process Group），一个前台作业可以由多个进程组成，一个后台作业也可以由多个进程组成，shell可以同时运行一个前台作业和任意多个后台作业，这称为作业控制（Job Control）。</p>
+<p>15、由Shell进程fork出的子进程本来具有和Shell相同的Session、进程组和控制终端，但是Shell调用setpgid函数将作业中的某个子进程指定为一个新进程组的leader，然后调用setpgid将该作业中的其他子进程也转移到这个进程组中。如果这个进程组需要在前台运行，就调用tcsetpgrp函数将它设置为前台进程组，由于一个session只能有一个前台进程组，所以shell所在的进程组就自动变成后台进程组。</p>
+<p>16、TCP/IP网络协议栈分为四层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-24-26.png" alt=""></p>
+<p>不同的协议层对数据包有不同的称谓，在传输层叫做段（segment）、在网络层叫做数据报（datagram），在链路层叫做帧（frame）。数据封装成帧后发到传输介质上，到达目的主机后每层协议再削掉相应的首部，最后将应用层数据交给应用程序处理。</p>
+<p>17、Multiplexing过程：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-29-17.png" alt=""></p>
+<p>18、Socket：如果发送端发送的速度较快，接收端接收到的数据后处理的速度较慢，而接收缓冲区的大小是固定的，就会丢失数据，TCP协议通过“滑动窗口”机制解决这一问题。</p>
+<p>19、TCP/IP协议规定，网络数据流应采用大端字节序，即低地址高字节，为使网络程序具有可移植性，使同样的C代码在大端和小端计算机上编译后都能正常运行，可以调用库函数做网络字节序和主机字节序的转换。</p>
+<p>20、TCP协议通信流程：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-35-03.png" alt=""></p>
+<p>21、socket编程时，客户端不需要固定的端口号，因此不必调用bind(),客户端的端口号由内核自动分配。注意，客户端不是不允许调用bind()，只是没有必要调用bind()固定一个端口号，服务器也不是必须调用bind()，但如果服务器不调用bind()，内核会自动给服务器分配监听端口，每次启动服务器时端口号都不一样，客户端要连接服务器就会遇到麻烦。</p>
+<p>22、TCP协议是面向流的，read和write调用的返回值往往小于参数指定的字节数，对于read调用，如果接收缓冲区有20字节，请求读100个字节，就会返回20。对于write调用，如果请求写100个字节，而发送缓冲区中只有20个字节的空闲位置，那么write会阻塞，直到把100个字节全部交给发送缓冲区才返回，但如果socket文件描述符有0——NONBLOCK标志，则write不阻塞，直接返回20。以上情况可以避免。</p>
+<p>23、UDP通信流程图：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-42-27.png" alt=""></p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Linux/">Linux</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="《Linux C编程一站式学习》读书笔记(三)" data-url="http://armsword.com/2013/04/08/linux-c-3/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>一些常用的Winsock API函数 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="一些常用的Winsock API函数"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2012-10-06T14:43:29.000Z"><a href="/2012/10/06/some-common-winsock-api-function/">10月 6 2012</a></time>
+      
+      
+  
+    <h1 class="title">一些常用的Winsock API函数</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>socket即“套接字”，它是在网络编程中经常遇到的一个概念，确切的说它是网络编程的一种借口，通过socket无需了解复杂的网络协议细节便能轻松地完成网络通信的任务。</p>
+<p>下面介绍一些常用的Winsock API函数。</p>
+<p>1.完成初始化操作 ——WSAStartup()函数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> WSAStartup(</div><div class="line"> WORD wVersionRequired, <span class="comment">//使用宏MAKEWORD(X,Y)设置</span></div><div class="line"> LPWSADATA lpWSAData <span class="comment">//一个指向WSADATA结构的指针</span></div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>2.创建套接字 ——socket()函数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">SOCKET socket(</div><div class="line"> <span class="typename">int</span> af,</div><div class="line"> <span class="typename">int</span> <span class="keyword">type</span>;</div><div class="line"> <span class="typename">int</span> protocol <span class="comment">//协议字段，默认为0</span></div><div class="line">);</div></pre></td></tr></table></figure>
+
+<p>af表示协议的地址簇，通常使用AF_INET表示在网络层采用网际协议(IP)。</p>
+<p>type是协议的套接字类型，通常TCP连接方式使用SOCK_STREAM(流连接方式)，UDP连接采用SOCK_DGRAM(数据报文方式)，而SOCK_RAW则被应用于原始套接字。</p>
+<p>3.选定本机用来通信的接口对象——bind()函数</p>
+<p>成功创建套接字后，下面就应该选定本机用来通信的接口对象，如IP地址和端口。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> bind(</div><div class="line"> SOCKET s, <span class="comment">//socket()返回的套接字</span></div><div class="line"> <span class="keyword">const</span> <span class="keyword">struct</span> sockaddr FAR *addr, <span class="comment">//一个指向sockaddr结构的指针</span></div><div class="line"> <span class="keyword">int</span> namelen <span class="comment">//该结构体的长度</span></div><div class="line"> );</div></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> sockaddr_in{</div><div class="line"> <span class="keyword">short</span> sin_family;<span class="comment">//地址协议簇，TCP/UDP时为AF_INET</span></div><div class="line"> u_short sin_port; <span class="comment">//指定的端口</span></div><div class="line"> <span class="keyword">struct</span> in_addr sin_addr; <span class="comment">//指定的IP地址</span></div><div class="line"> <span class="keyword">char</span> sin_zero[<span class="number">8</span>]; <span class="comment">//</span></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>在使用sin_port和sin_addr时，要执行一次类型转换操作，这是因为网络和主机采用不同的方法。典型的使用方法如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">lAddr.<span class="variable">sin_family =</span> AF_INET;</div><div class="line">lAddr.<span class="variable">sin_port =</span> htons(<span class="number">80</span>);</div><div class="line">lAddr.sin_addr.<span class="variable">s_addr =</span> inet_addr(<span class="string">"127.0.0.1"</span>);</div></pre></td></tr></table></figure>
+
+<p>如果用户的主机只有一个IP地址，则可以使用如下代码绑定套接字到默认的IP地址：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">lAddr.sin_addr.s_addr </span>=<span class="string"> INADDR_ANY</span></div></pre></td></tr></table></figure>
+
+<p>4.等待客户端的连接请求 ——listen()函数</p>
+<p>对于TCP类型的服务端套接字，在完成bind操作后，下一步就应该调用listen()函数等待客户端的连接请求，其原型说明如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">int</span> <span class="keyword">listen</span>(</div><div class="line"> SOCKET <span class="keyword">s</span>;</div><div class="line"> <span class="keyword">int</span> backlog</div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>参数backlog是并发连接等待队列的长度。当某个客户端发送了连接请求时，如果此时服务端正在忙于处理其他连接，那么这个后来的连接就被放入等待队列中，等待服务器进行处理。如果此时等待队列已满，该连接请求将会被拒绝，返回出错代码WASECNOOREFUSED。</p>
+<p>5.线程即将进入等待状态——accept()函数</p>
+<p>当没有连接请求时，对于阻塞式套接字，如果程序调用了accept()函数，那么线程即将进入等待状态，直到有一个连接请求到达为止。accept()函数在接收到连接请求时，会为这个连接建立起一个新的套接字，该套接字负责和客户端通信，常被成为“会话套接字”。此前调用socket()函数也会返回一个套接字，它负责监听和接收连接请求，因此被成为“监听套接字”。accept()函数的原型说明如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">SOCKET accept(</div><div class="line"> SOCKET s,</div><div class="line"> struct sockaddr_in <span class="preprocessor">FAR</span>* addr,</div><div class="line"> <span class="keyword">int</span> <span class="preprocessor">FAR</span>* addrlen</div><div class="line"> )<span class="comment">;</span></div></pre></td></tr></table></figure>
+
+<p>如果accept()函数执行成功，将会返回一个新的用于通信的会话套接字；否则将会返回出错码 INVALID_SOCKET，可以通过调用WSAGetLastError()函数来得到详细的出错信息。</p>
+<p>6.向服务器发出连接请求——connect()函数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> connect(</div><div class="line"> SOCKET s,</div><div class="line"> <span class="keyword">const</span> <span class="keyword">struct</span> sockaddr FAR *name,</div><div class="line"> <span class="keyword">int</span> namelen</div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>7.收发信息——send()/recv()函数</p>
+<p>如果服务端与客户端成功建立了连接，便可以调用函数send()和recv()收发信息。这2个函数的原型说明如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> send(</div><div class="line"> SOCKET s,<span class="comment">//调用accept()函数接收客户端的连接请求后返回的套接字</span></div><div class="line"> <span class="keyword">const</span> <span class="keyword">char</span> FAR *buf,</div><div class="line"> <span class="keyword">int</span> len,</div><div class="line"> <span class="keyword">int</span> flags</div><div class="line"> );</div></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> recv(</div><div class="line"> SOCKET s,</div><div class="line"> <span class="keyword">char</span> FAR *buf,</div><div class="line"> <span class="keyword">int</span> len,</div><div class="line"> <span class="keyword">int</span> flags</div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>如果函数调用成功，则返回实际发送或接收的字节数。</p>
+<p>对于send()函数而言，如果想成功发送指定数量的数据，调用方法如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> i = <span class="number">0</span>;</div><div class="line"><span class="keyword">while</span> (<span class="keyword">length</span> &<span class="keyword">gt</span>; <span class="number">0</span>)</div><div class="line">{</div><div class="line"> ret = <span class="keyword">send</span>(sock,&amp;(buffer[i]),<span class="keyword">length</span>,<span class="number">0</span>)</div><div class="line"> <span class="keyword">if</span>(ret = <span class="number">0</span>)</div><div class="line"> <span class="keyword">break</span>;</div><div class="line"> <span class="keyword">else</span> <span class="keyword">if</span>(ret == SOCKET_ERROR)</div><div class="line"> <span class="keyword">break</span>;</div><div class="line"> i = i + ret;</div><div class="line"> <span class="keyword">length</span> = <span class="keyword">length</span> - ret;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>如果函数调用失败，将返回SOCKET_ERROR,最常见的错误代码是WSAECONNABORTED,表示对方关闭了连接或此操作已经超时。</p>
+<p>send()与recv()函数通常都是用在TCP类型的套接字上，而在UDP类型的套接字中也有专门的发送/接收函数：sendto()/recvfrom()。</p>
+<p>8.关闭指定的套接字——closesocket()</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> closesocket(SOCKET s);</div></pre></td></tr></table></figure>
+
+<p>图一张，详细表示了TCP套接字的调用过程：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121006212505.jpg" alt=""></p>
+<p>下面给出一个典型的TCP套接字程序代码：</p>
+<p>服务器端：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="preprocessor">#include &lt;winsock.h&gt;</span></div><div class="line"><span class="comment">//使用前需要包含库ws2_32.lib</span></div><div class="line"><span class="preprocessor">#<span class="keyword">pragma</span> comment(lib,&quot;ws2_32&quot;)</span></div><div class="line"><span class="preprocessor">#<span class="keyword">define</span> MYPORT 1111 //监听端口</span></div><div class="line"><span class="preprocessor">#<span class="keyword">define</span> BACKLOG 10 //最大连接数</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> SOCKET sockfd,new_fd; <span class="comment">//套接字，监听套接字，会话套接字</span></div><div class="line"> <span class="keyword">struct</span> sockaddr_in my_addr; <span class="comment">//本地地址信息</span></div><div class="line"> <span class="keyword">struct</span> sockaddr_in their_addr; <span class="comment">//客户地址信息</span></div><div class="line"> WSADATA ws;</div><div class="line"> <span class="keyword">int</span> sin_size;</div><div class="line"> <span class="keyword">int</span> num = <span class="number">0</span>;</div><div class="line"> <span class="keyword">char</span> Buffer[MAX_PATH];</div><div class="line"></div><div class="line">WSAStartup(MAKEWORD(<span class="number">2</span>,<span class="number">2</span>),&amp;ws);</div><div class="line"> <span class="keyword">if</span> ((sockfd = socket(AF_INET,SOCK_STREAM,<span class="number">0</span>)) == INVALID_SOCKET)</div><div class="line"> {</div><div class="line"> exit(<span class="number">0</span>);</div><div class="line"> }</div><div class="line">my_addr.sin_family = AF_INET;</div><div class="line">my_addr.sin_port = htons(MYPORT);</div><div class="line">my_addr.sin_addr.S_un.S_addr = INADDR_ANY;</div><div class="line"></div><div class="line"><span class="keyword">if</span> (bind(sockfd,(<span class="keyword">struct</span> sockaddr*)&amp;my_addr,<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr)) == -<span class="number">1</span>)</div><div class="line">{</div><div class="line"> closesocket(sockfd);</div><div class="line"> exit(<span class="number">0</span>);</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">if</span> (listen(sockfd,BACKLOG) == SOCKET_ERROR)</div><div class="line">{</div><div class="line"> closesocket(sockfd);</div><div class="line"> exit(<span class="number">0</span>);</div><div class="line">}</div><div class="line"></div><div class="line">sin_size = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in);</div><div class="line"></div><div class="line"><span class="keyword">if</span> ((new_fd = accept(sockfd,(<span class="keyword">struct</span> sockaddr*)&amp;their_addr,&amp;sin_size)) == INVALID_SOCKET)</div><div class="line">{</div><div class="line"> closesocket(sockfd);</div><div class="line"> exit(<span class="number">0</span>);</div><div class="line">}</div><div class="line">printf(&quot;\nRequest Has Been Accept!\n\n&quot;);</div><div class="line">printf(&quot;\tClient IP:%s\n&quot;,inet_ntoa(their_addr.sin_addr));<span class="comment">//将网络地址转换成“.”点隔的字符串格式</span></div><div class="line">printf(&quot;\tClient Port: %d\n&quot;,ntohs(their_addr.sin_port));<span class="comment">//将一个无符号短整形数从网络字节顺序转换为主机字节顺序</span></div><div class="line">num = recv(new_fd,Buffer,MAX_PATH,<span class="number">0</span>);</div><div class="line">Buffer[num - <span class="number">1</span>] = <span class="string">'&#92;&#48;'</span>;</div><div class="line">printf(&quot;\nMsg:%s\n&quot;,Buffer);</div><div class="line">closesocket(sockfd);</div><div class="line">closesocket(new_fd);</div><div class="line"><span class="keyword">return</span> <span class="number">0</span>;</div><div class="line"></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>客户端：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdio.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;winsock.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">pragma</span> comment(lib,&quot;ws2_32&quot;)</span></div><div class="line"><span class="preprocessor">#<span class="keyword">define</span> PORT 1111</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc,<span class="keyword">char</span> *argv[])</div><div class="line">{</div><div class="line"> SOCKET sockfd;</div><div class="line"> WSADATA ws;</div><div class="line"> <span class="keyword">struct</span> sockaddr_in their_addr;</div><div class="line"> <span class="keyword">char</span> Buffer[MAX_PATH];</div><div class="line"> <span class="keyword">int</span> num = <span class="number">0</span>;</div><div class="line"> <span class="keyword">if</span> (argc != <span class="number">2</span>)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;Usage:client1.exe&lt;IP Address&gt;\n&quot;);</div><div class="line"> <span class="keyword">return</span> -<span class="number">1</span>;</div><div class="line"> }</div><div class="line"> WSAStartup(MAKEWORD(<span class="number">2</span>,<span class="number">2</span>),&amp;ws);</div><div class="line"> <span class="keyword">if</span> ((sockfd = socket(AF_INET,SOCK_STREAM,<span class="number">0</span>)) == INVALID_SOCKET)</div><div class="line"> {</div><div class="line"> <span class="keyword">return</span> -<span class="number">1</span>;</div><div class="line"> }</div><div class="line"> their_addr.sin_family = AF_INET;</div><div class="line"> their_addr.sin_port = htons(PORT);</div><div class="line"> their_addr.sin_addr.S_un.S_addr = inet_addr(argv[<span class="number">1</span>]);</div><div class="line"> <span class="keyword">if</span> (connect(sockfd,(<span class="keyword">struct</span> sockaddr*)&amp;their_addr,<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr)) ==SOCKET_ERROR)</div><div class="line"> {</div><div class="line"> closesocket(sockfd);</div><div class="line"> <span class="keyword">return</span> -<span class="number">1</span>;</div><div class="line"> }</div><div class="line"> gets(Buffer);</div><div class="line"> num = send(sockfd,Buffer,MAX_PATH,<span class="number">0</span>);</div><div class="line"> closesocket(sockfd);</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>如图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121006212506.jpg" alt=""></p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/SDK-MFC/">SDK/MFC</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="一些常用的Winsock API函数" data-url="http://armsword.com/2012/10/06/some-common-winsock-api-function/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

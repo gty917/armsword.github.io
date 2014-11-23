@@ -1,0 +1,258 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>《Linux C编程一站式学习》读书笔记(一) | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="《Linux C编程一站式学习》读书笔记(一)"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-03-25T13:50:41.000Z"><a href="/2013/03/25/linux-c-01/">3月 25 2013</a></time>
+      
+      
+  
+    <h1 class="title">《Linux C编程一站式学习》读书笔记(一)</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>现在编程学习基本算是转到Linux环境下了，快速学习了一些Linux下的基本操作以及编程技巧吧，之前也算是有点基础，所以看书也比较快。《Linux C编程一站式学习》一共分为3部分，有空就看看，第一部分2天也就阅读完毕，简单做个读书笔记吧，虽然有些知识自己也算是熟悉。</p>
+<p>1、在使用gcc的一个好的习惯就是打开gcc的 -Wall选项，也就是让gcc提示所有的警告信息，不管严重还是非严重的。</p>
+<p>2、Windows文本文件用\r\n做分割浮，linux\unix用\n做行分割符。</p>
+<p>3、共有三个声明：变量声明、函数声明和类型声明。</p>
+<p>4、精度：float单精度，double 双精度，long double 精度更高的浮点数，%f 表示double型。</p>
+<p>5、以下划线开头的标识符少用，往往被编译器用作一些功能的扩展，标准库里面定义了很多下划线开头的标识符。</p>
+<p>6、使用math.h 中声明的库还有一点特殊之处，gcc命令行必须加 -lm选项，因为数学函数位于libm.so库文件中(lib)，-lm选项告诉编译器，我们程序用到的数学函数要到这个库里找;大部分库如printf位于libc.so库文件中，使用libc.so中的库文件在编译时不需要加-lc选项，linux平台上最广泛使用的C函数库是glibc，多线程的C程序依赖于libpthread.so。</p>
+<p>7、隐式声明的函数返回值类型都是int。</p>
+<p>8、man 3 printf 可以查看printf函数的原型。Man Page的Section如下图所示：<strong>
+</strong></p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/201303025011.jpg" alt=""></p>
+<p>9、类型转换的规则：</p>
+<p>存储长度较短的转换为存储长度较大的，并且不丢失信息。常见的类型转换顺序：</p>
+<p>char、short - -&gt; int - -&gt; unsigned - -&gt;long int - -&gt; double  &lt;- - float (即运算中有double，则其他类型会全部转化为double类型)</p>
+<p>10、函数返回值相当于定义一个和返回i值类型相同的临时变量，并用return后面的表达式来初始化。临时变量在使用比如判断之后，就释放它，而不能往它里面存放新的值。</p>
+<p>11、递归和循环是等价的，用循环能做的事，用递归都能做，反之，亦然。（写这个文章之前，我还没意思到这个问题呢）</p>
+<p>12、在多层循环或switch嵌套的情况下，break只能跳出最内层的循环或switch。continue也只能终止最内层的循环并回到该循环的开头。</p>
+<p>13、<code>goto</code>可以从程序中的任何地方都可以无条件跳转到任何其它地方，只要在那个地方定义一个标号就行，唯一的限制是<code>goto</code>只能跳转到同一个函数中的某个标号处，而不能跳到别的函数中。</p>
+<p>14、C标准库函数<code>setjmp</code>和<code>longjmp</code>配合起来可以实现函数间的跳转，但只能从被调用的函数跳回到它的直接或间接调用者（同时从栈空间弹出一个或多个栈帧），而不能从一个函数跳转到另一个和它毫不相干的函数中。<code>setjmp/longjmp</code>函数主要也是用于出错处理，比如函数<code>A</code>调用函数<code>B</code>，函数<code>B</code>调用函数<code>C</code>，如果在<code>C</code>中出现某个错误条件，使得函数<code>B</code>和<code>C</code>继续执行下去都没有意义了，可以利用<code>setjmp/longjmp</code>机制快速返回到函数<code>A</code>做出错处理。</p>
+<p>15、结构体的成员名和变量名不在同一个命名空间中，但枚举的成员名却和变量名在同一个命名空间中。</p>
+<p>16、编译器的工作分为两个阶段，先是预处理阶段，然后才是编译阶段，用gcc的 -E选项可以看到预处理之后、编译之前的程序。</p>
+<p>$gcc -E main.c                   用cpp main.c命令也可以达到同样的效果，只做预处理而不编译。cpp表示c preprocessor 。</p>
+<p>17、indent工具可以把代码格式化成某种风格。</p>
+<p>$indent -kr -i8 main.c</p>
+<p>$cat main.c</p>
+<p>-kr 选项表示K&amp;R风格，-i8表示缩进8个空格的长度。</p>
+<p>18、在编译时要加上 -g选项，生成的可执行文件才能用gdb进行源码级调试。</p>
+<p>$gcc -g main.c -o main</p>
+<p>$gdb main</p>
+<p>-g的作用是在可执行文件中加入源代码的信息，比如可执行文件的第几条机器指令对应源代码的第几行，但并不把整个源文件嵌入到可执行文件中，所以在调试时必须保证gdb能找到源文件。</p>
+<p>19、gdb常用的命令如下图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/03/20130325021.jpg" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/03/20130325031.jpg" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/03/20130325041.jpg" alt=""></p>
+<p>20、如果包含了assert.h，之后定义了一个NDEBUG宏（表示no debug），就可以禁用assert.h中的assert宏定义，这样代码中的所有的assert测试都不起作用了。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Linux/">Linux</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="《Linux C编程一站式学习》读书笔记(一)" data-url="http://armsword.com/2013/03/25/linux-c-01/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

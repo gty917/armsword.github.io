@@ -1,0 +1,314 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Windows下文件操作的一些常用函数 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Windows下文件操作的一些常用函数"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2012-10-03T11:47:11.000Z"><a href="/2012/10/03/file-manipulation/">10月 3 2012</a></time>
+      
+      
+  
+    <h1 class="title">Windows下文件操作的一些常用函数</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>其实这些API基本上会经常用到，不过俗语说：“好记忆，不如烂笔头。”我还是记录下一些常用的文件操作函数吧，正好也能帮自己理理思路。文章中的内容，在MSDN上都可以找到的，也有不少著作多多少少也有介绍。</p>
+<p>1.打开文件</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">FILE *fopen(<span class="keyword">const</span> <span class="keyword">char</span> *filename, <span class="keyword">const</span> <span class="keyword">char</span> *mode);</div></pre></td></tr></table></figure>
+
+<p>如果文件打开成功，则该函数返回一个指向打开文件的FILE类型指针；否则将返回一个NULL表示出错。</p>
+<p>在Windows提供的API中，CreateFile()函数也可以打开或创建文件。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">HANDLE</span> CreateFile(</div><div class="line"> LPCSTR lpFileName, <span class="comment">//文件名，最大长度为MAX_PATH</span></div><div class="line"> DWORD dwDesiredAccess, <span class="comment">//存取方式，文件查询权限，读写权限</span></div><div class="line"> DWORD dwShareMode, <span class="comment">//共享属性</span></div><div class="line"> LPSECURITY_ATTRIBUTES lpSecurityAttributes,<span class="comment">//安全属性</span></div><div class="line"> DWORD dwCreationDisposition,<span class="comment">//文件是否存在来决定对其进行的操作</span></div><div class="line"> DWORD dwFlagsAndAttributes, <span class="comment">//文件属性和参数</span></div><div class="line"> <span class="keyword">HANDLE</span> hTemplateFile <span class="comment">//文件模版</span></div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>如果文件打开成功，则返回文件句柄；否则返回INVALID_HANDLE_VALUE,可通过GetLastError函数来返回错误信息。</p>
+<p>2.关闭文件</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> fclose(<span class="keyword">FILE</span> *stream);</div></pre></td></tr></table></figure>
+
+<p>stream为一个指向已经打开文件的指针。如果函数执行成功，将返回值0；否则返回EOF(-1)。</p>
+<p>使用API关闭文件比较简单，使用CloseHandle()函数就可以。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">BOOL</span> CloseHandle( HANDLE hObject );</div></pre></td></tr></table></figure>
+
+<p>hObject为使用CreateFile()函数打开文件后返回的句柄。若函数执行成功，则返回一个非0值；否则将返回0。另外，该函数不仅仅可以关闭文件，也可以用其他句柄的操作。</p>
+<p>3.读文件</p>
+<p>fgetc()函数:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> fgetc(<span class="keyword">FILE</span> *stream);<span class="comment">//stream为FILE类型的指针</span></div></pre></td></tr></table></figure>
+
+<p>该函数从文件中读取出一个字符，并将文件指针向前移动一位。若读取成功，则返回该字符；若出错或指针到达文件末尾，则返回EOF。</p>
+<p>fread():</p>
+<p>fread()可以精确地控制每次读取多个字节的内容。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">size_t fread(</div><div class="line"> <span class="keyword">void</span> *buffer, <span class="comment">//指向数据存放缓冲区的指针</span></div><div class="line"> size_t <span class="keyword">size</span>, <span class="comment">//单个字符占用字节数</span></div><div class="line"> size_t <span class="keyword">count</span>, <span class="comment">//要进行读写多少个size的字符</span></div><div class="line"> <span class="keyword">FILE</span> *stream <span class="comment">//指向某个已打开文件的FILE类型指针</span></div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>如果文件已二进制形式打开，使用fread()可以读取任何类型的数据。如果函数执行成功，则返回实际读取的字符数。</p>
+<p>fscanf(): 变长参数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">int fscanf(FILE *, const char *, <span class="keyword">...</span>);//读的是磁盘上的文件</div></pre></td></tr></table></figure>
+
+<p>win32提供的读文件API为ReadFile():</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">BOOL</span> ReadFile(</div><div class="line"> HANDLE hFile, <span class="comment">//CreateFile()返回的文件句柄</span></div><div class="line"> LPVOID lpBuffer,<span class="comment">//保存需要读入数据的缓冲区指针</span></div><div class="line"> DWORD nNumberOfBytesToRead,<span class="comment">//指定需要读入的字节数</span></div><div class="line"> LPDWORD lpNumberOfBytesRead, <span class="comment">//返回实际读入的字节数</span></div><div class="line"> LPOVERLAPPED lpOverlapped <span class="comment">//异步读取使用，同步时为NULL</span></div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>如果函数执行成功，将会返回一个非0值。如果返回FALSE且读入字节数为0，表示文件已经到达末尾。</p>
+<p>4.写文件</p>
+<p>fputs()函数:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> <span class="built_in">fputs</span>(<span class="keyword">const</span> <span class="keyword">char</span> *<span class="built_in">string</span>, FILE *stream);</div></pre></td></tr></table></figure>
+
+<p>string是将要写入到文件中的字符，stream是指向某个文件的FILE类型指针。若函数执行成功，将返回被成功写入到文件中的字符，若执行失败，则返回EOF。</p>
+<p>fwrite()函数：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">size_t fwrite( const <span class="keyword">void</span> *buffer, size_t <span class="keyword">size</span>, size_t <span class="keyword">count</span>, <span class="keyword">FILE</span> *stream );</div></pre></td></tr></table></figure>
+
+<p>fprintf()函数：同fscanf()相似，也是变长参数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">int fprintf(FILE *, const char *, <span class="keyword">...</span>);</div></pre></td></tr></table></figure>
+
+<p>WriteFile()函数：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">BOOL WriteFile(</div><div class="line"> HANDLE hFile,</div><div class="line"> LPCVOID lpBuffer,</div><div class="line"> <span class="preprocessor">DWORD</span> nNumberOfBytesToWrite,</div><div class="line"> LPDWORD lpNumberOfBytesWritten,</div><div class="line"> LPOVERLAPPED lpOverlapped</div><div class="line"> )<span class="comment">;</span></div></pre></td></tr></table></figure>
+
+<p>5.文件定位</p>
+<p>rewind()函数：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> rewind(<span class="keyword">FILE</span> *stream);</div></pre></td></tr></table></figure>
+
+<p>该函数可以使文件指针返回到文件开头，没返回值。</p>
+<p>fseek()函数：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> fseek(</div><div class="line"> <span class="keyword">FILE</span> *stream,</div><div class="line"> <span class="keyword">long</span> offset, <span class="comment">//偏移量，相当于origin而言</span></div><div class="line"> <span class="keyword">int</span> origin <span class="comment">//偏移起始地址</span></div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>fseek()函数一般用于二进制文件，因为文本文件要发生字符转换，在计算位置时会发生混乱。如果想知道指针移动到什么位置，可以使用</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">long</span> ftell(<span class="keyword">FILE</span> *stream);</div></pre></td></tr></table></figure>
+
+<p>该函数的功能是返回当前文件指针的位置，相对于文件开头的偏移量。如果出错，返回-1。</p>
+<p>与fseek()相对应的Windows API是SetFilePointer()函数：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">DWORD SetFilePointer(</div><div class="line"> HANDLE hFile,</div><div class="line"> <span class="keyword">LONG</span> lDistanceToMove, <span class="comment">//移动的字节数低32位</span></div><div class="line"> PLONG lpDistanceToMoveHigh,<span class="comment">//移动的字节数高32位，主要在64位系统里</span></div><div class="line"> DWORD dwMoveMethod <span class="comment">//移动起始位置</span></div><div class="line"> )</div></pre></td></tr></table></figure>
+
+<p>6.文件目录</p>
+<p>CreateDirectory()函数：</p>
+<p>用于目录的创建。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">BOOL</span> CreateDirectory(</div><div class="line"> LPCSTR lpPathName, <span class="comment">//创建目录的名称</span></div><div class="line"> LPSECURITY_ATTRIBUTES lpSecurityAttributes <span class="comment">//安全属性描述，通常为NULL</span></div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>RemoveDirectory()函数：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">BOOL</span> RemoveDirectory( LPCSTR lpPathName )</div></pre></td></tr></table></figure>
+
+<p>需要注意的是，该目录必须为一个空目录，即该目录下不能有任何文件或文件夹。</p>
+<p>7.文件操作</p>
+<p>删除文件 DeleteFile()：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">BOOL <span class="keyword">DeleteFile</span>( LPCSTR lpFileName );</div></pre></td></tr></table></figure>
+
+<p>文件的复制 CopyFile()：</p>
+<p>BOOL CopyFile(<br>LPCSTR lpExistingFileName, //源文件名<br>LPCSTR lpNewFileName, //目标文件名<br>BOOL bFailIfExists //目标是否存在，FALSE强制覆盖<br>)</p>
+<p>文件的移动 MoveFile()：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">BOOL</span> MoveFile(</div><div class="line"> LPCSTR lpExistingFileName, <span class="comment">//源文件路径</span></div><div class="line"> LPCSTR lpNewFileName <span class="comment">//目标文件路径</span></div><div class="line"> );</div></pre></td></tr></table></figure>
+
+<p>8.文件属性</p>
+<p>可以使用2个函数对文件的属性进行控制，他们是GetFileAttributes()函数和SetFileAttributes()函数。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">DWORD</span> GetFileAttributes( LPCSTR lpFileName )<span class="comment">;</span></div></pre></td></tr></table></figure>
+
+<p>使用GetFileAttributes()得到函数的文件属性，若执行成功，则返回文件的属性，否则返回OxFFFFFFFF。</p>
+<p>使用SetFileAttributes()函数设置文件属性：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">BOOL <span class="keyword">SetFileAttributes</span>( LPCSTR lpFileName, DWORD dwFileAttributes )<span class="comment">;</span></div></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/SDK-MFC/">SDK/MFC</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="Windows下文件操作的一些常用函数" data-url="http://armsword.com/2012/10/03/file-manipulation/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

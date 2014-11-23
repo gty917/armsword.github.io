@@ -1,0 +1,630 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>第 5 页 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-10-12T04:39:50.000Z"><a href="/2013/10/12/resolve-yum-problem/">10月 12 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/10/12/resolve-yum-problem/">无法使用yum安装程序的解决方法</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>实验室的项目做的快差不多了，昨天打算新装一台Centos机器进行下测试，师兄们先装的redis、ssh、mysql、PHP等等需要的开发包和模块，我守在最后一关，但是到我这里时候，yum不能使用了。报错内容如下:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">There was a problem importing one of the Python modules</div><div class="line">required to run yum. The error leading to this problem was: </div><div class="line"> </div><div class="line">/usr/lib/python2.6/site-packages/pycurl.so: undefined symbol: CRYPTO_set_locking_callback</div><div class="line"> </div><div class="line">Please <span class="operator"><span class="keyword">install</span> a package which provides this <span class="keyword">module</span>, <span class="keyword">or</span></span></div><div class="line">verify that the <span class="keyword">module</span> <span class="keyword">is</span> installed correctly.</div><div class="line"></div><div class="line">It<span class="string">'s possible that the above module doesn'</span>t <span class="keyword">match</span> the </div><div class="line"><span class="keyword">current</span> <span class="keyword">version</span> <span class="keyword">of</span> Python, which <span class="keyword">is</span>:</div><div class="line"><span class="number">2.6</span><span class="number">.6</span> (r266:<span class="number">84292</span>, <span class="built_in">Dec</span> <span class="number">7</span> <span class="number">2011</span>, <span class="number">20</span>:<span class="number">38</span>:<span class="number">36</span>) </div><div class="line">[GCC <span class="number">4.4</span><span class="number">.6</span> <span class="number">20110731</span> (Red Hat <span class="number">4.4</span><span class="number">.6</span>-<span class="number">3</span>)] </div><div class="line"> </div><div class="line"><span class="keyword">If</span> you cannot solve this problem yourself, please <span class="keyword">go</span> <span class="keyword">to</span></div><div class="line">the yum faq <span class="keyword">at</span>:</div><div class="line">http://yum.baseurl.org/wiki/Faq</div></pre></td></tr></table></figure>
+
+<p>测试机器是Centos6 64位系统，刚开始我以为是python冲突（yum是python写的），重装了python没有解决。之后又删掉了yum，折腾了大半夜，没有解决，之后我仔细阅读了上文中的错误报告，于是使用命令：</p>
+<p>ldd /usr/lib/python2.6/site-packages/pycurl.so</p>
+<p>程序显示内容如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">[root@centOS6 site-packages]# ldd /usr/lib/python2.<span class="number">6</span>/site-packages/pycurl.<span class="keyword">so</span></div><div class="line">linux-gate.<span class="keyword">so</span>.<span class="number">1</span> =&gt; (<span class="number">0</span>x006da000)</div><div class="line">libcurl.<span class="keyword">so</span>.<span class="number">4</span> =&gt; /usr/lib/libcurl.<span class="keyword">so</span>.<span class="number">4</span> (<span class="number">0</span>x0065f000)</div><div class="line">libpython2.<span class="number">6</span>.<span class="keyword">so</span>.<span class="number">1.0</span> =&gt; /usr/lib/libpython2.<span class="number">6</span>.<span class="keyword">so</span>.<span class="number">1.0</span> (<span class="number">0</span>x00394000)</div><div class="line">libpthread.<span class="keyword">so</span>.<span class="number">0</span> =&gt; /lib/libpthread.<span class="keyword">so</span>.<span class="number">0</span> (<span class="number">0</span>x006f8000)</div><div class="line">libc.<span class="keyword">so</span>.<span class="number">6</span> =&gt; /lib/libc.<span class="keyword">so</span>.<span class="number">6</span> (<span class="number">0</span>x0087c000)</div><div class="line">libidn.<span class="keyword">so</span>.<span class="number">11</span> =&gt; /lib/libidn.<span class="keyword">so</span>.<span class="number">11</span> (<span class="number">0</span>x00a47000)</div><div class="line">libldap-<span class="number">2.4</span>.<span class="keyword">so</span>.<span class="number">2</span> =&gt; /lib/libldap-<span class="number">2.4</span>.<span class="keyword">so</span>.<span class="number">2</span> (<span class="number">0</span>x00110000)</div><div class="line">librt.<span class="keyword">so</span>.<span class="number">1</span> =&gt; /lib/librt.<span class="keyword">so</span>.<span class="number">1</span> (<span class="number">0</span>x00bf6000)</div><div class="line">libgssapi_krb5.<span class="keyword">so</span>.<span class="number">2</span> =&gt; /lib/libgssapi_krb5.<span class="keyword">so</span>.<span class="number">2</span> (<span class="number">0</span>x0056f000)</div><div class="line">libkrb5.<span class="keyword">so</span>.<span class="number">3</span> =&gt; /lib/libkrb5.<span class="keyword">so</span>.<span class="number">3</span> (<span class="number">0</span>x0015d000)</div><div class="line">libk5crypto.<span class="keyword">so</span>.<span class="number">3</span> =&gt; /lib/libk5crypto.<span class="keyword">so</span>.<span class="number">3</span> (<span class="number">0</span>x00fc1000)</div><div class="line">libcom_err.<span class="keyword">so</span>.<span class="number">2</span> =&gt; /lib/libcom_err.<span class="keyword">so</span>.<span class="number">2</span> (<span class="number">0</span>x00a83000)</div><div class="line">libz.<span class="keyword">so</span>.<span class="number">1</span> =&gt; /lib/libz.<span class="keyword">so</span>.<span class="number">1</span> (<span class="number">0</span>x0024f000)</div><div class="line">libssl3.<span class="keyword">so</span> =&gt; /usr/lib/libssl3.<span class="keyword">so</span> (<span class="number">0</span>x00263000)</div><div class="line">libsmime3.<span class="keyword">so</span> =&gt; /usr/lib/libsmime3.<span class="keyword">so</span> (<span class="number">0</span>x00790000)</div><div class="line">libnss3.<span class="keyword">so</span> =&gt; /usr/lib/libnss3.<span class="keyword">so</span> (<span class="number">0</span>x00a88000)</div><div class="line">libnssutil3.<span class="keyword">so</span> =&gt; /usr/lib/libnssutil3.<span class="keyword">so</span> (<span class="number">0</span>x00299000)</div><div class="line">libplds4.<span class="keyword">so</span> =&gt; /lib/libplds4.<span class="keyword">so</span> (<span class="number">0</span>x00233000)</div><div class="line">libplc4.<span class="keyword">so</span> =&gt; /lib/libplc4.<span class="keyword">so</span> (<span class="number">0</span>x00238000)</div><div class="line">libnspr4.<span class="keyword">so</span> =&gt; /lib/libnspr4.<span class="keyword">so</span> (<span class="number">0</span>x00f7e000)</div><div class="line">libdl.<span class="keyword">so</span>.<span class="number">2</span> =&gt; /lib/libdl.<span class="keyword">so</span>.<span class="number">2</span> (<span class="number">0</span>x00e34000)</div><div class="line">libssh2.<span class="keyword">so</span>.<span class="number">1</span> =&gt; /usr/local/lib/libssh2.<span class="keyword">so</span>.<span class="number">1</span> (<span class="number">0</span>x00bff000)</div><div class="line">libutil.<span class="keyword">so</span>.<span class="number">1</span> =&gt; /lib/libutil.<span class="keyword">so</span>.<span class="number">1</span> (<span class="number">0</span>x002b5000)</div><div class="line">libm.<span class="keyword">so</span>.<span class="number">6</span> =&gt; /lib/libm.<span class="keyword">so</span>.<span class="number">6</span> (<span class="number">0</span>x0032c000)</div><div class="line">/lib/ld-linux.<span class="keyword">so</span>.<span class="number">2</span> (<span class="number">0</span>x00374000)</div><div class="line">liblber-<span class="number">2.4</span>.<span class="keyword">so</span>.<span class="number">2</span> =&gt; /lib/liblber-<span class="number">2.4</span>.<span class="keyword">so</span>.<span class="number">2</span> (<span class="number">0</span>x00d8a000)</div><div class="line">libresolv.<span class="keyword">so</span>.<span class="number">2</span> =&gt; /lib/libresolv.<span class="keyword">so</span>.<span class="number">2</span> (<span class="number">0</span>x002b9000)</div><div class="line">libsasl2.<span class="keyword">so</span>.<span class="number">2</span> =&gt; /usr/lib/libsasl2.<span class="keyword">so</span>.<span class="number">2</span> (<span class="number">0</span>x002d3000)</div><div class="line">libkrb5support.<span class="keyword">so</span>.<span class="number">0</span> =&gt; /lib/libkrb5support.<span class="keyword">so</span>.<span class="number">0</span> (<span class="number">0</span>x002ee000)</div><div class="line">libkeyutils.<span class="keyword">so</span>.<span class="number">1</span> =&gt; /lib/libkeyutils.<span class="keyword">so</span>.<span class="number">1</span> (<span class="number">0</span>x00d3b000)</div><div class="line">libcrypt.<span class="keyword">so</span>.<span class="number">1</span> =&gt; /lib/libcrypt.<span class="keyword">so</span>.<span class="number">1</span> (<span class="number">0</span>x002f9000)</div><div class="line">libselinux.<span class="keyword">so</span>.<span class="number">1</span> =&gt; /lib/libselinux.<span class="keyword">so</span>.<span class="number">1</span> (<span class="number">0</span>x00a24000)</div><div class="line">libfreebl3.<span class="keyword">so</span> =&gt; /lib/libfreebl3.<span class="keyword">so</span> (<span class="number">0</span>x005ae000)</div></pre></td></tr></table></figure>
+
+<p>我发现libssh2.so.1 =&gt; /usr/local/lib/libssh2.so.1 (0x00bff000) ，指向了/usr/local/lib。记忆中许多linux系统是默认安装ssh的。于是命令查看<br>[root@centOS6 lib]# find / -name “libssh2.so.1”<br>/usr/local/lib/libssh2.so.1<br>/usr/lib/libssh2.so.1<br>感觉应该是动态库冲突引起的yum不能使用。</p>
+<p>于是编辑 vim /etc/ld.so.conf</p>
+<p>include ld.so.conf.d/*.conf<br>/usr/local/lib</p>
+<p>改为：</p>
+<p>include ld.so.conf.d/*.conf<br>#/usr/local/lib</p>
+<p>之后，再用ldconfig刷新下动态链接库，问题解决。</p>
+<p>PS：可能自己程序安装的动态链接库位置在/usr/local/lib，删掉/usr/local/lib可能会影响用户自己安装程序使用。不更改ld.so.conf，建立个软链接应该可以解决。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-09-26T07:20:43.000Z"><a href="/2013/09/26/lru-cache/">9月 26 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/09/26/lru-cache/">实现一个LRU Cache</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1.什么是Cache和LRU Cache</p>
+<p>狭义的Cache指的是位于CPU和主存间的快速RAM， 通常它不像系统主存那样使用DRAM技术，而使用昂贵但较快速的SRAM技术。 广义上的Cache指的是位于速度相差较大的两种硬件之间， 用于协调两者数据传输速度差异的结构。除了CPU与主存之间有Cache， 内存与硬盘之间也有Cache，乃至在硬盘与网络之间也有某种意义上的Cache── 称为Internet临时文件夹或网络内容缓存等。</p>
+<p>CPU中Cache能极大提高存取数据和指令的时间，让整个存储器(Cache和内存)既有Cache的高速度，又能有内存的大容量；操作系统中的内存Page中使用的Cache能使得频繁读取的内存磁盘文件较少的被置换出内存，从而提高访问速度；数据库中数据查询也用到Cache来提高效率；即便是Powerbuilder的DataWindow数据处理也用到了Cache的类似设计。</p>
+<p>Cache的算法设计常见的有FIFO(first in first out)和LRU(least recently used)。LRU是Least Recently Used的缩写，意思是最近最少使用，它是一种Cache替换算法。Cache的容量有限，因此当Cache的容量用完后，而又有新的内容需要添加进来时， 就需要挑选并舍弃原有的部分内容，从而腾出空间来放新内容。LRU Cache 的替换原则就是将最近最少使用的内容替换掉。其实，LRU译成最久未使用会更形象， 因为该算法每次替换掉的就是一段时间内最久没有使用过的内容。</p>
+<p>注：</p>
+<p>动态随机存取存储器（Dynamic Random Access Memory，DRAM）是一种半导体存储器，主要的作用原理是利用电容内存储电荷的多寡来代表一个二进制比特（bit）是1还是0。由于在现实中电容会有漏电的现象，导致电位差不足而使记忆消失，因此除非电容经常周期性地充电，否则无法确保记忆长存。由于这种需要定时刷新的特性，因此被称为“动态”存储器。相对来说，“静态”存储器（SRAM）只要存入数据后，纵使不刷新也不会丢失记忆。</p>
+<p>静态随机存取存储器（Static Random-Access Memory, SRAM）是随机存取存储器的一种。所谓的“静态”，是指这种存储器只要保持通电，里面储存的数据就可以恒常保持[1]。相对之下，动态随机存取内存（DRAM）里面所储存的数据就需要周期性地更新。然而，当电力供应停止时，SRAM储存的数据还是会消失（被称为volatile memory），这与在断电后还能储存资料的ROM或闪存是不同的。</p>
+<p>下图是存储器层次结构，以前在《深入理解计算机系统》这本书看到的，顺便放到此处：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/09/20130926151041.jpg" alt=""></p>
+<p>2.数据结构</p>
+<p>Cache中的存储空间往往是有限的，当Cache中的存储块被用完，而需要把新的数据载入到Cache的时候，就需要设计一种良好的算法来完成数据块的替换。LRU的思想是基于“最近用到的数据被重用的概率比较早用到的大的多”这个设计规则来实现的。</p>
+<p>为了能够快速删除最久没有访问的数据项和插入最新的数据项，我们双向链表连接Cache中的数据项，并且保证链表维持数据项从最近访问到最旧访问的顺序。每次数据项被查询到时，都将此数据项移动到链表头部（O(1)的时间复杂度）。这样，在进行过多次查找操作后，最近被使用过的内容就向链表的头移动，而没有被使用的内容就向链表的后面移动。当需要替换时，链表最后的位置就是最近最少被使用的数据项，我们只需要将最新的数据项放在链表头部，当Cache满时，淘汰链表最后的位置就是了。</p>
+<p>注：<br>对于双向链表的使用，基于两个考虑。首先是Cache中块的命中可能是随机的，和载入进来的顺序无关。其次，双向链表插入、删除很快，可以灵活的调整相互间的次序，时间复杂度为O(1)。</p>
+<p>我们要访问某个结点，就需要顺序地一个个找，时间复杂度是O(n)。使用哈希表可以让我们在O(1)的时间找到想要访问的结点，或者返回未找到。</p>
+<p>所以：LRU的典型实现是双向链表和哈希表，双向链表用于存储数据结点，并且它是按照结点最近被使用的时间来存储的。哈希表用于快速访问某个结点。</p>
+<p>3.一个面试题<br>`</p>
+<p>Question: Implement LRU cache algorithm<br>Implement the LRU cache algorithm with the following interface:<br> —————————————————————————————————<br>T get(K key);<br>void put(K key, T data);</p>
+<p>`<br>此题参考价值还是蛮大的，不少公司，特别后台开发职位会考到此题。<a href="http://hawstein.com/posts/lru-cache-impl.html" target="_blank" rel="external">hawstein</a>大牛用C++代码实现了，我们看下代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div></pre></td><td class="code"><pre><div class="line">// A simple LRU cache written in C++</div><div class="line"><span class="regexp">//</span> Hash <span class="keyword">map</span> + doubly linked list</div><div class="line"><span class="comment">#include &lt;iostream&gt;</span></div><div class="line"><span class="comment">#include &lt;vector&gt;</span></div><div class="line"><span class="comment">#include &lt;ext/hash_map&gt;</span></div><div class="line">using namespace std;</div><div class="line">using namespace __gnu_cxx;</div><div class="line"></div><div class="line">template &<span class="keyword">lt</span>;class K, class T&<span class="keyword">gt</span>;</div><div class="line">struct Node{</div><div class="line"> K key;</div><div class="line"> T data;</div><div class="line"> Node *prev, *<span class="keyword">next</span>;</div><div class="line">};</div><div class="line"></div><div class="line">template &<span class="keyword">lt</span>;class K, class T&<span class="keyword">gt</span>;</div><div class="line">class LRUCache{</div><div class="line">public:</div><div class="line"> LRUCache(size_t size){</div><div class="line"> entries<span class="number">_</span> = new Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>;[size];</div><div class="line"> <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&<span class="keyword">lt</span>;size; ++i)// 存储可用结点的地址</div><div class="line"> free_entries<span class="number">_</span>.push_back(entries<span class="number">_</span>+i);</div><div class="line"> head<span class="number">_</span> = new Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>;;</div><div class="line"> tail<span class="number">_</span> = new Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>;;</div><div class="line"> head<span class="number">_</span>-&<span class="keyword">gt</span>;prev = NULL;</div><div class="line"> head<span class="number">_</span>-&<span class="keyword">gt</span>;<span class="keyword">next</span> = tail<span class="number">_</span>;</div><div class="line"> tail<span class="number">_</span>-&<span class="keyword">gt</span>;prev = head<span class="number">_</span>;</div><div class="line"> tail<span class="number">_</span>-&<span class="keyword">gt</span>;<span class="keyword">next</span> = NULL;</div><div class="line"> }</div><div class="line"> ~LRUCache(){</div><div class="line"> <span class="keyword">delete</span> head<span class="number">_</span>;</div><div class="line"> <span class="keyword">delete</span> tail<span class="number">_</span>;</div><div class="line"> <span class="keyword">delete</span>[] entries<span class="number">_</span>;</div><div class="line"> }</div><div class="line"> void Put(K key, T data){</div><div class="line"> Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>; *node = hashmap<span class="number">_</span>[key];</div><div class="line"> <span class="keyword">if</span>(node){ <span class="regexp">//</span> node <span class="keyword">exists</span></div><div class="line"> detach(node);</div><div class="line"> node-&<span class="keyword">gt</span>;data = data;</div><div class="line"> attach(node);</div><div class="line"> }</div><div class="line"> <span class="keyword">else</span>{</div><div class="line"> <span class="keyword">if</span>(free_entries<span class="number">_</span>.empty()){<span class="regexp">//</span> 可用结点为空，即cache已满</div><div class="line"> node = tail<span class="number">_</span>-&<span class="keyword">gt</span>;prev;</div><div class="line"> detach(node);</div><div class="line"> hashmap<span class="number">_</span>.erase(node-&<span class="keyword">gt</span>;key);</div><div class="line"> }</div><div class="line"> <span class="keyword">else</span>{</div><div class="line"> node = free_entries<span class="number">_</span>.back();</div><div class="line"> free_entries<span class="number">_</span>.pop_back();</div><div class="line"> }</div><div class="line"> node-&<span class="keyword">gt</span>;key = key;</div><div class="line"> node-&<span class="keyword">gt</span>;data = data;</div><div class="line"> hashmap<span class="number">_</span>[key] = node;</div><div class="line"> attach(node);</div><div class="line"> }</div><div class="line"> }</div><div class="line"> T Get(K key){</div><div class="line"> Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>; *node = hashmap<span class="number">_</span>[key];</div><div class="line"> <span class="keyword">if</span>(node){</div><div class="line"> detach(node);</div><div class="line"> attach(node);</div><div class="line"> <span class="keyword">return</span> node-&<span class="keyword">gt</span>;data;</div><div class="line"> }</div><div class="line"> <span class="keyword">else</span>{<span class="regexp">//</span> 如果cache中没有，返回T的默认值。与hashmap行为一致</div><div class="line"> <span class="keyword">return</span> T();</div><div class="line"> }</div><div class="line"> }</div><div class="line">private:</div><div class="line"> <span class="regexp">//</span> 分离结点</div><div class="line"> void detach(Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>;* node){</div><div class="line"> node-&<span class="keyword">gt</span>;prev-&<span class="keyword">gt</span>;<span class="keyword">next</span> = node-&<span class="keyword">gt</span>;<span class="keyword">next</span>;</div><div class="line"> node-&<span class="keyword">gt</span>;<span class="keyword">next</span>-&<span class="keyword">gt</span>;prev = node-&<span class="keyword">gt</span>;prev;</div><div class="line"> }</div><div class="line"> // 将结点插入头部</div><div class="line"> void attach(Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>;* node){</div><div class="line"> node-&<span class="keyword">gt</span>;prev = head<span class="number">_</span>;</div><div class="line"> node-&<span class="keyword">gt</span>;<span class="keyword">next</span> = head<span class="number">_</span>-&<span class="keyword">gt</span>;<span class="keyword">next</span>;</div><div class="line"> head<span class="number">_</span>-&<span class="keyword">gt</span>;<span class="keyword">next</span> = node;</div><div class="line"> node-&<span class="keyword">gt</span>;<span class="keyword">next</span>-&<span class="keyword">gt</span>;prev = node;</div><div class="line"> }</div><div class="line">private:</div><div class="line"> hash_map&<span class="keyword">lt</span>;K, Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>;* &<span class="keyword">gt</span>; hashmap<span class="number">_</span>;</div><div class="line"> vector&<span class="keyword">lt</span>;Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>;* &<span class="keyword">gt</span>; free_entries<span class="number">_</span>; <span class="regexp">//</span> 存储可用结点的地址</div><div class="line"> Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>; *head<span class="number">_</span>, *tail<span class="number">_</span>;</div><div class="line"> Node&<span class="keyword">lt</span>;K,T&<span class="keyword">gt</span>; *entries<span class="number">_</span>; <span class="regexp">//</span> 双向链表中的结点</div><div class="line">};</div><div class="line"></div><div class="line"><span class="keyword">int</span> main(){</div><div class="line"> hash_map&<span class="keyword">lt</span>;<span class="keyword">int</span>, <span class="keyword">int</span>&<span class="keyword">gt</span>; <span class="keyword">map</span>;</div><div class="line"> <span class="keyword">map</span>[<span class="number">9</span>]= <span class="number">999</span>;</div><div class="line"> cout&<span class="keyword">lt</span>;&<span class="keyword">lt</span>;<span class="keyword">map</span>[<span class="number">9</span>]&<span class="keyword">lt</span>;&<span class="keyword">lt</span>;endl;</div><div class="line"> cout&<span class="keyword">lt</span>;&<span class="keyword">lt</span>;<span class="keyword">map</span>[<span class="number">10</span>]&<span class="keyword">lt</span>;&<span class="keyword">lt</span>;endl;</div><div class="line"> LRUCache&<span class="keyword">lt</span>;<span class="keyword">int</span>, string&<span class="keyword">gt</span>; lru_cache(<span class="number">100</span>);</div><div class="line"> lru_cache.Put(<span class="number">1</span>, &quot;one&quot;);</div><div class="line"> cout&<span class="keyword">lt</span>;&<span class="keyword">lt</span>;lru_cache.Get(<span class="number">1</span>)&<span class="keyword">lt</span>;&<span class="keyword">lt</span>;endl;</div><div class="line"> <span class="keyword">if</span>(lru_cache.Get(<span class="number">2</span>) == &quot;&quot;)</div><div class="line"> lru_cache.Put(<span class="number">2</span>, &quot;two&quot;);</div><div class="line"> cout&<span class="keyword">lt</span>;&<span class="keyword">lt</span>;lru_cache.Get(<span class="number">2</span>);</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>看到此处，我就想研究下redis和memcache的cache是怎么设计的了。等下次研究完后，再做下笔记吧。</p>
+<p>参考链接：</p>
+<p><a href="http://www.cs.uml.edu/~jlu1/doc/codes/lruCache.html" target="_blank" rel="external">http://www.cs.uml.edu/~jlu1/doc/codes/lruCache.html</a></p>
+<p><a href="http://hawstein.com/posts/lru-cache-impl.html" target="_blank" rel="external">http://hawstein.com/posts/lru-cache-impl.html</a></p>
+<p><a href="http://blog.csdn.net/hexinuaa/article/details/6630384" target="_blank" rel="external">http://blog.csdn.net/hexinuaa/article/details/6630384</a></p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-09-25T03:21:25.000Z"><a href="/2013/09/25/the-this-pointer/">9月 25 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/09/25/the-this-pointer/">[翻译]The This Pointer</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>原帖：<a href="http://www.bogotobogo.com/cplusplus/this_pointer.php" target="_blank" rel="external">http://www.bogotobogo.com/cplusplus/this_pointer.php</a></p>
+<p>1.this指针</p>
+<p>当我开始学习C++的时候，其中一个最大的问题就是，”this”到底是什么玩意？<br>原来这是一种特殊的指针。</p>
+<p>为了确保对成员函数的类成员的指针访问，this指针存储类实例的地址。这对于刚入行的程序员来说是个不太显眼的秘密——this指针是问题的关键：<br>C++怎么知道它被调用哪个对象？<br>答案是C++有一个隐藏的被称作this的指针！</p>
+<p>假如我们创建一个名为objA的类A对象，类A有一个非静态的成员函数 void f()。如果你调用objA.f()，f()里面的关键字this存储objA的地址。类A的成员函数的this指针是 A* const 类型。</p>
+<p>所以，当我们调用f()，事实上我们调用的是 f(&amp;objA)。由于C++转换函数调用，它也需要转换函数本身：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">void</span> <span class="tag">A</span><span class="pseudo">::f()</span> <span class="rules">{ <span class="rule">}</span></span></div></pre></td></tr></table></figure>
+
+<p>内部转化为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> A::f(A* <span class="keyword">const</span> <span class="keyword">this</span>);</div></pre></td></tr></table></figure>
+
+<p>C++在函数里增加了一个新的参数。增加的参数是一个指针，指向类对象，此对象类函数正在处理。它总是被命名为this。类指针在每个类成员函数里面是一个隐藏的指针并指向类对象。作为一个结果，一个对象的this指针不是对象它自己的一部分；它并没有反映在对象上的 sizeof 语句的结果上。相反，当为对象调用非静态成员函数时，对象的地址是由编译器作为隐藏参数传递给该函数。</p>
+<p>我们拿一个具体的例子看下。这是一个简单的计算器代码，用在比较亚马逊的订单和结帐上。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">class</span> Cart {</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">int</span> total;</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> Cart(<span class="keyword">int</span> item){</div><div class="line"> <span class="keyword">this</span>-&gt;total = item;</div><div class="line"> }</div><div class="line"> Cart&amp; addItem(<span class="keyword">int</span> itemPrice) {</div><div class="line"> total += itemPrice;</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line"> }</div><div class="line"> <span class="keyword">void</span> checkOut() {</div><div class="line"> std::<span class="built_in">cout</span> &lt;&lt; <span class="string">"total: "</span> &lt;&lt; total &lt;&lt; <span class="string">" $\n"</span>;</div><div class="line"> }</div><div class="line">};</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> Cart myCart(<span class="number">0</span>);</div><div class="line"> myCart.addItem(<span class="number">100</span>);</div><div class="line"> myCart.checkOut();</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>按照这个代码，当我们调用</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">myCart.addItem(100);</div></pre></td></tr></table></figure>
+
+<p>事实上我们调用一个被编译器转化的函数：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">myCart.addItem(&amp;myCart, 100);</div></pre></td></tr></table></figure>
+
+<p>这个函数从：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Cart&amp; addItem(<span class="keyword">int</span> itemPrice) {</div><div class="line"> total += itemPrice;</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>转换为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Cart&amp; addItem(myCart* <span class="keyword">const</span> <span class="keyword">this</span>, <span class="keyword">int</span> itemPrice) {</div><div class="line"> <span class="keyword">this</span>-&gt;total += itemPrice;</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>注意到下面的表达式是相等的：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">this</span>-&gt;total;</div><div class="line">(*<span class="keyword">this</span>).total;</div></pre></td></tr></table></figure>
+
+<p>返回类型是一个引用，这意味着返回的对象是调用对象本身 （myCart），而不是通过返回机制传递一份副本。<br>在main()里，我们没有利用返回的对象。如果我们稍微更改下main函数(addItem)，我们可以增加尽可能多的条目。下面是代码。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;;</span></div><div class="line"></div><div class="line"><span class="keyword">class</span> Cart {</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">int</span> total;</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> Cart(<span class="keyword">int</span> item){</div><div class="line"> <span class="keyword">this</span>-&gt;total = item;</div><div class="line"> }</div><div class="line"> Cart&amp; addItem(<span class="keyword">int</span> itemPrice) {</div><div class="line"> total += itemPrice;</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line"> }</div><div class="line"> <span class="keyword">void</span> checkOut() {</div><div class="line"> std::<span class="built_in">cout</span> &lt;&lt; <span class="string">"total: "</span> &lt;&lt; total &lt;&lt; <span class="string">" $\n"</span>;</div><div class="line"></div><div class="line"> }</div><div class="line">};</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> Cart myCart(<span class="number">0</span>);</div><div class="line"> myCart.addItem(<span class="number">100</span>).addItem(<span class="number">200</span>).addItem(<span class="number">300</span>);</div><div class="line"> myCart.checkOut();</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>输出是简单的：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">total</span>: <span class="string">600 $</span></div></pre></td></tr></table></figure>
+
+<p>2.指针常量</p>
+<p>值得注意的是，this是个常量指针：我们能够改变它指向的对象的值，但是我们不能再使它指向其他值！所以，我们不能声明此指针或者赋值给它。</p>
+<p>如果成员函数被const修饰，类A的成员函数的this指针类型为const A * const。</p>
+<p>const指针只能被用作const成员函数。类的数据成员在此函数中将会是常量。函数仍然能改变此值，但是需要一个const_cast：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> A::f() <span class="keyword">const</span>{</div><div class="line">member = <span class="number">2010</span>: <span class="comment">// illegal</span></div><div class="line"><span class="keyword">const_cast</span> &lt;<span class="keyword">int</span>&amp;&gt; (member) =<span class="number">2010</span>; <span class="comment">// a bad practice but legal</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>更好的技术方法是使用mutable。如果成员函数被volatile修饰，类A的成员函数的this指针的类型是 volatile A* const。例如，下面的语句，编译器是不会允许的：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>{</div><div class="line"> <span class="keyword">int</span> n;</div><div class="line"> <span class="keyword">int</span> f() <span class="keyword">const</span> { <span class="keyword">return</span> n++; }</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>在f()函数体里，编译器不会允许n++这种声明。在f()函数里，this指针是一个 A* const 类型。函数f()尝试更改this指针指向的部分对象。</p>
+<p>this指针也可以防止自我引用：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (&amp;<span class="constant">Object</span> != this) {</div><div class="line"><span class="regexp">//</span> <span class="keyword">do</span> <span class="keyword">not</span> execute <span class="keyword">in</span> cases of <span class="keyword">self</span>-reference</div></pre></td></tr></table></figure>
+
+<p>3.参数匹配</p>
+<p>根据是否它们声明为静态，类成员函数是以不同的方式处理。因为非静态函数具有一个隐式参数提供this指针，非静态函数比静态函数要多一个参数。此外，它们的声明是相同的。</p>
+<p>这些非静态成员函数需要隐藏的this指针匹配对象类型，包括函数调用，操作符重载，它们需要的第一个参数匹配将运算符应用于该对象。</p>
+<p>不同于其他重载函数中的参数，当试图匹配this指针参数时候，没有临时对象被引入，也没有尝试被转换。</p>
+<p>操作符-&gt;被用作访问成员函数，this指针参数是一个 class-name <em> const 类型。如果成员被const或volatile修饰，类型就会分别为 const class-name</em> const 类型和 volatile class-name * const 类型。</p>
+<p>操作符 . 也是相同的工作方式，只是一个隐式的&amp;（取地址）操作符用作对象名称的前缀。</p>
+<p>如果我按照下面这种写代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">obj.<span class="property">name</span></div></pre></td></tr></table></figure>
+
+<p>编译器内部把它这样对待：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="params">(&obj)</span>-&gt;</span>name</div></pre></td></tr></table></figure>
+
+<p>4.在构造函数中使用this</p>
+<p>我们能够在构造函数内部使用this指针吗？</p>
+<p>答案是肯定的。我们问这个问题是因为当我们在构造函数里使用this指针，对象还没有完全形成。然而，如果我们足够小心，我们可以使用在构造函数里使用this(在正文里)，甚至初始化列表里。</p>
+<p>以下是总是成立的：构造函数的正文部分（或者从构造函数里调用的函数）可以可靠地访问基类中声明的数据成员和构造函数的类中声明的数据成员。那个因为在构造函数(正文)部分开始执行时，那些数据成员保证能够完全构造。</p>
+<p>当我们必须处理虚方式时候，事情就变的复杂了。</p>
+<p>5.删除this指针</p>
+<p>删除this指针？</p>
+<p>没有创造性的思维会做它。只有具有破坏性的头脑会尝试。</p>
+<p>无论如何，我认为它不会工作。即使在析构函数里。它可能像删除空指针一样。我试图用我的 Visual Studio，总是崩溃。</p>
+<p>根本的问题是既然我们仅仅能够删除堆上（自由存储区）里的对象，我们怎么能辨别出这些堆内存的位置。</p>
+<p>Scott Meyers的”More Effective C++ 35 New Ways …”书里总结到，毕竟，我们不知道地址什么时候在堆上，所以也不知道什么时候不在堆上。因为我们不能，所以不能，好吧。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-09-22T12:37:50.000Z"><a href="/2013/09/22/the-virtual-table/">9月 22 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/09/22/the-virtual-table/">[翻译]The Virtual Table</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>看到一篇文章里面很详细的介绍了虚函数表，所以，自己翻译了下，正好当作记忆和整理思路用了。翻译的好差，自己凑合看吧~<br>原帖：<a href="http://www.learncpp.com/cpp-tutorial/125-the-virtual-table/" target="_blank" rel="external">http://www.learncpp.com/cpp-tutorial/125-the-virtual-table/</a></p>
+<p>为了实现虚函数，C++使用一种特殊的后期绑定机制，这种机制被称作虚表。虚表是一种查找函数表，它被用来解决一种被称作动态/后期绑定方式的函数。虚表有时候被命名为其他名字，比如”vtable”,”virtual function table”（虚函数表）,”virtual method table”,或者”dispatch table”。</p>
+<p>虚函数表事实上是非常简单的，尽管用文字来表述稍微有点困难。首先，每个使用虚函数的类（或者从使用虚函数的类派生）被给予它自己的虚函数表。这个表只是一个简单的静态数组，编译器在编译期创建此数组。虚函数表包含虚函数的入口，它可以被类的对象调用。表中的每个入口是简单的函数指针，指向类的可访问派生函数。</p>
+<p>第二，编译器也在基类中增加了一个被称作 <em>__vptr 的隐藏指针。当一个类的实例被创建吼，</em><strong>vptr就被（自动）创建，所以它指向类的虚函数表。不像<em>this指针（这是一个被编译器用来指向自己的函数指针），</em></strong>vptr是一个真实的指针。所以，它使每个类对象被分配一个指针的大小。这已意味着*__vptr被派生类继承，这是非常重要的。</p>
+<p>现在，你可能会疑惑如何把这些东西组合在一起，所以，我们看一个简单的例子：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">class Base</div><div class="line">{</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">function1</span>() {};</div><div class="line"> <span class="keyword">virtual</span> <span class="keyword">void</span> function2() {};</div><div class="line">};</div><div class="line"></div><div class="line">class D1: <span class="keyword">public</span> Base</div><div class="line">{</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">function1</span>() {};</div><div class="line">};</div><div class="line"></div><div class="line">class D2: <span class="keyword">public</span> Base</div><div class="line">{</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">function2</span>() {};</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>因为此处有三个类，编译器会创建三个虚函数表：一个是基类的，另一个是D1，最后一个是D2的。</p>
+<p>编译器也在使用了虚函数的基类中增加了一个隐藏的指针。尽管编译器自动完成这个步骤，我们在下一个示例中增加这些代码，仅仅就是为了显示哪里增加的：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">class Base</div><div class="line">{</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> FunctionPointer *__vptr;</div><div class="line"> <span class="keyword">virtual</span> <span class="keyword">void</span> function1() {};</div><div class="line"> <span class="keyword">virtual</span> <span class="keyword">void</span> function2() {};</div><div class="line">};</div><div class="line"></div><div class="line">class D1: <span class="keyword">public</span> Base</div><div class="line">{</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">function1</span>() {};</div><div class="line">};</div><div class="line"></div><div class="line">class D2: <span class="keyword">public</span> Base</div><div class="line">{</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">function2</span>() {};</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>当一个类对象被创建后，<em>__vptr被设置为指向类的虚函数表。例如，当一个基类的对象被创建后，</em><strong>vptr被设置指向基类的虚函数表。当D1或D2类型的对象被构造后，*</strong>vptr分别被设置为指向D1或D2的虚函数表。</p>
+<p>现在，我们讨论下这些虚函数表是怎么被填写的。因为此处仅仅有两个虚函数，每个虚函数表有两个进口（一个是function1()，另一个是function2()）。记住，当这些虚函数表被填写的时候，每个入口被填充了派生的函数。</p>
+<p>基类的虚函数表比较简单。基类的对象仅仅可以访问基类的成员变量。基类没有访问D1和D2函数的权限。因此，function1的入口指向Base::function1()，function2的入口指向Base::function2()。</p>
+<p>D1的虚函数表稍微复杂些。D1的对象能够访问D1和基类的成员。然而，D1覆盖了function1()，使D1::function1()成为派生函数，而不是base::function1()。所以，function1的入口指向D1::function1()。D1没有覆盖function2()，所以function2的入口将会指向Base::function2()。</p>
+<p>D2的虚函数表与D1相似，除了function1的入口指向Base::function1()，function2的入口指向D2::function2()。</p>
+<p>如下图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/09/VTable.jpg" alt=""></p>
+<p>尽管这个图看起来有点糟糕，但是它确实相当简单：每个类的*__vptr指向它的虚函数表。指向那个类的函数对象的底层派生版本的虚函数入口被允许调用。</p>
+<p>考虑下，当我们创建D1类型的对象时候，什么将会发生：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="title">int</span> main()</div><div class="line">{</div><div class="line"> <span class="title">D1</span> cClass;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>因为cClass是一个D1的对象，cClass使它的*__vptr指向D1的虚函数表。</p>
+<p>现在，我们设置一个基指针指向D1：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">int main()</span></div><div class="line">{</div><div class="line"> D1 cClass;</div><div class="line"> Base *pClass =<span class="string"> &amp;cClass;</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>注意到，因为pClass是一个基指针，它仅仅指向cClass的基类部分。然而，我们也注意到*<strong>vptr是在此类的基类部分，所以pClass有访问此指针的权利。最后，注意到pClass-&gt;</strong>vptr指向D1的虚函数表。所以，尽管pClass是基类型，它仍然有访问D1虚函数表的权利。</p>
+<p>当我尝试访问pClass-&gt;function1()，什么会发生？</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> D1 cClass;</div><div class="line"> Base *pClass = &amp;cClass;</div><div class="line"> pClass-&<span class="keyword">gt</span>;function1();</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>首先，程序辨认出function1()是一个虚函数。第二，使用pClass-&gt;__vptr得到D1的虚函数表。第三，它在D1的虚函数表里寻找该调用function1()哪个版本。这个已经被D1::function1()设置。因此，pClass-&gt;function1()解析为D1::function1()！</p>
+<p>现在你可能会说，如果基类指向一个基类对象，而不是一个D1对象。它会仍然调用D1::function1()吗？这个答案为 NO！</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> Base cClass;</div><div class="line"> Base *pClass = &amp;cClass;</div><div class="line"> pClass-&<span class="keyword">gt</span>;function1();</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>在这个例子中，当cClass被创建后，<strong>vptr指向一个基类的虚函数表，而不是D1的虚函数表。所以，pClass-&gt;</strong>vptr 将会指向基类的虚函数表。基类的function1()的虚函数表入口指向Base::function1()。因此，pClass-function1()解析为Base::function1()。</p>
+<p>使用这些表，编译器和程序能够保证函数调用解析为恰当的虚函数，甚至你仅仅使用一个指向基类的指针或引用。</p>
+<p>调用一个虚函数比调用非虚函数要慢的多，有两种原因：首先，我们必须使用*__vptr来得到前挡的虚函数表。第二，我们必须索引虚函数表来找到并调用正确的函数。只有这样我们才能调用函数。结果，与正常非直接函数的两步调用，或者直接函数的一步调用，我们必须三步操作才找到函数并调用。然而，对于现在的计算机来说，这增加的时间通常是微不足道的。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-09-14T14:20:46.000Z"><a href="/2013/09/14/io-synchronous-and-blocking/">9月 14 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/09/14/io-synchronous-and-blocking/">IO模型以及同步、异步与阻塞、非阻塞的区别</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1.同步、异步：你总是做完一件再去做另一件，不管是否需要时间等待，这就是同步；异步呢则反之，你可以同时做几件事，并非一定需要一件事做完再做另一件事。同步简单理解成一问一答同步进行，异步可以简单理解为不必等一个问题有答了再去问另一个问题，尽管问，有答了再通知你。<br>在实际的程序中：<br>同步消息通知机制：就好比简单的read/write 操作,它们需要等待这两个操作成功才能返回。<br>同步, 是由处理消息者自己去等待消息是否被触发。<br>异步消息通知机制：类似于select/poll 之类的多路复用IO 操作，当所关注的消息被触发时,由消息触发机制通知触发对消息的处理。<br>异步, 由触发机制来通知处理消息者。</p>
+<p>2.阻塞、非阻塞：阻塞调用是指调用结果返回之前，当前线程会被挂起。函数只有在得到结果之后才会返回。非阻塞：指在不能立刻得到结果之前，该函数不会阻塞当前线程，而会立刻返回。可以简单理解为需要做一件事能不能立即得到返回应答，如果不能立即获得返回，需要等待，那就阻塞了，否则就可以理解为非阻塞。<br>有人也许会把阻塞调用和同步调用等同起来，实际上他是不同的。<br>对于同步调用来说，很多时候当前线程还是激活的，只是从逻辑上当前函数没有返回而已。<br>socket接收数据函数recv是一个阻塞调用的例子。<br>当socket工作在阻塞模式的时候， 如果没有数据的情况下调用该函数，则当前线程就会被挂起，直到有数据为止</p>
+<p>3.Unix网络编程中说到：<br>将IO模型分为五类：阻塞IO，非阻塞IO，IO复用，信号驱动，异步IO。<br>基本 Linux I/O 模型的简单矩阵：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/09/figure1.gif" alt=""><br>阻塞I/O模型：<br>最流行的I/O模型是阻塞I/O模型，缺省情形下，所有文件操作都是阻塞的。我们以套接口为例来讲解此模型。在进程空间中调用recvfrom，其系统调用直到数据报到达且被拷贝到应用进程的缓冲区中或者发生错误才返回，期间一直在等待。我们就说进程在从调用recvfrom开始到它返回的整段时间内是被阻塞的。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201391401.jpg" alt=""><br>非阻塞I/O模型：<br>进程把一个套接口设置成非阻塞是在通知内核：当所请求的I/O操作不能满足要求时候，不把本进程投入睡眠，而是返回一个错误。也就是说当数据没有到达时并不等待，而是以一个错误返回。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309142.jpg" alt=""><br>I/O复用模型：<br>linux提供select/poll，进程通过将一个或多个fd传递给select或poll系统调用，阻塞在select；这样select/poll可以帮我们侦测许多fd是否就绪。但是select/poll是顺序扫描fd是否就绪，而且支持的fd数量有限。linux还提供了一个epoll系统调用，epoll是基于事件驱动方式，而不是顺序扫描,当有fd就绪时，立即回调函数rollback；<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309143.jpg" alt=""><br>信号驱动异步I/O模型：<br>首先开启套接口信号驱动I/O功能, 并通过系统调用sigaction安装一个信号处理函数（此系统调用立即返回，进程继续工作，它是非阻塞的）。当数据报准备好被读时，就为该进程生成一个SIGIO信号。随即可以在信号处理程序中调用recvfrom来读数据报，井通知主循环数据已准备好被处理中。也可以通知主循环，让它来读数据报。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309144.jpg" alt=""><br>异步I/O模型（AIO模型）：<br>告知内核启动某个操作，并让内核在整个操作完成后(包括将数据从内核拷贝到用户自己的缓冲区)通知我们。这种模型与信号驱动模型的主要区别是：信号驱动I/O：由内核通知我们何时可以启动一个I/O操作；异步I/O模型：由内核通知我们I/O操作何时完成。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309145.jpg" alt=""><br>具体的可以查看参考链接(2)。</p>
+<p>4.通常，我们写服务器处理模型的程序时，有以下几种模型：<br>（1）每收到一个请求，创建一个新的进程，来处理该请求；<br>（2）每收到一个请求，创建一个新的线程，来处理该请求；<br>（3）每收到一个请求，放入一个事件列表，让主进程通过非阻塞I/O方式来处理请求<br>上面的几种方式，各有千秋，<br>第（1）中方法，由于创建新的进程的开销比较大，所以，会导致服务器性能比较差,但实现比较简单。<br>第（2）种方式，由于要涉及到线程的同步，有可能会面临死锁等问题。<br>第（3）种方式，在写应用程序代码时，逻辑比前面两种都复杂。<br>综合考虑各方面因素，一般普遍认为第（3）种方式是大多数网络服务器采用的方式，这也是接下来要讨论的重点—事件驱动处理库。</p>
+<p>select 模型：<br>①最大并发数限制，因为一个进程所打开的 FD（文件描述符）是有限制的，由 FD_SETSIZE 设置，默认值是1024/2048，因此Select模型的最大并发数就被相应限制了。<br>②效率问题，select 每次调用都会线性扫描全部的FD集合这样效率就会呈现线性下降，把 FD_SETSIZE 改大的后果就是，大家都慢慢来，什么？都超时了。<br>③内核/用户空间内存拷贝问题，如何让内核把FD消息通知给用户空间呢？在这个问题上select 采取了内存拷贝方法。</p>
+<p>总结为：1.连接数受限 2.查找配对速度慢 3.数据由内核拷贝到用户态</p>
+<p>poll 模型：<br>基本上效率和select是相同的，select缺点的②和③它都没有改掉。</p>
+<p>epoll模型：<br>①epoll没有最大并发连接的限制，上限是最大可以打开文件的数目，这个数字一般远大于 2048, 一般来说这个数目和系统内存关系很大 ，具体数目可以 cat /proc/sys/fs/file-max 察看。</p>
+<p>②效率提升，epoll最大的优点就在于它只管你“活跃”的连接,而跟连接总数无关，因此在实际的网络环境中,epoll 的效率就会远远高于select和poll。</p>
+<p>③内存拷贝,epoll在这点上使用了“共享内存”,这个内存拷贝也省略了。</p>
+<p>参考链接：<br>(1)《怎样理解阻塞非阻塞与同步异步的区别》<a href="http://www.zhihu.com/question/19732473" target="_blank" rel="external">http://www.zhihu.com/question/19732473</a><br>(2)《Unix Network Programming Vol1 1002003, 3Ed》 <a href="http://english.tebyan.net/newindex.aspx?pid=31159&amp;BookID=23760&amp;PageIndex=92&amp;Language=3" target="_blank" rel="external">http://english.tebyan.net/newindex.aspx?pid=31159&amp;BookID=23760&amp;PageIndex=92&amp;Language=3</a><br>(3)<a href="http://blog.chinaunix.net/uid-26000296-id-3754118.html" target="_blank" rel="external">http://blog.chinaunix.net/uid-26000296-id-3754118.html</a><br>(4)<a href="http://blog.csdn.net/colzer/article/details/8169075" target="_blank" rel="external">http://blog.csdn.net/colzer/article/details/8169075</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-09-07T11:51:53.000Z"><a href="/2013/09/07/offer/">9月 7 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/09/07/offer/">看了点《剑指offer》</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>早就听说，《剑指offer》这本书特别赞，对于马上要找工作的同学（技术岗）帮助特别大，今天随便翻了几十页，这本书确实值得读一读，比如一些简单的程序，这本书会提示你别忘记考虑边界条件，特殊情况，比如判断指针为空，字符串长度为0情况以及错误处理方面，还多次提到别忘记写test case，还有一些问题答案虽然很简单，但是其解释特别详细，原理也说的很明白。当然参加过ACM的同学这本书可能就意义不是太大了。这里简单记录下几道入门题目：</p>
+<p>1.C++里定义一个空的类型，里面没有任何成员变量和成员函数。对该类型求sizeof，得到的结果是多少？</p>
+<p>答案：1</p>
+<p>这个时候面试官肯定如果问你为什么不是0，我想不少同学就可能答不出来具体的原因了，当然这本书很好的讲解了这些基础原理。</p>
+<p>原因：空类型的实例中不包含任何信息，本来求sizeof应该是0，但是当我们声明该类型的实例的时候，它必须在内存中占有一定的空间，否则无法使用这些实例。至于占用多少内存，由编译器决定。Visual Studio中每个空类型的实例占用1字节的空间。</p>
+<p>问：如果在该类型中添加一个构造函数和析构函数，再对该类型求sizeof，得到的结果又是多少？</p>
+<p>答：和前面一样，还是1。调用构造函数和析构函数只需要知道函数的地址即可，而这些函数的地址只与类型相关，而与类型的实例无关，编译器也不会因为这两个函数而在实例内添加任何额外的信息。</p>
+<p>问：那如果把析构函数标记为虚函数呢？ 你看看，这题都是逐渐深入的。所以这是我推荐这本书的主要原因。</p>
+<p>答：C++编译器一旦发现一个类型中有虚函数，就会为该类型生成虚函数表，并在该类型的每一个实例中添加一个虚函数表的指针。在32位的机器上，一个指针占4字节的空间，因此求sizeof得到4；如果是64位的机器，一个指针占8字节的空间，因此求sizeof则得到8。</p>
+<p>2.分析以下程序的编译运行结果，3个选项：A.编译错误；B.编译成功，运行时程序崩溃；C.编译运行正常，输出10</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">class</span> A</div><div class="line">{</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">int</span> value;</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> A(<span class="keyword">int</span> n) {value = n;}</div><div class="line"> A(A other) {value = other.value;}</div><div class="line"> <span class="keyword">void</span> Print() {std::<span class="built_in">cout</span> &lt;&lt; value &lt;&lt; std::endl;}</div><div class="line">};</div><div class="line"></div><div class="line"><span class="keyword">int</span> _tmain(<span class="keyword">int</span> argc,_TCHAR* argv[])</div><div class="line">{</div><div class="line"> A a = <span class="number">10</span>;</div><div class="line"> A b = a;</div><div class="line"> b.Print();</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>在上述代码中，复制构造函数A(A other)传入的参数是A的一个实例。由于是传值参数，我们把形参复制到实参会调用复制构造函数。因此如果允许复制构造函数传值，就会在复制构造函数内调用复制构造函数，就会形成永无休止的递归调用从而导致栈溢出。因此C++的标准不允许复制构造函数传值参数，在VS和GCC中，都将编译出错。要解决这个问题，我们可以把构造函数修改为A(const A&amp; other)，也就是把传值参数改成常量引用。</p>
+<p>3.如下为类型CMyString的声明，请为该类型添加赋值运算符函数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">class CMyString</div><div class="line">{</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="title">CMyString</span>(<span class="keyword">char</span>* pData = NULL);</div><div class="line"> CMyString(<span class="keyword">const</span> CMyString&amp; str);</div><div class="line"> ~CMyString(<span class="keyword">void</span>);</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">char</span>* m_pData;</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>此题其实不是太难，但是此题书中的解题思路和考虑的问题让我叹服，这里把书中的观点表述下：<br>(1)是否把返回值的类型声明为该类型的引用，并在函数结束前返回实例自身的引用(即<em>this)。只有返回一个引用，才可以允许连续赋值。否则如果函数的返回值是void，应用该赋值运算符将不能做连续赋值。假设有3个CMyString的对象:str1、str2和str3，在程序中语句str1=str2=str3将不能通过编译。<br>(2)是否把传入的参数的类型声明为常量引用。如果传入的参数不是引用而是实例，那么从形参到实参会调用一次复制构造函数。把参数声明为引用可以避免这样的无谓消耗，能提高代码的效率。同时，我们在赋值运算符函数内不会改变传入的实例的状态，因此应该为传入的引用参数加上const关键字。<br>(3)是否释放实例自身已有的内存。如果我们忘记在分配内存之前释放自身已有的空间，程序将出现内存泄漏。<br>(4)是否判断传入的参数和当前的实例(</em>this)是不是同一个实例。如果是同一个，则不进行赋值操作，直接返回。如果事先不判断就进行赋值，那么在释放实例自身的内存的时候就会导致严重的问题：当*this和传入的参数是同一个实例时，那么一旦释放了自身的内存，传入的参数的内存也同时被释放了，因此再也找不到需要赋值的内容了。<br>经典的解法：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">CMyString&amp; CMyString::<span class="keyword">operator</span> =(<span class="keyword">const</span> CMyString &amp;str)</div><div class="line">{</div><div class="line"> <span class="keyword">if</span>(<span class="keyword">this</span> == &amp;str)</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line"></div><div class="line"><span class="keyword">delete</span> []m_pData;</div><div class="line"> m_pData = NULL;</div><div class="line"> m_pData = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="built_in">strlen</span>(str.m_pData) + <span class="number">1</span>];</div><div class="line"> <span class="built_in">strcpy</span>(m_pData,str.m_pData);</div><div class="line"></div><div class="line"><span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>考虑异常安全性的解法：<br>在前面的函数中，我们在分配内存之前先用delete释放了实例m_pData的内存。如果此时内存不足导致new char 抛出异常，m_pData将是一个空指针，这样非常容易导致程序崩溃。也就是说一旦在赋值运算符函数内部抛出一个异常，CMyString的实例不再保持有效的状态，这就违背了异常安全性(Exception Safety)原则。<br>要想在赋值运算符函数中实现异常安全性，我们有两种方法。一个简单的方式是我们先用new分配新内容再用delete释放已有的内存。这样只在分配内容成功之后再释放原来的内容，也就是当分配内存失败时我们能确保CMyString的实例不会被修改。我们还有一个更好的办法是先创建一个临时实例，再交换临时实例和原来的实例。下面是这种思路的参考代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">CMyString&amp; CMyString::operator =(<span class="keyword">const</span> CMyString &amp;<span class="keyword">str</span>)</div><div class="line">{</div><div class="line"> <span class="keyword">if</span>(this != &amp;<span class="keyword">str</span>)</div><div class="line"> {</div><div class="line"> CMyString strTemp(<span class="keyword">str</span>);</div><div class="line"> <span class="keyword">char</span>* pTemp = strTemp.m_pData;</div><div class="line"> strTemp.m_pData = m_pData;</div><div class="line"> m_pData = pTemp;</div><div class="line"> }</div><div class="line"> <span class="keyword">return</span> *this;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>在这个函数中，我们先创建一个临时实例strTemp，接着把strTemp.m_pData和实例自身的m_pData做交换。由于strTemp是一个局部变量，但程序运行到if的外面时也就出了该变量的作用域，就会自动调用strTemp的析构函数，把strTemp.m_pData所指向的内存释放掉。由于strTemp.m_pData指向的内存就是实例之前m_pData的内存，这就相当于自动调用析构函数释放实例的内存。<br>在新的代码中，我们在CMyString的构造函数里用new分配内存。如果由于内存不足抛出诸如bad_alloc等异常，我们还没有修改原来实例的状态，因此实例的状态还是有效的，这也就保证了异常安全性。</p>
+<p>参考资料：<br>《剑指offer》</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-08-25T14:58:28.000Z"><a href="/2013/08/25/linux-memory-and-manage/">8月 25 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/08/25/linux-memory-and-manage/">linux内存空间分配和内存管理</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>前段时间把《程序员的自我修养—链接、装载与库》这本书看完了，期间有些地方不是太明白，当时网络搜索了下，今天把当时看到的东西摘抄下，基本文中大部分内容都是拷贝下面提到的参考链接里的东西，自己在组织下，以备以后需要时查看。</p>
+<p>地址分为三类，逻辑地址，线性地址和物理地址。</p>
+<p>在《深入理解linux内核》中其把地址分为三类：逻辑地址（汇编语言中操作数地址或指令的地址，对于80x86的CPU，逻辑地址是段+段内偏移地址）、线性地址（也叫虚拟地址）和物理地址。但在Stott Maxwell的《Linux Core Kernel Commentrary》中确是这样分的：逻辑地址（也叫虚拟地址）、线性地址和物理地址。按照386CPU总设计师John Crowford的解释，虚拟地址是保护模式下段和段内偏移量组成的地址，而逻辑地址就是代码段内偏移量，或称进程的逻辑地址。其实对于linux来说，这三种说法都没错，由于linux下并不主张将程序分段，而是主张分页，所以即使是在80x86的体系结构下，段的基地址也是0。因此逻辑地址、线性地址、虚拟地址在linux中其实是相同的。所以对于linux下的ELF可执行文件来说，代码段的起始地址0x08048000既是逻辑地址，也是线性地址也是虚拟地址。</p>
+<p>1.X86的物理地址空间布局</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/08/201382501.jpg" alt=""></p>
+<p>以x86_32，4G RAM为例：</p>
+<p>物理地址空间的顶部以下一段空间，被PCI设备的I/O内存映射占据，它们的大小和布局由PCI(Peripheral Component Interconnect,一种连接电子计算机主板和外部设备的总线标准)规范所决定。640K~1M这段地址空间被BIOS和VGA(Video Graphics Array,视频传输标准)适配器所占据。</p>
+<p>由于这两段地址空间的存在，导致相应的RAM空间不能被CPU所寻址(当CPU访问该段地址时，北桥会自动将目的物理地址“路由”到相应的I/O设备上，不会发送给RAM)，从而形成RAM空洞。</p>
+<p>Linux内核是以物理页面(也称为PAGE FRAME)为单位管理物理内存的(X86机器中一个页面的大小默认为4KB)，为了方便的记录每个物理页面的信息，Linux定义了page结构体，位于include/linux/mm_types.h<br>Linux系统在初始化时，会根据实际的物理内存的大小，为每个物理页面创建一个page对象，所有的page对象构成一个mem_map数组。进一步，针对不同的用途，Linux内核将所有的物理页面划分到3类内存管理区中，如图，分别为ZONE_DMA，ZONE_NORMAL，ZONE_HIGHMEM。</p>
+<p>ZONE_DMA的范围是0~16M，该区域的物理页面专门供I/O设备的DMA(Direct Memory Access，直接内存存取)使用。之所以需要单独管理DMA的物理页面，是因为DMA使用物理地址访问内存，不经过MMU，并且需要连续的缓冲区，所以为了能够提供物理上连续的缓冲区，必须从物理地址空间专门划分一段区域用于DMA。</p>
+<p>ZONE_NORMAL的范围是16M~896M，该区域的物理页面是内核能够直接使用的。</p>
+<p>ZONE_HIGHMEM的范围是896M~结束，该区域即为高端内存，内核不能直接使用。</p>
+<p>2.linux虚拟地址内核空间分布</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/08/20138250121.jpg" alt=""></p>
+<p>在kernel image下面有16M的内核空间用于DMA操作。位于内核空间高端的128M地址主要由3部分组成，分别为vmalloc area，persistent kernel mapping(持久化内核映射区)，tempoary kernel mapping(临时内核映射区)。</p>
+<p>由于ZONE<em>NORMAL和内核线性空间存在直接映射关系，所以内核会将频繁使用的数据如kernel代码、GDT、IDT、PGD、mem_map数组等放在ZONE_NORMAL里。而将用户数据、页表(PT)等不常用数据放在ZONE</em> HIGHMEM里，只在要访问这些数据时才建立映射关系(kmap())。比如，当内核要访问I/O设备存储空间时，就使用ioremap()将位于物理地址高端的mmio区内存映射到内核空间的vmalloc area中，在使用完之后便断开映射关系。</p>
+<p>3.linux虚拟地址用户空间分布</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/08/2013825013.jpg" alt=""></p>
+<p>用户进程的代码区一般从虚拟地址空间的0x08048000开始，这是为了便于检查空指针。代码区之上便是数据区，未初始化数据区，堆区，栈区，以及参数、全局环境变量。</p>
+<p>4.linux虚拟地址与物理地址映射的关系 [内核访问物理地址]</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/08/2013825014.jpg" alt=""></p>
+<p>Linux将4G的线性地址空间分为2部分，0~3G为user space，3G~4G为kernel space。</p>
+<p>由于开启了分页机制，内核想要访问物理地址空间的话，必须先建立映射关系，然后通过虚拟地址来访问。为了能够访问所有的物理地址空间，就要将全部物理地址空间映射到1G的内核线性空间中，这显然不可能。于是，内核将0~896M的物理地址空间一对一映射到自己的线性地址空间中，这样它便可以随时访问ZONE_DMA和ZONE_NORMAL里的物理页面；此时内核剩下的128M线性地址空间不足以完全映射所有的ZONE_HIGHMEM，Linux采取了动态映射的方法，即按需的将ZONE_HIGHMEM里的物理页面映射到kernel space的最后128M线性地址空间里，使用完之后释放映射关系，以供其它物理页面映射。虽然这样存在效率的问题，但是内核毕竟可以正常的访问所有的物理地址空间了。</p>
+<p>5.linux内存管理</p>
+<p>Linux采用了分页的内存管理机制。由于x86体系的分页机制是基于分段机制的，因此，为了使用分页机制，分段机制是无法避免的。为了降低复杂性，Linux内核将所有段的基址都设为0，段限长设为4G，只是在段类型和段访问权限上有所区分，并且Linux内核和所有进程共享1个GDT(全局描述符表)，不使用LDT(局部描述符表即系统中所有的段描述符都保存在同一个GDT中)，这是为了应付CPU的分段机制所能做的最少工作。</p>
+<p>Linux内存管理机制可以分为3个层次，从下而上依次为物理内存的管理、页表的管理、虚拟内存的管理。</p>
+<p>当开启分段分页机制时，典型的x86寻址过程为：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/08/2013825015.png" alt=""></p>
+<p>内存寻址的工作是由Linux内核和MMU共同完成的，其中Linux内核负责cr3，gdtr等寄存器的设置，页表的维护，页面的管理，MMU则进行具体的映射工作。</p>
+<p>物理内存主要包括：物理页面分配和物理页面回收，当空闲物理页面不足时，就需要从inactive_clean_list队列中选择某些物理页面插入空闲队列中，如果仍然不足，就需要把某些物理页面里的内容写回到磁盘交换文件里，腾出物理页面。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/08/2013825016.jpg" alt=""></p>
+<p>页表管理：</p>
+<p>为了保持兼容性，Linux最多支持4级页表，而在x86上，实际只用了其中的2级页表，即PGD（页全局目录表）和PT(页表)，中间的PUD和PMD所占的位长都是0，因此对于x86的MMU是不可见的。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/08/2013825017.jpg" alt=""></p>
+<p>6.linux中可执行程序与虚拟地址空间的映射关系</p>
+<p>虚拟内存区域(VMA，Virtual Memory Area)是Linux中进程虚拟地址空间中的一个段，在Windows里面叫虚拟段。当操作系统创建线程后，会在进程相应的数据结构中设置一个.text段的VMA，它在虚拟空间中的地址为0x08048000~0x08049000，它对应ELF文件中的偏移为0的.text。由于linux下的ELF可执行文件会有很多个段(section)，所以如果把每个section都映射为一个VMA，那么没有一个页大小的段(section)也会被映射为一个页的VMA，这样就浪费了物理空间，由于不足会用0补充。故ELF有一个装载的段（segment)，与前面的段(section)不同，前面的段(section)主要用于链接，而段(segment)主要用于装载进内存。可以通过段（section）的权限来合并，如以代码段为代表的权限为可读可执行权限；以数据段和BSS段为代表的权限为可读可写的段；以只读数据为代表的权限为只读权限。</p>
+<p>ELF与Linux进程虚拟空间映射关系如下：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/08/20130825018.jpg" alt=""></p>
+<p>7.可执行文件的装载过程</p>
+<p>一、进程的建立</p>
+<p>(1)创建一个独立的虚拟地址空间</p>
+<p>(2)读取可执行文件头，并且建立虚拟空间与可执行文件的映射关系</p>
+<p>(3)将CPU的指令寄存器设置成可执行文件的入口地址，启动运行。</p>
+<p>二、页错误</p>
+<p>上面的步骤执行完以后，其实可执行文件的真正指令和数据都没有载入到内存中。操作系统只是通过可执行文件头部的信息建立起可执行文件和进程虚存之间的映射关系而已。假设在上面的例子中，程序的入口地址为0X08048000，即刚好是.text段的起始地址。当CPU开始打算执行这个地址的指令时，发现0X08048000~0X08049000是个空白页，于是它就认为这是个页错误（Page Fault）。CPU将控制器交给操作系统，操作系统有专门的页错误处理例程来处理这种情况。这时候我们装载过程的第二步建立的数据结构起到了很关键的作用，操作系统将查询这个数据结构，然后找到空页面所在的VMA，计算出相应的页面在可执行文件中的偏移，然后在物理内存中分配一个物理页面，将进程中该虚拟页与分配的物理页之间建立映射关系，然后把控制权再还给进程，进程从刚才页错误的位置重新开始执行。随着进程的执行，页错误也会不断地产生，操作系统也会为进程分配相应的物理页面来满足进程执行的需求。当然有可能进程所需要的内存会超过可用的内存数量，特别是在有多个进程同时执行的时候，这时候操作系统就需要精心组织和分配物理内存，甚至有时候将分配给进程的物理内存暂时收回等等，这就涉及了操作系统的虚拟存储管理。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/08/20130825019.jpg" alt=""></p>
+<p>参考资料：</p>
+<p><a href="http://www.cnblogs.com/chengxuyuancc/archive/2013/04/17/3026920.html" target="_blank" rel="external">http://www.cnblogs.com/chengxuyuancc/archive/2013/04/17/3026920.html</a>（绝大部分拷贝此链接资料）</p>
+<p><a href="http://www.cnblogs.com/zszmhd/archive/2012/08/29/2661461.html" target="_blank" rel="external">http://www.cnblogs.com/zszmhd/archive/2012/08/29/2661461.html</a></p>
+<p>《程序员的自我修养—装载、链接与库》</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+<nav id="pagination">
+  
+    <a href="/page/4/" class="alignleft prev">上一页</a>
+  
+  
+    <a href="/page/6/" class="alignright next">下一页</a>
+  
+  <div class="clearfix"></div>
+</nav></div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

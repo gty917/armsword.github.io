@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>[翻译]The This Pointer | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="[翻译]The This Pointer"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-09-25T03:21:25.000Z"><a href="/2013/09/25/the-this-pointer/">9月 25 2013</a></time>
+      
+      
+  
+    <h1 class="title">[翻译]The This Pointer</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>原帖：<a href="http://www.bogotobogo.com/cplusplus/this_pointer.php" target="_blank" rel="external">http://www.bogotobogo.com/cplusplus/this_pointer.php</a></p>
+<p>1.this指针</p>
+<p>当我开始学习C++的时候，其中一个最大的问题就是，”this”到底是什么玩意？<br>原来这是一种特殊的指针。</p>
+<p>为了确保对成员函数的类成员的指针访问，this指针存储类实例的地址。这对于刚入行的程序员来说是个不太显眼的秘密——this指针是问题的关键：<br>C++怎么知道它被调用哪个对象？<br>答案是C++有一个隐藏的被称作this的指针！</p>
+<p>假如我们创建一个名为objA的类A对象，类A有一个非静态的成员函数 void f()。如果你调用objA.f()，f()里面的关键字this存储objA的地址。类A的成员函数的this指针是 A* const 类型。</p>
+<p>所以，当我们调用f()，事实上我们调用的是 f(&amp;objA)。由于C++转换函数调用，它也需要转换函数本身：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">void</span> <span class="tag">A</span><span class="pseudo">::f()</span> <span class="rules">{ <span class="rule">}</span></span></div></pre></td></tr></table></figure>
+
+<p>内部转化为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> A::f(A* <span class="keyword">const</span> <span class="keyword">this</span>);</div></pre></td></tr></table></figure>
+
+<p>C++在函数里增加了一个新的参数。增加的参数是一个指针，指向类对象，此对象类函数正在处理。它总是被命名为this。类指针在每个类成员函数里面是一个隐藏的指针并指向类对象。作为一个结果，一个对象的this指针不是对象它自己的一部分；它并没有反映在对象上的 sizeof 语句的结果上。相反，当为对象调用非静态成员函数时，对象的地址是由编译器作为隐藏参数传递给该函数。</p>
+<p>我们拿一个具体的例子看下。这是一个简单的计算器代码，用在比较亚马逊的订单和结帐上。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">class</span> Cart {</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">int</span> total;</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> Cart(<span class="keyword">int</span> item){</div><div class="line"> <span class="keyword">this</span>-&gt;total = item;</div><div class="line"> }</div><div class="line"> Cart&amp; addItem(<span class="keyword">int</span> itemPrice) {</div><div class="line"> total += itemPrice;</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line"> }</div><div class="line"> <span class="keyword">void</span> checkOut() {</div><div class="line"> std::<span class="built_in">cout</span> &lt;&lt; <span class="string">"total: "</span> &lt;&lt; total &lt;&lt; <span class="string">" $\n"</span>;</div><div class="line"> }</div><div class="line">};</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> Cart myCart(<span class="number">0</span>);</div><div class="line"> myCart.addItem(<span class="number">100</span>);</div><div class="line"> myCart.checkOut();</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>按照这个代码，当我们调用</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">myCart.addItem(100);</div></pre></td></tr></table></figure>
+
+<p>事实上我们调用一个被编译器转化的函数：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">myCart.addItem(&amp;myCart, 100);</div></pre></td></tr></table></figure>
+
+<p>这个函数从：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Cart&amp; addItem(<span class="keyword">int</span> itemPrice) {</div><div class="line"> total += itemPrice;</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>转换为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Cart&amp; addItem(myCart* <span class="keyword">const</span> <span class="keyword">this</span>, <span class="keyword">int</span> itemPrice) {</div><div class="line"> <span class="keyword">this</span>-&gt;total += itemPrice;</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>注意到下面的表达式是相等的：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">this</span>-&gt;total;</div><div class="line">(*<span class="keyword">this</span>).total;</div></pre></td></tr></table></figure>
+
+<p>返回类型是一个引用，这意味着返回的对象是调用对象本身 （myCart），而不是通过返回机制传递一份副本。<br>在main()里，我们没有利用返回的对象。如果我们稍微更改下main函数(addItem)，我们可以增加尽可能多的条目。下面是代码。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;iostream&gt;;</span></div><div class="line"></div><div class="line"><span class="keyword">class</span> Cart {</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">int</span> total;</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> Cart(<span class="keyword">int</span> item){</div><div class="line"> <span class="keyword">this</span>-&gt;total = item;</div><div class="line"> }</div><div class="line"> Cart&amp; addItem(<span class="keyword">int</span> itemPrice) {</div><div class="line"> total += itemPrice;</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line"> }</div><div class="line"> <span class="keyword">void</span> checkOut() {</div><div class="line"> std::<span class="built_in">cout</span> &lt;&lt; <span class="string">"total: "</span> &lt;&lt; total &lt;&lt; <span class="string">" $\n"</span>;</div><div class="line"></div><div class="line"> }</div><div class="line">};</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> Cart myCart(<span class="number">0</span>);</div><div class="line"> myCart.addItem(<span class="number">100</span>).addItem(<span class="number">200</span>).addItem(<span class="number">300</span>);</div><div class="line"> myCart.checkOut();</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>输出是简单的：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">total</span>: <span class="string">600 $</span></div></pre></td></tr></table></figure>
+
+<p>2.指针常量</p>
+<p>值得注意的是，this是个常量指针：我们能够改变它指向的对象的值，但是我们不能再使它指向其他值！所以，我们不能声明此指针或者赋值给它。</p>
+<p>如果成员函数被const修饰，类A的成员函数的this指针类型为const A * const。</p>
+<p>const指针只能被用作const成员函数。类的数据成员在此函数中将会是常量。函数仍然能改变此值，但是需要一个const_cast：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> A::f() <span class="keyword">const</span>{</div><div class="line">member = <span class="number">2010</span>: <span class="comment">// illegal</span></div><div class="line"><span class="keyword">const_cast</span> &lt;<span class="keyword">int</span>&amp;&gt; (member) =<span class="number">2010</span>; <span class="comment">// a bad practice but legal</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>更好的技术方法是使用mutable。如果成员函数被volatile修饰，类A的成员函数的this指针的类型是 volatile A* const。例如，下面的语句，编译器是不会允许的：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>{</div><div class="line"> <span class="keyword">int</span> n;</div><div class="line"> <span class="keyword">int</span> f() <span class="keyword">const</span> { <span class="keyword">return</span> n++; }</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>在f()函数体里，编译器不会允许n++这种声明。在f()函数里，this指针是一个 A* const 类型。函数f()尝试更改this指针指向的部分对象。</p>
+<p>this指针也可以防止自我引用：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (&amp;<span class="constant">Object</span> != this) {</div><div class="line"><span class="regexp">//</span> <span class="keyword">do</span> <span class="keyword">not</span> execute <span class="keyword">in</span> cases of <span class="keyword">self</span>-reference</div></pre></td></tr></table></figure>
+
+<p>3.参数匹配</p>
+<p>根据是否它们声明为静态，类成员函数是以不同的方式处理。因为非静态函数具有一个隐式参数提供this指针，非静态函数比静态函数要多一个参数。此外，它们的声明是相同的。</p>
+<p>这些非静态成员函数需要隐藏的this指针匹配对象类型，包括函数调用，操作符重载，它们需要的第一个参数匹配将运算符应用于该对象。</p>
+<p>不同于其他重载函数中的参数，当试图匹配this指针参数时候，没有临时对象被引入，也没有尝试被转换。</p>
+<p>操作符-&gt;被用作访问成员函数，this指针参数是一个 class-name <em> const 类型。如果成员被const或volatile修饰，类型就会分别为 const class-name</em> const 类型和 volatile class-name * const 类型。</p>
+<p>操作符 . 也是相同的工作方式，只是一个隐式的&amp;（取地址）操作符用作对象名称的前缀。</p>
+<p>如果我按照下面这种写代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">obj.<span class="property">name</span></div></pre></td></tr></table></figure>
+
+<p>编译器内部把它这样对待：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="params">(&obj)</span>-&gt;</span>name</div></pre></td></tr></table></figure>
+
+<p>4.在构造函数中使用this</p>
+<p>我们能够在构造函数内部使用this指针吗？</p>
+<p>答案是肯定的。我们问这个问题是因为当我们在构造函数里使用this指针，对象还没有完全形成。然而，如果我们足够小心，我们可以使用在构造函数里使用this(在正文里)，甚至初始化列表里。</p>
+<p>以下是总是成立的：构造函数的正文部分（或者从构造函数里调用的函数）可以可靠地访问基类中声明的数据成员和构造函数的类中声明的数据成员。那个因为在构造函数(正文)部分开始执行时，那些数据成员保证能够完全构造。</p>
+<p>当我们必须处理虚方式时候，事情就变的复杂了。</p>
+<p>5.删除this指针</p>
+<p>删除this指针？</p>
+<p>没有创造性的思维会做它。只有具有破坏性的头脑会尝试。</p>
+<p>无论如何，我认为它不会工作。即使在析构函数里。它可能像删除空指针一样。我试图用我的 Visual Studio，总是崩溃。</p>
+<p>根本的问题是既然我们仅仅能够删除堆上（自由存储区）里的对象，我们怎么能辨别出这些堆内存的位置。</p>
+<p>Scott Meyers的”More Effective C++ 35 New Ways …”书里总结到，毕竟，我们不知道地址什么时候在堆上，所以也不知道什么时候不在堆上。因为我们不能，所以不能，好吧。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/C-C/">C/C++</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="[翻译]The This Pointer" data-url="http://armsword.com/2013/09/25/the-this-pointer/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

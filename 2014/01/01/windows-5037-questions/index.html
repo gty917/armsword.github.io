@@ -1,0 +1,238 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>找出大量TIME_WAIT及进程监听大量其他端口的罪魁祸首程序 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="找出大量TIME_WAIT及进程监听大量其他端口的罪魁祸首程序"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-01-01T10:58:42.000Z"><a href="/2014/01/01/windows-5037-questions/">1月 1 2014</a></time>
+      
+      
+  
+    <h1 class="title">找出大量TIME_WAIT及进程监听大量其他端口的罪魁祸首程序</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>刚才在windows下想查看某端口问题，于是命令netstat -an 查看了下，好家伙，竟然屏幕上显示不下端口连接监听情况，于是 netstat -an &gt;1.txt重定向看了下，发现是5037端口监听其他端口太多了。难道中毒了？于是自己查看了下，原来是腾讯手机连接助手搞的鬼。这里写点分析思路吧。</p>
+<p>1.先查看都有哪些程序占用或监听5037端口，命令 netstat -ano | findstr  “5037”</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/01/20140101182952.jpg" alt=""></p>
+<p>2.根据pid值，查看指定程序的进程，命令为：tasklist | findstr “4476”<br><code>C:\Users\Administrator&amp;gt;tasklist | findstr &quot;4476&quot;</code><br><code>tadb.exe 4476 Console 1 4,936 K</code><br>3.tadb.exe是啥玩意？全盘搜索下：</p>
+<p>首先进入C盘根目录，然后运行命令，dir tadb.exe /s/a（此为全盘检索tadb.exe文件），我们查看下结果:</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/01/20140101182953.jpg" alt=""></p>
+<p>一共找到了五个程序，仔细查看，我们发现该程序原来是腾讯的手机链接助手。这个如果你不爽的话，那杀掉此进程就是了。</p>
+<p>4.强制杀掉进程及其子进程，命令：taskkill /f /t /im tadb.exe<br><code>C:\&gt;taskkill /f /t /im tadb.exe</code><br>成功: 已终止 PID 4476 (属于 PID 8032 子进程)的进程。<br>5.如果你想让删除此程序，我没测试，方法是安全模式，进入刚才找到的五个文件夹下，删掉这个文件，然后分别建个同名的文件，一般就可以。</p>
+<p>当然你也可以这样，命令行下输入”gpedit.msc”，进入组策略编辑器，然后选择“用户配置-管理模板-系统”，双击右侧的“不要运行指定的windows应用程序”，在打开的对话框里，选择“已启用”，点击“不允许的应用程序的列表”后面的“显示”，在弹出的“显示内容”的对话框里把想要禁止的程序输入即可。我们把刚才找到的五个目录下的tadb.exe都输入进去，注意别忘了在目录后添加\tadb.exe。如图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/01/20140101190522.jpg" alt=""></p>
+<p>PS：现在移动端各大厂商斗争挺激烈的，各家程序也各种无底线啊，归根到底受害的还是用户。</p>
+<p>PSS：发现第五种方法搞不定手机助手，现在这些互联网软件做的比病毒还霸道，真烦心。</p>
+<p>最后，祝大家元旦快乐！</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/计算机网络/">计算机网络</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="找出大量TIME_WAIT及进程监听大量其他端口的罪魁祸首程序" data-url="http://armsword.com/2014/01/01/windows-5037-questions/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

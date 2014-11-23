@@ -1,0 +1,256 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Redis里dict源码剖析 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Redis里dict源码剖析"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-04-20T15:07:52.000Z"><a href="/2014/04/20/redis-dict-analyze/">4月 20 2014</a></time>
+      
+      
+  
+    <h1 class="title">Redis里dict源码剖析</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>Redis全名叫做Remote Dictionary Server，从全称就可以看出dict是Redis里重要的数据结构，看了下dict.c里的源码，简单分析下。</p>
+<p>dict.c主要是实现了哈希功能，实际上实现哈希（字典）常见的方法有几种：</p>
+<p>&lt;1&gt;比如我们数据结构课上学的数组和链表法，但是这种方法适用于元素个数不多的情况下</p>
+<p>&lt;2&gt;使用复杂的平衡树(B-等等)，性能比较不错，比如MySQL里的索引就使用了这种方法</p>
+<p>&lt;3&gt;哈希表，兼顾了高效和简单性，Redis选择了这种方法。</p>
+<p>我们就解读下dict.c里源码里的数据结构吧，我们知道hash表的性能由hash表的大小和解决冲突的方法决定。Redis里使用了两个哈希表(ht[0])和哈希表(ht[1])，hash[0]是字典主要使用的hash表，而hash[1]主要对0号哈希表进行rehash时才使用。读者可能不明白这个地方啥意思？其实就是，程序每次申请几个字节（默认为4字节），当key/value数量达到规定时，程序申请的4字节就翻一倍（这里使用了慢迁移），那什么时候rehash呢？我们知道size == used（根据下面的dictht结构体）时，达到最理想状态，所以当used/size &gt; 1时，就进行rehash。我们先看看dict.h里定义的几个结构体吧：</p>
+<p>dict:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dict</span> </span>{</div><div class="line">    dictType *type;  <span class="comment">//哈希表节点指针数组(俗称桶，bucket)hash表的类型，可以是string，list等</span></div><div class="line">    <span class="keyword">void</span> *privdata; <span class="comment">//该hash表的一些private数据</span></div><div class="line">    dictht ht[<span class="number">2</span>];</div><div class="line">    int rehashidx; <span class="comment">/* rehashidx记录的实际上是rehash进行到的索引，比如如果rehash进行到第10个元素，那么rehashidx的值就为9。如果没有在进行rehash，rehashidex的值就为-1.*/</span></div><div class="line">    int iterators; <span class="comment">/* number of iterators currently running */</span></div><div class="line">} dict;</div></pre></td></tr></table></figure>
+
+<p>dictType:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//每种hash table的类型，里面既有成员函数，又有成员变量，模拟的C++类，每个函数带有的privdata均为预留参数</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictType {</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> (*hashFunction)(<span class="keyword">const</span> <span class="keyword">void</span> *key); <span class="comment">//要采用的hash函数</span></div><div class="line">    <span class="keyword">void</span> *(*keyDup)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *key); <span class="comment">//对key进行拷贝</span></div><div class="line">    <span class="keyword">void</span> *(*valDup)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *obj); <span class="comment">//对value进行拷贝</span></div><div class="line">    <span class="keyword">int</span> (*keyCompare)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *key1, <span class="keyword">const</span> <span class="keyword">void</span> *key2); <span class="comment">//key比较器</span></div><div class="line">    <span class="keyword">void</span> (*keyDestructor)(<span class="keyword">void</span> *privdata, <span class="keyword">void</span> *key); <span class="comment">//销毁key，一般为释放空间</span></div><div class="line">    <span class="keyword">void</span> (*valDestructor)(<span class="keyword">void</span> *privdata, <span class="keyword">void</span> *obj); <span class="comment">//销毁value，一般为释放空间</span></div><div class="line">} dictType;</div></pre></td></tr></table></figure>
+
+<p>dictht:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* This is our hash table structure. Every dictionary has two of this as we</span></div><div class="line"> * implement incremental rehashing, for the old to the new table. */</div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictht {</div><div class="line">    dictEntry **table; <span class="comment">//hash表中的数据，以key/value形式，通过单链表保存</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> size; <span class="comment">//桶个数</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> sizemask; <span class="comment">//size - 1，方便定位</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> used; <span class="comment">//实际保存的元素数</span></div><div class="line">} dictht;</div></pre></td></tr></table></figure>
+
+<p>dictEntry:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//hash表中每一项key/value，若key的映射值，以单链表的形式保存</span></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span> </span>{</div><div class="line">    <span class="keyword">void</span> *key;</div><div class="line">    union {</div><div class="line">        <span class="keyword">void</span> *val;</div><div class="line">        uint64_t u64;</div><div class="line">        int64_t s64;</div><div class="line">    } v;</div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span> *next;</span></div><div class="line">} dictEntry;</div></pre></td></tr></table></figure>
+
+<p>dict.h一共有这四种结构，每个结构体里的每个变量的用途，我都已经注释出来。</p>
+<p>根据程序分析出整个字典结构如图所示（此时的状态为dictadd，且未出现rehash和rehash也未在进行中）：<br><img src="http://armsword.com/wp-content/uploads/2014/04/2014042001.png" alt=""></p>
+<p>我们之后再说下程序的执行流程吧：</p>
+<p>首先是dict初始化，init_hash_dict —&gt; dictCreate —&gt; _dictInit —&gt; _dictRest</p>
+<p>上面流程代码都很简单，就是把dict结构体和dictht里面的数据都初始化。</p>
+<p>然后是添加键值到字典，这个地方比较难懂，也是重点，因为它包括的操作比较多，分为三种情况：</p>
+<p>&lt;1&gt;如果字典为未初始化（也即字典的0号哈希表的table属性为空），那么程序需要对0号哈希表进行初始化。</p>
+<p>&lt;2&gt;如果在插入时发生了键碰撞，处理碰撞，链表法</p>
+<p>&lt;3&gt;如果插入新元素使得字典满足了rehash条件，那么启动相应的rehash程序(used / size &gt; 1)。</p>
+<p>这里有个需要注意的地方，如果rehash正在进行中(ht[0]数据—&gt;ht[1])，那么选择ht[1]作为新键值对的添加目标，否则ht[0]作为新键值对的添加目标。</p>
+<p>本来想长篇大论呢，但是学校网速真的是太卡了，不写了，看看其他的吧。</p>
+<p>参考资料：</p>
+<p><a href="http://origin.redisbook.com/en/latest/" target="_blank" rel="external">《Redis设计与实现》</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/C-C/">C/C++</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="Redis里dict源码剖析" data-url="http://armsword.com/2014/04/20/redis-dict-analyze/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

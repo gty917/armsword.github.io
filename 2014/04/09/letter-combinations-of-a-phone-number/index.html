@@ -1,0 +1,234 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Letter Combinations of a Phone Number | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Letter Combinations of a Phone Number"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-04-09T08:54:14.000Z"><a href="/2014/04/09/letter-combinations-of-a-phone-number/">4月 9 2014</a></time>
+      
+      
+  
+    <h1 class="title">Letter Combinations of a Phone Number</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>由于这个月还没写博客，找道题应付下吧，主要原因是自己现在太忙了，得准备找工作啊，唉，弱的惨不忍睹。好吧，不抱怨了，进入正题，<a href="http://oj.leetcode.com/problems/letter-combinations-of-a-phone-number/" target="_blank" rel="external">LeetCode</a>上面的一道题，题目描述为：</p>
+<p>Given a digit string, return all possible letter combinations that the number could represent.</p>
+<p>A mapping of digit to letters (just like on the telephone buttons) is given below.</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/04/200px-Telephone-keypad2.svg_.png" alt=""></p>
+<p><pre><strong>Input:</strong>Digit string “23”<br><strong>Output:</strong> [“ad”, “ae”, “af”, “bd”, “be”, “bf”, “cd”, “ce”, “cf”].<br><strong><br>Note:</strong><br>Although the above answer is in lexicographical order, your answer could be in any order you want.</pre><br>其实就是组合问题，如下图所示：<br><img src="http://armsword.com/wp-content/uploads/2014/04/Combo.jpg" alt=""></p>
+<p>如图所示，遍历完 1，2，3，就把a,d (g,h,i)遍历完了，之后回溯到e，就是个DFS搞定。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include &lt;iostream&gt;;</span></div><div class="line"><span class="comment">#include &lt;vector&gt;;</span></div><div class="line"><span class="comment">#include &lt;string&gt;;</span></div><div class="line"></div><div class="line"><span class="keyword">using</span> namespace std;</div><div class="line">class <span class="type">Solution</span></div><div class="line">{</div><div class="line">public:</div><div class="line"> vector&lt;<span class="type">string</span>&gt; letterCombinations(<span class="type">string</span> digits)</div><div class="line"> {</div><div class="line"> <span class="type">int</span> len = digits.size();</div><div class="line"> <span class="literal">result</span>.clear();</div><div class="line"> num[<span class="number">2</span>] = &quot;abc&quot;;</div><div class="line"> num[<span class="number">3</span>] = &quot;def&quot;;</div><div class="line"> num[<span class="number">4</span>] = &quot;ghi&quot;;</div><div class="line"> num[<span class="number">5</span>] = &quot;jkl&quot;;</div><div class="line"> num[<span class="number">6</span>] = &quot;mno&quot;;</div><div class="line"> num[<span class="number">7</span>] = &quot;pqrs&quot;;</div><div class="line"> num[<span class="number">8</span>] = &quot;tuv&quot;;</div><div class="line"> num[<span class="number">9</span>] = &quot;wxyz&quot;;</div><div class="line"> solve(digits,<span class="number">0</span>,len);</div><div class="line"> <span class="keyword">return</span> <span class="literal">result</span>;</div><div class="line"> }</div><div class="line"></div><div class="line"> <span class="type">void</span> solve(<span class="type">string</span> &amp;digits,<span class="type">int</span> i,<span class="type">int</span> len)</div><div class="line"> {</div><div class="line"> <span class="keyword">if</span>(i == len)</div><div class="line"> {</div><div class="line"> str[len] = '&<span class="comment">#92;&#48;';</span></div><div class="line"> <span class="type">string</span> temp = str;</div><div class="line"> <span class="literal">result</span>.push_back(temp);</div><div class="line"> <span class="keyword">return</span>;</div><div class="line"> }</div><div class="line"> unsigned <span class="type">int</span> j;</div><div class="line"> <span class="type">int</span> index = digits[i] - '<span class="number">0</span>';</div><div class="line"> <span class="keyword">for</span>(j = <span class="number">0</span>; j &lt; num[index].size(); j++)</div><div class="line"> {</div><div class="line"> str[i] = num[index][j];</div><div class="line"> solve(digits,i+<span class="number">1</span>,len);</div><div class="line"> }</div><div class="line"> }</div><div class="line">private:</div><div class="line"> vector&lt;<span class="type">string</span>&gt; <span class="literal">result</span>;</div><div class="line"> <span class="type">string</span> num[<span class="number">10</span>];</div><div class="line"> <span class="type">char</span> str[<span class="number">1000</span>];</div><div class="line">};</div><div class="line"></div><div class="line"><span class="type">int</span> main()</div><div class="line">{</div><div class="line"> <span class="type">Solution</span> solution;</div><div class="line"> <span class="type">string</span> p;</div><div class="line"> p = &quot;<span class="number">23</span>&quot;;</div><div class="line"> vector&lt;<span class="type">string</span>&gt; p1;</div><div class="line"> p1 = solution.letterCombinations(p);</div><div class="line"> vector&lt;<span class="type">string</span>&gt;::<span class="keyword">iterator</span> iter;</div><div class="line"></div><div class="line"> <span class="keyword">for</span>(iter=p1.begin();iter != p1.<span class="keyword">end</span>();iter++)</div><div class="line"> {</div><div class="line"> cout&lt;&lt;*iter&lt;&lt;endl;</div><div class="line"> }</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>最近开始集中精力做OJ了，唯一的感觉就是自己好弱，算法准备的有点晚了，有点找不上工作的节奏。算法也不是一朝一夕就能提高的，自己好好努力吧，即使实习拿不到dream offer，到正式找工作（9月份）还有时间努力，集中精力弥补自己弱点就可以了。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/算法-数据结构/">算法/数据结构</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="Letter Combinations of a Phone Number" data-url="http://armsword.com/2014/04/09/letter-combinations-of-a-phone-number/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

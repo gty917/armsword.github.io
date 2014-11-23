@@ -1,0 +1,253 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>使用g++编译C/C++程序，链接时出现undefined reference to错误 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="使用g++编译C/C++程序，链接时出现undefined reference to错误"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-11-10T15:58:57.000Z"><a href="/2013/11/10/undefined-reference-to/">11月 10 2013</a></time>
+      
+      
+  
+    <h1 class="title">使用g++编译C/C++程序，链接时出现undefined reference to错误</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>题目说是g++编译C/C++程序，其实是我这个程序是C、C++混着用的，这是错误的根源，弄了几个小时才发现问题根源，记录下吧：</p>
+<p>通常链接时出现 undefined reference to 错误，一般是以下原因造成的：</p>
+<p>1.链接时缺失相关目标文件（.o）</p>
+<p>此时，注意缺少的目标文件或者相对应.c/cpp文件是否是跟在gcc语句后面</p>
+<p>2.链接时缺少相关的库文件（静态库或动态库）</p>
+<p>这个一般是动态库出问题，可以用ldconfig查看下，并且gcc链接语句里要有相应的.a或.so文件。</p>
+<p>3.库文件链接顺序出错</p>
+<p>这个其实看函数调用顺序吧，调用函数的顺序与库文件相同。</p>
+<p>4.在C++中链接C语言相关的库</p>
+<p>在C++中直接调用C语言库的函数，会导致出现undefined reference to错误，这是因为C++要对函数名重新命名（与C不一样），导致找不到C语言函数，所以需要在包含的头文件里包含extern “C” 。</p>
+<p>本来我以为第四种是我今天问题出现的主要原因，我在main函数里调用其他函数，出现了 undefined reference to 错误，详情如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">undefined reference to `looptopo(char*, <span class="symbol">std:</span><span class="symbol">:vector&lt</span>;<span class="symbol">std:</span><span class="symbol">:basic_string&lt</span>;char, <span class="symbol">std:</span><span class="symbol">:char_traits&lt</span>;char&gt;, <span class="symbol">std:</span><span class="symbol">:allocator&lt</span>;char&gt; &gt;, <span class="symbol">std:</span><span class="symbol">:allocator&lt</span>;<span class="symbol">std:</span><span class="symbol">:basic_string&lt</span>;char, <span class="symbol">std:</span><span class="symbol">:char_traits&lt</span>;char&gt;, <span class="symbol">std:</span><span class="symbol">:allocator&lt</span>;char&gt; &gt; &gt; &gt;&amp;, char const*)<span class="string">'</span></div></pre></td></tr></table></figure>
+
+<p>因为我调用了mysql以及net-snmp，这些是C函数库，链接时候可能会找不到对应的函数，但是，我更改后（添加了extern “C”）也没解决，更改方法如下：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/11/201311102340.png" alt=""></p>
+<p>但是，这样依然没解决问题，并且第四种如果出问题，也应该不会报我自己定义的函数未找到，后来仔细查找，终于找到了问题所在。主要原因是函数声明与定义不一致导致的：</p>
+<p>头文件里声明：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> looptopo(<span class="keyword">char</span> *topoip,<span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; &amp;vector_type,<span class="keyword">const</span> <span class="keyword">char</span> *mib_type);</div></pre></td></tr></table></figure>
+
+<p>函数定义：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> looptopo(<span class="keyword">char</span> *topoip,<span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; &amp;vector_type,<span class="keyword">char</span> *mib_type)</div><div class="line"></div><div class="line">{<span class="comment">//省略}</span></div></pre></td></tr></table></figure>
+
+<p>你会发现头文件里函数声明，第三个参数与定义不一样，一个为const，一个为no-const，将函数定义改为如下，问题解决：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> looptopo(<span class="keyword">char</span> *topoip,<span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; &amp;vector_type,<span class="keyword">const</span> <span class="keyword">char</span> *mib_type)</div></pre></td></tr></table></figure>
+
+<p>我想了想，这种情况产生的原因，因为第三个参数的实参是const类型，而声明也是const类型，所以函数编译时候是不会报错的，但是链接时候，因为C++ 是可以函数重载的，所以找不到对应的函数，导致报错。</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/C-C/">C/C++</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="使用g++编译C/C++程序，链接时出现undefined reference to错误" data-url="http://armsword.com/2013/11/10/undefined-reference-to/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

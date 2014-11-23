@@ -1,0 +1,265 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>常用的VIM配置及其插件安装 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="常用的VIM配置及其插件安装"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-19T12:22:29.000Z"><a href="/2013/06/19/install-vim-and-plugins/">6月 19 2013</a></time>
+      
+      
+  
+    <h1 class="title">常用的VIM配置及其插件安装</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>首先，我们先看下自己的VIM都安装了什么插件，命令：:scriptnames</p>
+<p>首先，我们先配置下vimrc文件，vim ~/.vimrc ，我们先设置让其显示行号和高亮代码，添加如下代码：</p>
+<p>set nu!  “显示行号<br>syntax enable   “语法高亮<br>syntax on</p>
+<p>1.TagList</p>
+<p>功能：有点像VC里面的工作区，里面列出了当前文件的所有的宏，全局变量，函数名等。CTRL+W 连续2下可以左右切换。</p>
+<p>下载taglist压缩包, 下载地址：<a href="http://www.vim.org/scripts/script.php?script_id=273" target="_blank" rel="external">http://www.vim.org/scripts/script.php?script_id=273</a>，然后把解压的两个文件taglist.vim 和 taglist.txt 分别放到$HOME/.vim/plugin 和 $HOME/.vim/doc 目录中。</p>
+<p>之后在～/.vimrc中添加如下几条命令：</p>
+<p>let Tlist_Auto_Open = 1<br>let Tlist_Ctags_Cmd = ‘/usr/bin/ctags’<br>let Tlist_Show_One_File = 1<br>let Tlist_Exit_OnlyWindow = 1</p>
+<p>此时，我们打开一个.c文件查看，发现左边多出一个workspace，当不想出现此工作区时，使用:Tlist可以关闭和打开。</p>
+<p>2.Ctags</p>
+<p>功能：ctags的作用是为系统头文件及自己的程序头文件建立索引，有了这个索引后，就可以使用其它VIM插件来实现相应的功能，比如我需要的功能就是代码提示，那就需要用omnicppcomplete插件，但该插件是依赖于ctags的。VIM默认已安装此插件。</p>
+<p>sudo apt-get install exuberant-ctags</p>
+<p>我们在源代码的最上层目录下使用此命令：</p>
+<p>ctags -R —c++-kinds=+p 或者ctags -R —c-types=+p+x</p>
+<p>再在VIM中运行此命令：</p>
+<p>:set tags=/home/linuxer/source/tags 该命令将tags文件加入到vim中，也可以加入到~/.vimrc中。</p>
+<p>使用方法：</p>
+<p>我们把光标移动到函数上，按下CTRL+]，VIM会自动切换到意义的函数处。返回时，我们输入CTRL+t。</p>
+<p>vim“找到 tag: 1/? 或更多” 其他定义的查看方法:</p>
+<p>:tselect 显示列表</p>
+<p>:tn和:tp 显示后一个tag和前一个tag</p>
+<p>或者g] 就可以了。</p>
+<p>3.WinManager</p>
+<p>功能：作用是一个文件管理器，能列出当前目标中的文件，可以通过这个浏览工程中的源文件。当光标停在某个文件或文件夹的时候，回车可以打开该文件或文件夹。</p>
+<p>在说这个插件之前，我们先说下netrw.vim插件，这个插件在安装VIM时候就已经安装到系统里了，我们打开VIM输入:e /home/linuxer/source 就可以显示出该文件夹里面的文件，我们的插件其实原理就是由这个插件实现的。</p>
+<p>使用方法：</p>
+<p><a href="http://www.vim.org/scripts/script.php?script_id=95" target="_blank" rel="external">http://www.vim.org/scripts/script.php?script_id=95</a> ，将对应的plugin和doc放入 ~/.vim 文件夹下对应的plugin和doc文件夹下。</p>
+<p>在~/.vimrc下添加以下两行：</p>
+<p>let g:winManagerWindowLayout=’FileExplorer|TagList’</p>
+<p>或者 let g:winManagerWindowLayout=’FileExplorer’   “这2个显示方式不一样，读者选择自己喜欢的吧，一个是左右两列，一个是上下2列</p>
+<p>nmap wm :WMToggle&lt;cr&gt;</p>
+<p>在正常情况下输入wm（无:号）可以开启和打开，注意：第一种会把Taglist也关闭，此时用:Tlist可以重新打开。本人倾向第二种，使用时候用wm开启就可已了。</p>
+<p>4.C/C++自动补全插件：clang complete</p>
+<p>这个插件需要clang编译器的支持，我们先安装下：</p>
+<p>sudo apt-get install clang</p>
+<p>之后下载clang complete：<a href="http://www.vim.org/scripts/script.php?script_id=3302" target="_blank" rel="external">http://www.vim.org/scripts/script.php?script_id=3302</a></p>
+<p>方法：vim clang_complete.vmb -c ‘so %’ -c ‘q’</p>
+<p>之后在~/.vimrc里添加 <code>set</code> <code>completeopt=longest</code></p>
+<p>配合CTRL+N函数、变量补全基本就差不多了。</p>
+<p>上传了一份目前我使用的Vimrc配置到github，主要是为了方便你我使用，点击下面链接进入，<a href="https://github.com/armsword/vim-depoly" target="_blank" rel="external">我的Vimrc设置</a>。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Linux/">Linux</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="常用的VIM配置及其插件安装" data-url="http://armsword.com/2013/06/19/install-vim-and-plugins/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

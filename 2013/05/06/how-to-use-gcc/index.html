@@ -1,0 +1,278 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>gcc使用入门 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="gcc使用入门"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-05-06T15:50:34.000Z"><a href="/2013/05/06/how-to-use-gcc/">5月 6 2013</a></time>
+      
+      
+  
+    <h1 class="title">gcc使用入门</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>随便写了点，主要写给我看的，原因可能读者不容易看懂-_-!</p>
+<p>1.gcc -Wall hello.c -o hello</p>
+<p>-Wall会出现警告信息</p>
+<p>2.gcc -Wall main.c hello.c -o newhello</p>
+<p>3.-V：展示详细信息<br>gcc -V -Wall hello.c -o hello</p>
+<p>4.-c 指定目标文件，编译一个源文件 —&gt; 目标文件，只编译不链接。<br>gcc -Wall -c main.c （不需要 -o）</p>
+<p>5.有了目标文件，产生可执行文件，gcc使用链接库ld<br>gcc main.o hello.o -o hello<br>注意链接顺序，被调用的在右边，现在的编译器不考虑顺序，gcc不需要考虑。</p>
+<p>6.链接比编译快很多，只改动编译过的文件，但是源文件太多时候，需要用Make，原理是比较源文件和目标文件的时间戳。</p>
+<p>7.静态库 *.a，库是多个目标文件联合起来，比如math库。<br>gcc -Wall main.c /usr/lib/libm.a -o Calc<br>或者<br>-l 链接库<br>gcc -Wall main.c -lm -o Calc</p>
+<p>编译选项 -lName 尝试在标准库目录下找到库文件libNAME.a</p>
+<p>8.系统缺省头文件和库目录</p>
+<p>/usr/local/include<br>/usr/include</p>
+<p>/usr/local/lib<br>/usr/lib</p>
+<p>当在其它目录下，需要指定目录 ‘-I’（头文件目录）和’-L’（库文件目录）<br>比如 -I/opt/include<br>注意绝对路径不需要，不利于移植，相对路径可以。<br>定义环境变量就不需要指定-I,-L了，比如在.bash_profile</p>
+<p>C_INCLUDE_PATH (for c header file)<br>CPLUS_INCLUDE_PATH (for C++ header)</p>
+<p>库：</p>
+<p>LIBRARY_PATH</p>
+<p>一般用 -I、-L方法，Makefile。</p>
+<p>9.创建库文件ar</p>
+<p>ar cr libNAME.a file1.o file2.o … filen.o</p>
+<p>ar也可以查看库文件有多少目标文件</p>
+<p>ar t libNAME.a ar t /usr/lib/libssl.a （查看包含的目标文件—-&gt;对应一个C文件）</p>
+<p>gcc -Wall main.c libhello.a -o hello （注意顺序）<br>gcc -Wall main.c -L. -lhello -o hello<br>gcc -Wall -Iinclude -c main.c （src文件下有对应的lib）</p>
+<p>10.不加选项，默认是gcc dialect ===&gt;GNU C，包含嵌套函数，动态数组</p>
+<p>-ansi 和 -pedantic 指定 ANSI 编译，如下：<br>gcc -Wall -ansi -pedantic hello.c</p>
+<p>-std指定C标准<br>-std=c89 or -std=iso9899:1990<br>-std=iso9899:199409<br>-std=c99 or -std=iso9899:1999</p>
+<p>gcc -Wall -ansi -D_GNU_SOURCE hello.c -o hello</p>
+<p>GNU_SOURCE：使用标准的ansi标准，但使用GNU的库(GNU_SOURCE)。</p>
+<p>-D宏定义，-DNUM = 1234 ，-DTEST相当于定义了该宏</p>
+<p>11.预处理器<br>gcc -E hello.c 只调预处理器，将预处理结果打印到屏幕上。<br>gcc -Wall -c -save-temps hello.c</p>
+<p>-save-temps:将临时结果输出到当前文件夹下，hello.i—&gt;hello.s—&gt;hello.o</p>
+<p>12.gcc -g 调试信息，为了让gdb使用。一般不产生coredump，为了产生coredump<br>ulimit -c unlimited<br>gdb hello.out core.xxx （调试）</p>
+<p>13.优化<br>CSE/FL/Loop unrolling (-funroll-loops)</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(<span class="built_in">i</span>=<span class="number">0</span>;<span class="built_in">i</span>&lt;<span class="number">8</span>;<span class="built_in">i</span>++)</div><div class="line"><span class="cell">{</span></div><div class="line"> y[i]=i;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>======&gt;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="xml"><span class="tag"><span class="attribute">for</span>(<span class="attribute">i</span>=<span class="value">0;i&lt;8;i+=4)</span></span></span></div><div class="line">{</div><div class="line"> <span class="attribute">y</span>[<span class="attribute">i</span>]=<span class="value">i;</span></div><div class="line"> <span class="attribute">y</span>[<span class="attribute">i</span>+<span class="attribute">1</span>]=<span class="value">i+1;</span></div><div class="line"> <span class="attribute">y</span>[<span class="attribute">i</span>+<span class="attribute">2</span>]=<span class="value">i+2;</span></div><div class="line"> <span class="attribute">y</span>[<span class="attribute">i</span>+<span class="attribute">3</span>]=<span class="value">i+3;</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(<span class="built_in">i</span>=<span class="number">0</span>;<span class="built_in">i</span>&lt;n;<span class="built_in">i</span>++)</div><div class="line"><span class="cell">{</span></div><div class="line"> y[i]=i;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>=======&gt;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(<span class="built_in">i</span>=<span class="number">0</span>;<span class="built_in">i</span>&lt;(n<span class="comment">%2);i++)</span></div><div class="line"><span class="cell">{</span></div><div class="line"> y[i]=i;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(;<span class="built_in">i</span>+<span class="number">1</span>&lt;n;<span class="built_in">i</span>+<span class="number">2</span>)</div><div class="line"><span class="cell">{</span></div><div class="line"> y[i]=i;</div><div class="line"> y[i+<span class="number">1</span>]=i+<span class="number">1</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>14.gcc编译C程序，g++编译C++，gcc是True C++编译器，不将C++—&gt;C—&gt;汇编，而将C++—&gt;汇编</p>
+<p>15.编译器是怎么工作的<br>Preprocessing —&gt; Compilation —&gt; Assembly —&gt;Linking</p>
+<p>Preprocessing：cpp hello.c — &gt; hello.i<br>Compilation： gcc -Wall -s hello.i — &gt; hello.s<br>Assembly: as hello.s -o hello.o<br>Linking: gcc hello.o -o hello</p>
+<p>16.辅助工具<br>file:判断文件一些特性<br>nm: 符号表<br>ldd：查找需要的动态链接库</p>
+<p>17.编译器相关工具<br>gprof:记录函数调用次数、花费时间等等<br>gcc -Wall -pg -hello.c -o hello<br>执行hello.out产生gmon.out, gprof hello.out 之后查看文件开始部分</p>
+<p>gcov:分析程序里每一行执行时间，发现程序里没被调用的代码<br>gcc -Wall -fprofile-arcs -ftest-coverage hello.c<br>会产生hello.gcno，执行hello.out会产生hello.gcda<br>gcov hello.c，之后其会产生hello.c.gcov，vi查看hello.c.gcov，”#####”表示没被执行的代码。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/C-C/">C/C++</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="gcc使用入门" data-url="http://armsword.com/2013/05/06/how-to-use-gcc/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>0</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
+      </li>
+    
+      <li>
+        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com/" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://blog.purplecow.me/" target="_blank" title="PurpleCow">PurpleCow</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 armsword
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>
