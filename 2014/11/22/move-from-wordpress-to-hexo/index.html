@@ -108,8 +108,14 @@
 
 <p>之后再简单修改下_POST文件各文章的md格式就可以了。</p>
 <p>详情，我就不做多做解析了，网上有很多详细的攻略，可以查看我的参考链接里那篇文章吧。</p>
+<p>然后同时部署到github和gitcafe上，方法如下：<br>编辑_config.yml文件，将deploy改为</p>
+<p><code>deploy:
+    type: git
+    repo:
+        github: git@github.com:armsword/armsword.github.io.git,master        
+        gitcafe: git@gitcafe.com:armsword/armsword.git,gitcafe-pages</code><br>同时删除目录下的 .deploy 文件，之后hexo deploy 即可。<br>当然之后还需要去DnsPod做下DNS解析。</p>
 <h2 id="参考链接：">参考链接：</h2>
-<p><a href="http://ibruce.info/2013/11/22/hexo-your-blog/" target="_blank" rel="external">hexo搭建博客教程</a><br><a href="http://dlutwuwei.github.io/2014/05/20/hexo%E9%80%9F%E5%BA%A6%E4%BC%98%E5%8C%96/" target="_blank" rel="external">hexo博客去掉google字体</a></p>
+<p><a href="http://ibruce.info/2013/11/22/hexo-your-blog/" target="_blank" rel="external">hexo搭建博客教程</a><br><a href="http://dlutwuwei.github.io/2014/05/20/hexo%E9%80%9F%E5%BA%A6%E4%BC%98%E5%8C%96/" target="_blank" rel="external">hexo博客去掉google字体</a><br><a href="https://gitcafe.com/GitCafe/Help/wiki/Pages-%E7%9B%B8%E5%85%B3%E5%B8%AE%E5%8A%A9" target="_blank" rel="external">gitcafe搭建过程</a><br><a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">deployment</a></p>
 
       
     </div>
