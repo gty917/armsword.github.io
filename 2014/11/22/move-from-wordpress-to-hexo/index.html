@@ -67,6 +67,7 @@
     <div class="entry">
       
         <p>租了两年多的服务器要过期了，不打算续费了，于是就研究了下将博客从WordPress迁移到静态博客上，后来选择了hexo静态博客，node.js编写，并且同时使用Github和Gitcafe托管博客。</p>
+<p>在迁移过程中，删除了部分难修改且目前无意义的博客，并且链接我也没改成与之前一样，就这样吧，反正我也不在乎流量，就当个记事本用。</p>
 <p>这里简单记录下将WordPress迁移到静态博客和将博客同时托管到Github和Gitcafe过程。</p>
 <ul>
 <li>Ubuntu下安装node.js</li>
@@ -109,11 +110,11 @@
 <p>之后再简单修改下_POST文件各文章的md格式就可以了。</p>
 <p>详情，我就不做多做解析了，网上有很多详细的攻略，可以查看我的参考链接里那篇文章吧。</p>
 <p>然后同时部署到github和gitcafe上，方法如下：<br>编辑_config.yml文件，将deploy改为</p>
-<p><code>deploy:
-    type: git
-    repo:
-        github: git@github.com:armsword/armsword.github.io.git,master        
-        gitcafe: git@gitcafe.com:armsword/armsword.git,gitcafe-pages</code><br>同时删除目录下的 .deploy 文件，之后hexo deploy 即可。<br>当然之后还需要去DnsPod做下DNS解析。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">deploy:</div><div class="line">    type: git</div><div class="line">    repo:</div><div class="line">        github: git@<span class="filename">github.com</span>:armsword/<span class="filename">armsword.github.io.git,master        </span></div><div class="line">        gitcafe: git@<span class="filename">gitcafe.com</span>:armsword/<span class="filename">armsword.git,gitcafe-pages</span></div></pre></td></tr></table></figure>
+
+<p>同时删除目录下的 .deploy 文件，之后hexo deploy 即可。<br>当然之后还需要去DnsPod做下DNS解析。</p>
+<p>最后一张博客流量图，纪念我那逝去的WordPress：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/11/traffic.png" alt=""></p>
 <h2 id="参考链接：">参考链接：</h2>
 <p><a href="http://ibruce.info/2013/11/22/hexo-your-blog/" target="_blank" rel="external">hexo搭建博客教程</a><br><a href="http://dlutwuwei.github.io/2014/05/20/hexo%E9%80%9F%E5%BA%A6%E4%BC%98%E5%8C%96/" target="_blank" rel="external">hexo博客去掉google字体</a><br><a href="https://gitcafe.com/GitCafe/Help/wiki/Pages-%E7%9B%B8%E5%85%B3%E5%B8%AE%E5%8A%A9" target="_blank" rel="external">gitcafe搭建过程</a><br><a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">deployment</a></p>
 
