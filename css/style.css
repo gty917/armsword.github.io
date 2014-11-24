@@ -1,4 +1,4 @@
-@import url("//fonts.googleapis.com/css?family=Lato:400,400italic");
+@import url("//fonts.useso.com/css?family=Lato:400,400italic");
 @font-face {
   font-family: 'FontAwesome';
   font-style: normal;
@@ -11,9 +11,10 @@
 }
 body {
   background: #eee;
-  color: #444;
-  font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
-  font-size: 14px;
+  color: #000;
+  font-family: Georgia, 'Times New Roman', Times, 'Songti SC', SimSun, "Microsoft YaHei", serif;
+  font-size: 16px;
+  font-weight: 500;
   text-shadow: 0 0 1px transparent;
 }
 @media screen and (max-width: 1260px) {
@@ -32,7 +33,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Lato", Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-family: Helvetica Neue, Helvetica, Arial, "Hiragino Sans GB", sans-serif;
 }
 h1 {
   font-size: 1.8em;
@@ -45,7 +46,7 @@ h3 {
 }
 a {
   text-decoration: none;
-  color: #258fb8;
+  color: #0085ff;
 }
 a:hover {
   text-decoration: underline;
@@ -109,7 +110,7 @@ a:hover {
   color: #999;
 }
 #header a:hover {
-  color: #258fb8;
+  color: #0085ff;
   text-decoration: none;
 }
 #header h1 {
@@ -124,7 +125,7 @@ a:hover {
   margin-top: 10px;
 }
 #header #main-nav {
-  font-family: "Lato", Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-family: Helvetica Neue, Helvetica, Arial, "Hiragino Sans GB", sans-serif;
   line-height: 2.5em;
 }
 #header #main-nav ul {
@@ -156,7 +157,7 @@ article.link .icon:before {
 }
 article.link .title a:after {
   content: '\f08e';
-  color: #999;
+  color: #777;
   font: 12px FontAwesome;
   padding-left: 10px;
   vertical-align: super;
@@ -241,7 +242,7 @@ article header .icon {
   position: absolute;
   top: 20px;
   left: 20px;
-  color: #258fb8;
+  color: #0085ff;
 }
 @media screen and (max-width: 600px) {
   article header .icon {
@@ -257,8 +258,8 @@ article header .icon:before {
   text-align: center;
 }
 article header time {
-  color: #999;
-  font: 0.9em "Lato", Helvetica Neue, Helvetica, Arial, sans-serif;
+  color: #777;
+  font: 0.9em Helvetica Neue, Helvetica, Arial, "Hiragino Sans GB", sans-serif;
   margin-bottom: 5px;
   display: block;
   line-height: 1;
@@ -267,10 +268,10 @@ article header .title {
   font-weight: normal;
 }
 article header .title a {
-  color: #444;
+  color: #000;
 }
 article header .title a:hover {
-  color: #258fb8;
+  color: #0085ff;
   text-decoration: none;
 }
 article .entry {
@@ -295,7 +296,7 @@ article .entry blockquote {
   border-top: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
   font-style: italic;
-  font-family: "Georgia", serif;
+  font-family: Georgia, "Times New Roman", Times, "Songti SC", "SimSun", serif;
   font-size: 1.2em;
   padding: 0 30px 15px;
   text-align: center;
@@ -384,7 +385,7 @@ article .entry iframe {
 article .entry .caption {
   display: block;
   margin-top: 5px;
-  color: #999;
+  color: #777;
   position: relative;
   font-size: 0.9em;
   padding-left: 25px;
@@ -427,17 +428,17 @@ article footer {
   margin-top: 15px;
   padding-top: 10px;
   border-top: 1px solid #ddd;
-  color: #999;
+  color: #777;
   font-size: 0.9em;
   line-height: 16px;
   position: relative;
   min-height: 16px;
 }
 article footer a {
-  color: #999;
+  color: #777;
 }
 article footer a:hover {
-  color: #258fb8;
+  color: #0085ff;
   text-decoration: none;
 }
 article footer a:before {
@@ -493,13 +494,13 @@ article footer .addthis iframe {
   display: block;
   padding: 5px 10px;
   background: #ddd;
-  color: #999;
-  font-family: "Lato", Helvetica Neue, Helvetica, Arial, sans-serif;
+  color: #777;
+  font-family: Helvetica Neue, Helvetica, Arial, "Hiragino Sans GB", sans-serif;
   text-shadow: 0 0 1px #fff;
   margin-bottom: 50px;
 }
 #pagination a:hover {
-  background: #258fb8;
+  background: #0085ff;
   color: #fff;
   text-decoration: none;
   text-shadow: none;
@@ -515,7 +516,7 @@ article footer .addthis iframe {
   font-family: FontAwesome;
 }
 .archive-title {
-  color: #999;
+  color: #777;
   font-weight: normal;
   margin-bottom: 30px;
   text-shadow: 0 0 1px #fff;
@@ -593,7 +594,7 @@ article footer .addthis iframe {
 }
 #sidebar .search input {
   background: #fff;
-  font-family: "Lato", Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-family: Helvetica Neue, Helvetica, Arial, "Hiragino Sans GB", sans-serif;
   font-style: italic;
   font-size: 1em;
   padding: 10px 15px;
@@ -602,14 +603,14 @@ article footer .addthis iframe {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  color: #999;
+  color: #777;
 }
 #sidebar .search input:focus {
-  color: #444;
+  color: #000;
 }
 #sidebar .tag small {
   margin-left: 15px;
-  color: #999;
+  color: #777;
 }
 #sidebar .tag small:before {
   content: '(';
@@ -628,7 +629,7 @@ article footer .addthis iframe {
 #sidebar .twitter small {
   display: block;
   margin-top: 10px;
-  color: #999;
+  color: #777;
   line-height: 1;
 }
 #sidebar .tagcloud .entry {
@@ -639,9 +640,9 @@ article footer .addthis iframe {
   display: inline-block;
 }
 #footer {
-  color: #999;
+  color: #777;
   margin-bottom: 50px;
-  font: 0.9em/1.6 "Lato", Helvetica Neue, Helvetica, Arial, sans-serif;
+  font: 0.9em/1.6 Helvetica Neue, Helvetica, Arial, "Hiragino Sans GB", sans-serif;
   text-shadow: 0 0 1px #fff;
 }
 .entry .gist {
@@ -672,17 +673,17 @@ article footer .addthis iframe {
 }
 .entry .gist .gist-file .gist-meta {
   background: none;
-  color: #999;
+  color: #777;
   margin-top: 5px;
   padding: 0;
   text-shadow: 0 0 1px #fff;
   font-size: 100%;
 }
 .entry .gist .gist-file .gist-meta a {
-  color: #258fb8;
+  color: #0085ff;
 }
 .entry .gist .gist-file .gist-meta a:visited {
-  color: #258fb8;
+  color: #0085ff;
 }
 figure.highlight {
   background: #eee;
@@ -698,7 +699,7 @@ figure.highlight {
   font-size: 0.9em;
 }
 figure.highlight figcaption {
-  color: #999;
+  color: #777;
   margin-bottom: 5px;
   text-shadow: 0 0 1px #fff;
 }
@@ -716,7 +717,7 @@ figure.highlight table {
   border-spacing: 0;
 }
 figure.highlight .gutter {
-  color: #999;
+  color: #777;
   padding-right: 15px;
   border-right: 1px solid #ddd;
   text-align: right;
