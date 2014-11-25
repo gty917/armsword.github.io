@@ -324,10 +324,24 @@
 <p>不过程序中使用了双管道，读写模型，如果你对此不理解，可以翻阅《Unix环境高级编程》。</p>
 <p>如果你对HTTP不慎了解，参考链接里的两篇文章，能帮助你更好的了解HTTP协议，其实HTTP1.1里面的难点，理解以下几句话就足够了：</p>
 <p>http协议规定头必然有2个连续的”\r\n”，就像Cookie后面就跟了2个\r\n，所以读取请求头的时候只要读到\r\n\r\n，那么前面就是头，后面就是实体。实体大小在上面有一个Content-Length标记。所以从\r\n\r\n后面读Content-Length大小后就结束了。所以服务端一般是1、判断状态码，http协议规定1xx 204 304肯定不包括实体，所以读到\r\n\r\n就不用再读；2、判断没有Content-Length；3、判断有没有chunked。有Content-Length直接读，而chunked的最后7个一定是\r\n0\r\n\r\n。</p>
-<p>chunked编码，这种编码一般是gzip压缩的<br>```<br>HTTP/1.1 200 OK<br>Cache-Control: private<br>Content-Type: text/html; charset=utf-8<br>Server: Microsoft-IIS/7.5<br>X-AspNetMvc-Version: 2.0<br>X-AspNet-Version: 4.0.30319<br>Set-Cookie: Set-Cookie: X-Powered-By: ASP.NET<br>ntCoent-Length: 166137<br>Content-Encoding: gzip<br>Transfer-Encoding: chunked </p>
-<p>&nbsp; </p>
-<p>2D23<br>………..}.s.G…….j….*u……y….%…;QO.M.[….3..,…<br>.!..O….H-.”v..&gt;………….=YY </p>
-<p>&nbsp;<br>在处理chunked时候，像上面chunked\r\n\r\n后面是实体，第一行2D23就是一chunk的大小所以在2D23\r\n后面开始读2D23个然后会紧跟着\r\n，然后后面就是下一chunk的大小，直到最后一chunk是0大小。实体结束，最后再来一个\r\n。也就是说chunked的最后7个一定是\r\n0\r\n\r\n，本来判断读到\r\n0\r\n\r\n就结束应该没问题，但是为了保险起见，还是一次一次的读大小值再读取指定的大小数据。</p>
+<p>chunked编码，这种编码一般是gzip压缩的</p>
+<pre><code><span class="status">HTTP/1.1 <span class="number">200</span> OK </span>
+<span class="attribute">Cache-Control</span>: <span class="string">private </span>
+<span class="attribute">Content-Type</span>: <span class="string">text/html; charset=utf-8 </span>
+<span class="attribute">Server</span>: <span class="string">Microsoft-IIS/7.5</span>
+<span class="attribute">X-AspNetMvc-Version</span>: <span class="string">2.0</span>
+<span class="attribute">X-AspNet-Version</span>: <span class="string">4.0.30319 </span>
+<span class="attribute">Set-Cookie</span>: <span class="string">Set-Cookie: X-Powered-By: ASP.NET </span>
+<span class="attribute">ntCoent-Length</span>: <span class="string">166137</span>
+<span class="attribute">Content-Encoding</span>: <span class="string">gzip </span>
+<span class="attribute">Transfer-Encoding</span>: <span class="string">chunked </span>
+
+<span class="r">&amp;nbsp; 
+
+2D23 
+...........}.s.G.......j....*u......y....%<span class="keyword">...</span>;QO.M.[....3..,<span class="keyword">...</span>
+.!..O....H-.<span class="string">"v..&amp;gt;.............=YY </span></span>
+</code></pre><p>&nbsp;<br>在处理chunked时候，像上面chunked\r\n\r\n后面是实体，第一行2D23就是一chunk的大小所以在2D23\r\n后面开始读2D23个然后会紧跟着\r\n，然后后面就是下一chunk的大小，直到最后一chunk是0大小。实体结束，最后再来一个\r\n。也就是说chunked的最后7个一定是\r\n0\r\n\r\n，本来判断读到\r\n0\r\n\r\n就结束应该没问题，但是为了保险起见，还是一次一次的读大小值再读取指定的大小数据。</p>
 <p>另外，此代码里有部分缺陷，一是我急于完成，某些结构设计不合理，所以可扩展性比较差。第二，有少部分内存泄漏，懒得修改了。毕竟，我也得忙着找工作，时间比较紧张，但是总的来说，如果你想找后台开发相关的职位，如果你没有更好的项目经验，此代码如果你能读懂，写到简历上，面试官肯定会问你的。</p>
 <p>能力和精力有限，希望能对你们有所帮助 ^-^</p>
 <p>参考链接：</p>

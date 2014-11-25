@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://armsword.com/2014/05/18/light-cgi-server/</loc>
+    <lastmod>2014-11-25T15:06:12.000Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://armsword.com/2014/11/22/move-from-wordpress-to-hexo/</loc>
     <lastmod>2014-11-23T13:35:22.000Z</lastmod>
   </url>
@@ -219,11 +224,6 @@
   <url>
     <loc>http://armsword.com/2014/04/20/redis-dict-analyze/</loc>
     <lastmod>2014-11-22T14:37:21.000Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://armsword.com/2014/05/18/light-cgi-server/</loc>
-    <lastmod>2014-11-22T14:32:56.000Z</lastmod>
   </url>
   
   <url>
