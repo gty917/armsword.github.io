@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://armsword.com/2014/03/07/linux-io-multiplexing/</loc>
+    <lastmod>2014-11-25T15:45:54.000Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://armsword.com/2014/11/22/move-from-wordpress-to-hexo/</loc>
     <lastmod>2014-11-25T15:17:42.000Z</lastmod>
   </url>
@@ -139,11 +144,6 @@
   <url>
     <loc>http://armsword.com/2013/08/25/linux-memory-and-manage/</loc>
     <lastmod>2014-11-22T15:44:03.000Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://armsword.com/2014/03/07/linux-io-multiplexing/</loc>
-    <lastmod>2014-11-22T15:42:08.000Z</lastmod>
   </url>
   
   <url>
