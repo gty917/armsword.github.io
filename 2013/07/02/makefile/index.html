@@ -76,9 +76,54 @@
 <p>target也就是一个目标文件，可以是Object File，也可以是执行文件。还可以是一个标签（Label），对于标签这种特性，在后续的“伪目标”章节中会有叙述。</p>
 <p>prerequisites就是，要生成那个target所需要的文件或是目标。</p>
 <p>command也就是make需要执行的命令，TAB键。（任意的Shell命令）</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line"><span class="type">INCLUDE</span> = ./include</div><div class="line"></div><div class="line"><span class="type">INCLUDE</span> += -<span class="type">I</span>/usr/include/mysql</div><div class="line"></div><div class="line">objects = findtopo.o looptopo.o handlesql.o readoid.o ifroute.o</div><div class="line"></div><div class="line"> ifirewall.o hostname.o</div><div class="line"></div><div class="line">findtopo : $(objects)</div><div class="line"></div><div class="line"> gcc -o findtopo $(objects) -lsnmp -lmysqlclient</div><div class="line"></div><div class="line">findtopo.o : findtopo.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> findtopo.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">looptopo.o : looptopo.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> looptopo.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">handlesql.o : handlesql.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> handlesql.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">readoid.o : readoid.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> readoid.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">ifroute.o : ifroute.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> ifroute.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">ifirewall.o : ifirewall.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> ifirewall.<span class="built_in">c</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">hostname.o : hostname.<span class="built_in">c</span> findtopo.h</div><div class="line"></div><div class="line"> gcc -<span class="built_in">c</span> hostname.<span class="type">C</span> $&lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)</div><div class="line"></div><div class="line">.<span class="type">PHONY</span> : clean</div><div class="line"></div><div class="line">clean:</div><div class="line"></div><div class="line"> rm findtopo findtopo.o looptopo.o handlesql.o readoid.o</div><div class="line"></div><div class="line"> ifroute.o ifirewall.o hostname.o</div></pre></td></tr></table></figure>
+<pre><code><span class="type">INCLUDE</span> = ./include
 
-<p>“$&lt;”表示所有的依赖目标集，.PHONY意思表示clean是一个“伪目标”。向make说明，不管是否有这个文件，这个目标就是“伪目标”。</p>
+<span class="type">INCLUDE</span> += -<span class="type">I</span>/usr/include/mysql
+
+objects = findtopo.o looptopo.o handlesql.o readoid.o ifroute.o
+
+  ifirewall.o hostname.o
+
+findtopo : $(objects)
+
+  gcc -o findtopo $(objects) -lsnmp -lmysqlclient
+
+findtopo.o : findtopo.<span class="built_in">c</span> findtopo.h
+
+  gcc -<span class="built_in">c</span> findtopo.<span class="built_in">c</span> $&amp;lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)
+
+looptopo.o : looptopo.<span class="built_in">c</span> findtopo.h
+
+  gcc -<span class="built_in">c</span> looptopo.<span class="built_in">c</span> $&amp;lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)
+
+handlesql.o : handlesql.<span class="built_in">c</span> findtopo.h
+
+  gcc -<span class="built_in">c</span> handlesql.<span class="built_in">c</span> $&amp;lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)
+
+readoid.o : readoid.<span class="built_in">c</span> findtopo.h
+
+  gcc -<span class="built_in">c</span> readoid.<span class="built_in">c</span> $&amp;lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)
+
+ifroute.o : ifroute.<span class="built_in">c</span> findtopo.h
+
+  gcc -<span class="built_in">c</span> ifroute.<span class="built_in">c</span> $&amp;lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)
+
+ifirewall.o : ifirewall.<span class="built_in">c</span> findtopo.h
+
+  gcc -<span class="built_in">c</span> ifirewall.<span class="built_in">c</span> $&amp;lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)
+
+hostname.o : hostname.<span class="built_in">c</span> findtopo.h
+
+  gcc -<span class="built_in">c</span> hostname.<span class="type">C</span> $&amp;lt; -<span class="type">I</span>$(<span class="type">INCLUDE</span>)
+
+.<span class="type">PHONY</span> : clean
+
+clean:
+
+  rm findtopo findtopo.o looptopo.o handlesql.o readoid.o
+
+ifroute.o ifirewall.o hostname.o
+</code></pre><p>“$&lt;”表示所有的依赖目标集，.PHONY意思表示clean是一个“伪目标”。向make说明，不管是否有这个文件，这个目标就是“伪目标”。</p>
 <p>.PHONY : clean</p>
 <p>只要有这个声明，不管是否有“clean”文件，要运行“clean”这个目标，只有“make clean”这样。</p>
 <p>make是如何工作的</p>
