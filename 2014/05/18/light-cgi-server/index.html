@@ -6,7 +6,7 @@
   <title>写了一个简单的CGI Server | armsword的涅槃之地</title>
   <meta name="author" content="armsword">
   
-  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  <meta name="description" content="程序员,搜索引擎,网络编程,后台开发,北邮人,阿里巴巴,神马搜索,Linux,C,C++,Python">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -87,11 +87,11 @@
 <span class="attribute">Content-Encoding</span>: <span class="string">gzip </span>
 <span class="attribute">Transfer-Encoding</span>: <span class="string">chunked </span>
 
-<span class="r">&amp;nbsp; 
+<span class="http">
 
-2D23 
+<span class="r">2D23 
 ...........}.s.G.......j....*u......y....%<span class="keyword">...</span>;QO.M.[....3..,<span class="keyword">...</span>
-.!..O....H-.<span class="string">"v..&amp;gt;.............=YY </span></span>
+.!..O....H-.<span class="string">"v..&amp;gt;.............=YY </span></span></span>
 </code></pre><p>&nbsp;<br>在处理chunked时候，像上面chunked\r\n\r\n后面是实体，第一行2D23就是一chunk的大小所以在2D23\r\n后面开始读2D23个然后会紧跟着\r\n，然后后面就是下一chunk的大小，直到最后一chunk是0大小。实体结束，最后再来一个\r\n。也就是说chunked的最后7个一定是\r\n0\r\n\r\n，本来判断读到\r\n0\r\n\r\n就结束应该没问题，但是为了保险起见，还是一次一次的读大小值再读取指定的大小数据。</p>
 <p>另外，此代码里有部分缺陷，一是我急于完成，某些结构设计不合理，所以可扩展性比较差。第二，有少部分内存泄漏，懒得修改了。毕竟，我也得忙着找工作，时间比较紧张，但是总的来说，如果你想找后台开发相关的职位，如果你没有更好的项目经验，此代码如果你能读懂，写到简历上，面试官肯定会问你的。</p>
 <p>能力和精力有限，希望能对你们有所帮助 ^-^</p>

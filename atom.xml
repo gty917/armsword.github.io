@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2014-11-25T15:06:26.599Z</updated>
+  <updated>2014-11-25T15:13:26.044Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -307,8 +307,8 @@
     <link href="http://armsword.com/2014/08/09/download-baidu-music/"/>
     <id>http://armsword.com/2014/08/09/download-baidu-music/</id>
     <published>2014-08-09T13:55:42.000Z</published>
-    <updated>2014-11-22T15:07:19.000Z</updated>
-    <content type="html"><![CDATA[<p>之前我写过一篇文章，介绍过怎么下载百度音乐无损音乐，地址点击<a href="http://armsword.com/2014/01/01/get-baidu-music-addr.html" title="百度无损音乐下载" target="_blank" rel="external">此处</a>进入，但是前几天有网友给我邮件说这个方法现在不能使用了。我今天正好回实验室改论文，弄完后，研究了下，发现之前的无损音乐下载方法确实不能使用了，之后用了几十分钟又分析了下，终于找到新方法了，因为我听见外面打雷了，貌似要下雨，我简单的说下方法吧：</p>
+    <updated>2014-11-25T15:10:10.000Z</updated>
+    <content type="html"><![CDATA[<p>之前我写过一篇文章，介绍过怎么下载百度音乐无损音乐，地址点击<a href="http://armsword.com/2014/01/01/get-baidu-music-addr/" title="百度无损音乐下载" target="_blank" rel="external">此处</a>进入，但是前几天有网友给我邮件说这个方法现在不能使用了。我今天正好回实验室改论文，弄完后，研究了下，发现之前的无损音乐下载方法确实不能使用了，之后用了几十分钟又分析了下，终于找到新方法了，因为我听见外面打雷了，貌似要下雨，我简单的说下方法吧：</p>
 <p>1、之前是从<a href="http://music.baidu.com/" target="_blank" rel="external">http://music.baidu.com/</a> 入手的，现在发现从此处入手已经找不到方法了。由于我又不是太懂JS语法，于是用了几十分钟，没分析到地址放弃。</p>
 <p>2、灵光一闪，从<a href="http://fm.baidu.com/" target="_blank" rel="external">http://fm.baidu.com/</a> 入手，在Chrome下抓包，细心分析后，果然发现蜘丝马迹，如下图所示：</p>
 <p><img src="http://armsword.com/wp-content/uploads/2014/08/20140809213933.png" alt=""></p>
@@ -320,7 +320,6 @@
 <p>我们构造下不同格式的音乐试试看，以无损音乐flac格式和921kbps为例：</p>
 <p>构造的链接为：<a href="http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=mp3&amp;rate=921" target="_blank" rel="external">http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac&amp;rate=921</a></p>
 <p><img src="http://armsword.com/wp-content/uploads/2014/08/20140809214749.png" alt=""></p>
-<p>&nbsp;</p>
 <p>将songLink后的地址格式化为正常网页地址，如下所示：<br><a href="http://yinyueshiting.baidu.com/data2/music/33809115/966991111600921.flac?xcode=a6ed00d30421e9bebbbef0f52f4938299d0fba1db032ff5f" target="_blank" rel="external">http://yinyueshiting.baidu.com/data2/music/33809115/966991111600921.flac?xcode=a6ed00d30421e9bebbbef0f52f4938299d0fba1db032ff5f</a><br>下载下，发现可以正常下载，28.8M，flac格式的无损音乐。</p>
 <p>所以，超高/无损音乐下载方法就是：<br>将此链接的：<br><a href="http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac&amp;rate=921" title="百度无损音乐下载方法教程" target="_blank" rel="external">http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac&amp;rate=921</a><br>songIds、type、rate改完你想下载的音乐就可以了。</p>
 <p>如果只想下载无损音乐flac格式的（前提条件是百度下载里包含无损格式），这样就可以了，只需要更改歌曲songIds。</p>
@@ -328,7 +327,7 @@
 <p>代码不写，分析就到此为止吧。</p>
 ]]></content>
     <summary type="html">
-    <![CDATA[<p>之前我写过一篇文章，介绍过怎么下载百度音乐无损音乐，地址点击<a href="http://armsword.com/2014/01/01/get-baidu-music-addr.html" title="百度无损音乐下载" target="_blank" rel="ex]]>
+    <![CDATA[<p>之前我写过一篇文章，介绍过怎么下载百度音乐无损音乐，地址点击<a href="http://armsword.com/2014/01/01/get-baidu-music-addr/" title="百度无损音乐下载" target="_blank" rel="extern]]>
     </summary>
     
       <category term="计算机网络" scheme="http://armsword.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
@@ -495,7 +494,7 @@
     <link href="http://armsword.com/2014/05/18/light-cgi-server/"/>
     <id>http://armsword.com/2014/05/18/light-cgi-server/</id>
     <published>2014-05-18T09:22:17.000Z</published>
-    <updated>2014-11-25T15:06:12.000Z</updated>
+    <updated>2014-11-25T15:07:44.000Z</updated>
     <content type="html"><![CDATA[<p>之前看过一些开源程序的源码，也略微知道些Apache的CGI处理程序架构，于是用了一段时间，用C写了一个简单的CGI Server，代码算上头文件，一共1200行左右，难度中等偏上。麻雀虽小，五脏俱全。如果把程序里所涉及的HTTP协议，Linux下POSIX编程等等搞清楚，我想找工作中肯定是有足够的竞争力的，当然我也只是皮毛而已，不再班门弄斧了，下面简单的说下程序流程吧，方便小伙伴们阅读。</p>
 <p>程序源代码：<a href="https://github.com/armsword/LightCgiServer" target="_blank" rel="external">戳我</a></p>
 <p>在说程序流程之前，我先简单说下CGI吧，CGI这个东西比较老了，N年之前，没有PHP JSP等等动态脚本之前，这个是非常火的。只要能支持输入输出的程序，都可以编写CGI脚本，比如Apache就集成了CGI服务器功能，你可以使用Python编写简单的CGI脚本，可以参照前几天我发的文章，<a href="http://armsword.com/2014/05/07/let-apache-understand-python-cgi.html" target="_blank" rel="external">点击此处</a>，现在CGI 脚本基本上使用的比较少了，但是在一些对效率要求比较高的设计里还是可以看到一些身影，比如腾讯的QQ相册，QQ空间里就可以看到（你可以打开QQ空间，查看源码-查找CGI），他们的脚本应该是C/C++编写的，效率，你懂的，如果你想更多的了解CGI脚本相关，可以<a href="http://www.jdon.com/idea/cgi.htm" target="_blank" rel="external">点击此处</a>，推荐了解一些，但是不值得深入学习，那个精力不如学习PHP/Python了。。。</p>
@@ -519,11 +518,11 @@
 <span class="attribute">Content-Encoding</span>: <span class="string">gzip </span>
 <span class="attribute">Transfer-Encoding</span>: <span class="string">chunked </span>
 
-<span class="r">&amp;nbsp; 
+<span class="http">
 
-2D23 
+<span class="r">2D23 
 ...........}.s.G.......j....*u......y....%<span class="keyword">...</span>;QO.M.[....3..,<span class="keyword">...</span>
-.!..O....H-.<span class="string">"v..&amp;gt;.............=YY </span></span>
+.!..O....H-.<span class="string">"v..&amp;gt;.............=YY </span></span></span>
 </code></pre><p>&nbsp;<br>在处理chunked时候，像上面chunked\r\n\r\n后面是实体，第一行2D23就是一chunk的大小所以在2D23\r\n后面开始读2D23个然后会紧跟着\r\n，然后后面就是下一chunk的大小，直到最后一chunk是0大小。实体结束，最后再来一个\r\n。也就是说chunked的最后7个一定是\r\n0\r\n\r\n，本来判断读到\r\n0\r\n\r\n就结束应该没问题，但是为了保险起见，还是一次一次的读大小值再读取指定的大小数据。</p>
 <p>另外，此代码里有部分缺陷，一是我急于完成，某些结构设计不合理，所以可扩展性比较差。第二，有少部分内存泄漏，懒得修改了。毕竟，我也得忙着找工作，时间比较紧张，但是总的来说，如果你想找后台开发相关的职位，如果你没有更好的项目经验，此代码如果你能读懂，写到简历上，面试官肯定会问你的。</p>
 <p>能力和精力有限，希望能对你们有所帮助 ^-^</p>

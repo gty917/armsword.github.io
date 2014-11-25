@@ -6,7 +6,7 @@
   <title>获得百度无损音乐下载地址最新方法 | armsword的涅槃之地</title>
   <meta name="author" content="armsword">
   
-  <meta name="description" content="程序员 搜索引擎 网络编程 后台开发 北邮人 C/C++ Linux">
+  <meta name="description" content="程序员,搜索引擎,网络编程,后台开发,北邮人,阿里巴巴,神马搜索,Linux,C,C++,Python">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -64,7 +64,7 @@
     </header>
     <div class="entry">
       
-        <p>之前我写过一篇文章，介绍过怎么下载百度音乐无损音乐，地址点击<a href="http://armsword.com/2014/01/01/get-baidu-music-addr.html" title="百度无损音乐下载" target="_blank" rel="external">此处</a>进入，但是前几天有网友给我邮件说这个方法现在不能使用了。我今天正好回实验室改论文，弄完后，研究了下，发现之前的无损音乐下载方法确实不能使用了，之后用了几十分钟又分析了下，终于找到新方法了，因为我听见外面打雷了，貌似要下雨，我简单的说下方法吧：</p>
+        <p>之前我写过一篇文章，介绍过怎么下载百度音乐无损音乐，地址点击<a href="http://armsword.com/2014/01/01/get-baidu-music-addr/" title="百度无损音乐下载" target="_blank" rel="external">此处</a>进入，但是前几天有网友给我邮件说这个方法现在不能使用了。我今天正好回实验室改论文，弄完后，研究了下，发现之前的无损音乐下载方法确实不能使用了，之后用了几十分钟又分析了下，终于找到新方法了，因为我听见外面打雷了，貌似要下雨，我简单的说下方法吧：</p>
 <p>1、之前是从<a href="http://music.baidu.com/" target="_blank" rel="external">http://music.baidu.com/</a> 入手的，现在发现从此处入手已经找不到方法了。由于我又不是太懂JS语法，于是用了几十分钟，没分析到地址放弃。</p>
 <p>2、灵光一闪，从<a href="http://fm.baidu.com/" target="_blank" rel="external">http://fm.baidu.com/</a> 入手，在Chrome下抓包，细心分析后，果然发现蜘丝马迹，如下图所示：</p>
 <p><img src="http://armsword.com/wp-content/uploads/2014/08/20140809213933.png" alt=""></p>
@@ -76,7 +76,6 @@
 <p>我们构造下不同格式的音乐试试看，以无损音乐flac格式和921kbps为例：</p>
 <p>构造的链接为：<a href="http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=mp3&amp;rate=921" target="_blank" rel="external">http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac&amp;rate=921</a></p>
 <p><img src="http://armsword.com/wp-content/uploads/2014/08/20140809214749.png" alt=""></p>
-<p>&nbsp;</p>
 <p>将songLink后的地址格式化为正常网页地址，如下所示：<br><a href="http://yinyueshiting.baidu.com/data2/music/33809115/966991111600921.flac?xcode=a6ed00d30421e9bebbbef0f52f4938299d0fba1db032ff5f" target="_blank" rel="external">http://yinyueshiting.baidu.com/data2/music/33809115/966991111600921.flac?xcode=a6ed00d30421e9bebbbef0f52f4938299d0fba1db032ff5f</a><br>下载下，发现可以正常下载，28.8M，flac格式的无损音乐。</p>
 <p>所以，超高/无损音乐下载方法就是：<br>将此链接的：<br><a href="http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac&amp;rate=921" title="百度无损音乐下载方法教程" target="_blank" rel="external">http://music.baidu.com/data/music/fmlink?songIds=966991&amp;type=flac&amp;rate=921</a><br>songIds、type、rate改完你想下载的音乐就可以了。</p>
 <p>如果只想下载无损音乐flac格式的（前提条件是百度下载里包含无损格式），这样就可以了，只需要更改歌曲songIds。</p>
