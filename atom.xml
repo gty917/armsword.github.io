@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2014-11-25T15:13:26.044Z</updated>
+  <updated>2014-11-25T15:18:02.379Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://armsword.com/2014/11/22/move-from-wordpress-to-hexo/"/>
     <id>http://armsword.com/2014/11/22/move-from-wordpress-to-hexo/</id>
     <published>2014-11-22T13:30:51.000Z</published>
-    <updated>2014-11-23T13:35:22.000Z</updated>
+    <updated>2014-11-25T15:17:42.000Z</updated>
     <content type="html"><![CDATA[<p>租了两年多的服务器要过期了，不打算续费了，于是就研究了下将博客从WordPress迁移到静态博客上，后来选择了hexo静态博客，node.js编写，并且同时使用Github和Gitcafe托管博客。</p>
 <p>在迁移过程中，删除了部分难修改且目前无意义的博客，并且链接我也没改成与之前一样，就这样吧，反正我也不在乎流量，就当个记事本用。</p>
 <p>这里简单记录下将WordPress迁移到静态博客和将博客同时托管到Github和Gitcafe过程。</p>
