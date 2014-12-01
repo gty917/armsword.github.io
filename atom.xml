@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2014-12-01T09:39:57.756Z</updated>
+  <updated>2014-12-01T09:46:15.395Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -19,21 +19,20 @@
     <link href="http://armsword.com/2014/12/01/learn-emacs-note/"/>
     <id>http://armsword.com/2014/12/01/learn-emacs-note/</id>
     <published>2014-12-01T09:17:49.000Z</published>
-    <updated>2014-12-01T09:39:37.000Z</updated>
+    <updated>2014-12-01T09:45:45.000Z</updated>
     <content type="html"><![CDATA[<p>团队师兄给我说，我们团队统一使用Emacs编程，因为那边是结对编程，所以作为一枚Emacs门外汉，还是需要在明年入职前，熟悉下Emacs的基本操作的，今天折腾了一小会，感觉要比Vim复杂好多，并且总是感觉自己手不够大，命令也要比Vim难记住，索性写篇笔记记录下吧。</p>
 <h2 id="安装Emacs">安装Emacs</h2>
 <p>Ubuntu已支持最新版本，命令直接安装即可：</p>
 <pre><code><span class="built_in">sudo</span> apt-get install emacs
 </code></pre><p>即可成功安装，目前是GNU Emacs 24.3.1版本。</p>
 <h2 id="熟悉快捷键">熟悉快捷键</h2>
-<p>在Emacs的快捷键中，C表示Ctrl键，M表示Alt键，快捷键C-x C-f代表的含义就是：先按下Ctrl不放，然后按下x键；接着放手，再按下Ctrl键不放，最后按下f键。</p>
+<p>在Emacs的快捷键中，C表示Ctrl键，M表示Alt键，快捷键C-x C-f代表的含义就是：<br>先按下Ctrl不放，然后按下x键；接着放手，再按下Ctrl键不放，最后按下f键。</p>
+<p>常用的快捷键如下所示：</p>
 <ul>
 <li><strong>新建文件</strong>：C-x C-f</li>
 <li><strong>保存文件</strong>：C-x C-s</li>
-<li><p><strong>退出文件</strong>：C-x C-c</p>
-</li>
-<li><p><strong>选中</strong>：C-@</p>
-</li>
+<li><strong>退出文件</strong>：C-x C-c</li>
+<li><strong>选中</strong>：C-@</li>
 <li><strong>复制</strong>：M-w</li>
 <li><strong>剪切</strong>：C-w</li>
 <li><strong>粘贴</strong>：C-y</li>
