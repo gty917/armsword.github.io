@@ -55,6 +55,69 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2013-04-08T14:43:29.000Z"><a href="/2013/04/08/linux-c-3/">4月 8 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/08/linux-c-3/">《Linux C编程一站式学习》读书笔记(三)</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1、所有的I/O操作最终都是在内核中做的，以前我们用的C标准I/O库函数最终也是通过系统调用把I/O操作从用户空间传给内核，然后让内核去做I/O操作。</p>
+<p>2、ebx 文件描述符</p>
+<p>edx 文件输出的字节</p>
+<p>ecx 输出缓冲区的首地址</p>
+<p>3、open、read、write、close等系统函数成为无缓冲区I/O（unbuffered I/O）函数，因为它们位于C标准库的I/O缓冲区的底层。用户程序在读写文件时既可以调用C标准I/O库函数，也可以直接调用底层的unbuffered I/O函数，但unbuffered I/O函数每次读写都要进内核，调一个系统调用比调一个用户空间的函数要慢得多，所以在用户空间开辟I/O缓冲区还是必要的，用标准I/O库函数就比较方便，省去了自己管理I/O缓冲区的麻烦。</p>
+<p>但是，unix的传统是Eerything is a file。I/O不仅用于读写常规文件，也便于读写设备，比如终端或网络设备。在读写设备时通常是不希望有缓冲区的，例如向代表网络设备的文件写数据就是希望数据通过网络设备发送出去，而不希望只写到缓冲区里就算完事儿了，当网络设备接收到数据时应用程序也希望第一时间被通知到，所以网络编程通常直接调用unbuffered I/O 函数。</p>
+<p>4、读常规文件不会阻塞的，不管读多少字节，read一定会在有限的时间内返回，从终端设备或网络读则不一定。如果从终端输入的数据没有换行符，调用read读终端设备就会阻塞，如果网络上没有接收到数据包，调用read从网络读就会阻塞。至于阻塞多长时间也是不确定的，如果一直没有数据到达就一直阻塞在那里，同样，写常规文件是不会阻塞的，而向终端设备或网络设备写则不一定。当进程调用一个阻塞的系统函数时，该进程被至于睡眠状态，这时内核调用其它进程运行，直到该进程等待的事件发生了（比如网络上接收到数据包，或者调用sleep指定的睡眠时间到了）它才有可能继续运行，与睡眠状态相对的是运行（Running）状态，在linux内核中，处于运行状态的进程分为两种情况：正在被调度执行，就绪状态。</p>
+<p>5、可以用strace命令执行程序，跟踪该程序执行过程中用到的所有系统调用的参数及返回值。</p>
+<p>6、在shell命令下可以运行一个命令，是因为shell进程在读取用户输入的命令之后会调用fork复制出一个新的shell进程，然后新的shell进程调用exec执行新的程序。</p>
+<p>7、子进程中fork的返回值是0，而父进程中fork的返回值则是子进程的id。</p>
+<p>fork的另一个特性是所有由父进程打开的描述符都被复制到子进程中。父、子进程中相同编号的文件描述符在内核中指向同一个file结构体，也就是说，file结构体的引用计数要增加。用gdb调试多进程的程序会遇到困难，gdb只能跟踪一个进程（默认是跟踪父进程），而不能同时跟踪多个进程，但可以设置gdb在fork之后跟踪父进程还是子进程。</p>
+<p>set follow-fork-mode child 命令设置gdb在fork之后跟踪子进程。set follow-fork-mode parent 则是跟踪父进程。</p>
+<p>8、子进程往往要调用一种exec函数以执行另一个程序，当进程调用一种exec函数时，该进程的用户空间代码和数据完全被新程序替换，从新程序的启动例程开始执行，调用exec并不创建新进程，所以调用exec前后该进程的id并未改变。</p>
+<p>9、一个进程在终止时会关闭所有文件描述符，释放在用户空间分配的内存，但它的pcb还保留着，内核在其中保存一些信息；如果是正常终止，则保存着退出状态，如果是异常终止，则保存着导致该进程终止的信号是哪个。</p>
+<p>10、每个进程各自有不同的用户地址空间，任何一个进程的全局变量在另一个进程中都看不到，所以进程之间要交换数据必须通过内核，在内核中开辟一块缓冲区，进程1把数据从用户空间拷到内核缓冲区，进程2再从内核缓冲区把数据读走，内核提供的这种机制称为进程间通信（IPC，Inter Process Communication）</p>
+<p>11、FIFO和Unix Domain Socket 这2种IPC机制都是利用文件系统中的特殊文件来标识的。</p>
+<p>12、默认是不允许产生core文件的，因为core文件中可能包含用户密码等敏感信息，不安全。在开发调试阶段可以用ulimit命令改变这个限制，允许产生core文件。首先用ulimit命令改变shell进程的Resource Limit，允许core文件最大为1024k，$ ulimit -c 1024</p>
+<p>13、sig_atomic_t 类型的变量应该总是加上volatile限定符，因为要使用sig_atomic_t 类型的理由也真是要加volatile限定符的理由。</p>
+<p>14、Shell分前后台来控制的不是进程而是作业（Job）或者进程组（Process Group），一个前台作业可以由多个进程组成，一个后台作业也可以由多个进程组成，shell可以同时运行一个前台作业和任意多个后台作业，这称为作业控制（Job Control）。</p>
+<p>15、由Shell进程fork出的子进程本来具有和Shell相同的Session、进程组和控制终端，但是Shell调用setpgid函数将作业中的某个子进程指定为一个新进程组的leader，然后调用setpgid将该作业中的其他子进程也转移到这个进程组中。如果这个进程组需要在前台运行，就调用tcsetpgrp函数将它设置为前台进程组，由于一个session只能有一个前台进程组，所以shell所在的进程组就自动变成后台进程组。</p>
+<p>16、TCP/IP网络协议栈分为四层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-24-26.png" alt=""></p>
+<p>不同的协议层对数据包有不同的称谓，在传输层叫做段（segment）、在网络层叫做数据报（datagram），在链路层叫做帧（frame）。数据封装成帧后发到传输介质上，到达目的主机后每层协议再削掉相应的首部，最后将应用层数据交给应用程序处理。</p>
+<p>17、Multiplexing过程：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-29-17.png" alt=""></p>
+<p>18、Socket：如果发送端发送的速度较快，接收端接收到的数据后处理的速度较慢，而接收缓冲区的大小是固定的，就会丢失数据，TCP协议通过“滑动窗口”机制解决这一问题。</p>
+<p>19、TCP/IP协议规定，网络数据流应采用大端字节序，即低地址高字节，为使网络程序具有可移植性，使同样的C代码在大端和小端计算机上编译后都能正常运行，可以调用库函数做网络字节序和主机字节序的转换。</p>
+<p>20、TCP协议通信流程：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-35-03.png" alt=""></p>
+<p>21、socket编程时，客户端不需要固定的端口号，因此不必调用bind(),客户端的端口号由内核自动分配。注意，客户端不是不允许调用bind()，只是没有必要调用bind()固定一个端口号，服务器也不是必须调用bind()，但如果服务器不调用bind()，内核会自动给服务器分配监听端口，每次启动服务器时端口号都不一样，客户端要连接服务器就会遇到麻烦。</p>
+<p>22、TCP协议是面向流的，read和write调用的返回值往往小于参数指定的字节数，对于read调用，如果接收缓冲区有20字节，请求读100个字节，就会返回20。对于write调用，如果请求写100个字节，而发送缓冲区中只有20个字节的空闲位置，那么write会阻塞，直到把100个字节全部交给发送缓冲区才返回，但如果socket文件描述符有0——NONBLOCK标志，则write不阻塞，直接返回20。以上情况可以避免。</p>
+<p>23、UDP通信流程图：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/04/2013-04-08-22-42-27.png" alt=""></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2013-03-30T12:06:22.000Z"><a href="/2013/03/30/linux-c-2/">3月 30 2013</a></time>
       
       
@@ -365,52 +428,6 @@
 </article>
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2012-10-07T12:39:06.000Z"><a href="/2012/10/07/order-of-variables-in-the-memory-allocation/">10月 7 2012</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2012/10/07/order-of-variables-in-the-memory-allocation/">变量在内存的分配顺序</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>有时候，我们想更清楚的了解变量的内存分配顺序，那全局变量、栈、堆在内存的分配顺序是不是相同？我们写个程序测试下。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> a = <span class="number">12</span>; <span class="regexp">//</span>全局变量</div><div class="line"><span class="keyword">int</span> b = <span class="number">34</span>;</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> <span class="keyword">int</span> num1 = <span class="number">56</span>; <span class="regexp">//</span>栈</div><div class="line"> <span class="keyword">int</span> num2 = <span class="number">78</span>;</div><div class="line"></div><div class="line"> <span class="keyword">int</span> *<span class="keyword">m</span>;</div><div class="line"> <span class="keyword">int</span> *n;</div><div class="line"> <span class="keyword">m</span> = (<span class="keyword">int</span> *)malloc(sizeof(<span class="keyword">int</span>));</div><div class="line"> n = (<span class="keyword">int</span> *)malloc(sizeof(<span class="keyword">int</span>));</div><div class="line"> *<span class="keyword">m</span> = <span class="number">1</span>;</div><div class="line"> *n = <span class="number">2</span>;</div><div class="line"></div><div class="line"> <span class="keyword">printf</span>(&quot;全局变量a:<span class="variable">%ld</span>\n&quot;,&amp;a);</div><div class="line"> <span class="keyword">printf</span>(&quot;全局变量b:<span class="variable">%ld</span>\n&quot;,&amp;b);</div><div class="line"> <span class="keyword">printf</span>(&quot;栈num1:<span class="variable">%ld</span>\n&quot;,&amp;num1);</div><div class="line"> <span class="keyword">printf</span>(&quot;栈num2:<span class="variable">%ld</span>\n&quot;,&amp;num2);</div><div class="line"> <span class="keyword">printf</span>(&quot;堆<span class="keyword">m</span>:<span class="variable">%ld</span>\n&quot;,<span class="keyword">m</span>);</div><div class="line"> <span class="keyword">printf</span>(&quot;堆n:<span class="variable">%ld</span>\n&quot;,n);</div><div class="line"></div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>执行结果：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">全局变量<span class="tag">a</span><span class="pseudo">:4344368</span></div><div class="line">全局变量<span class="tag">b</span><span class="pseudo">:4344372</span></div><div class="line">栈<span class="tag">num1</span><span class="pseudo">:1244996</span></div><div class="line">栈<span class="tag">num2</span><span class="pseudo">:1244992</span></div><div class="line">堆<span class="tag">m</span><span class="pseudo">:6031056</span></div><div class="line">堆<span class="tag">n</span><span class="pseudo">:6031112</span></div></pre></td></tr></table></figure>
-
-<p>其实，如果打印出&amp;m,&amp;n的地址时，你会发现 &amp;m = 1244988 ,&amp;n = 1244984。<br>总结：</p>
-<p>全局变量的内存分配是从低地址向高地址分配的，即先定义的全局变量在低地址，后定义的在高地址。</p>
-<p>栈中变量指的是由编译器自动分配释放的变量，栈是从高地址向低地址分配的，所以先声明的变量在高地址，后声明的在低地址。</p>
-<p>堆的内存分配与全局变量相同，也是从低地址向高地址分配。但是你会发现堆中的内存分别是不连续的。</p>
-<p>在VC，我们F11，之后ALT+8查看下汇编代码</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">{</div><div class="line"><span class="number">00401010</span> <span class="keyword">push</span> <span class="literal">ebp</span>    <span class="comment">;保存ebp</span></div><div class="line"><span class="number">00401011</span> <span class="keyword">mov</span> <span class="literal">ebp</span>,<span class="literal">esp</span>   <span class="comment">;把esp放入ebp中</span></div><div class="line"><span class="number">00401013</span> <span class="keyword">sub</span> <span class="literal">esp</span>,<span class="number">50h</span>  <span class="comment">;把esp往下移动一个范围，等于在栈中放出一片新的空间来存局部变量</span></div><div class="line"><span class="number">00401016</span> <span class="keyword">push</span> <span class="number">ebx</span>   <span class="comment">;保存三个寄存器,ebx,esi,edi,貌似这是C里面的规范</span></div><div class="line"><span class="number">00401017</span> <span class="keyword">push</span> <span class="literal">esi</span></div><div class="line"><span class="number">00401018</span> <span class="keyword">push</span> <span class="literal">edi</span></div><div class="line"><span class="number">00401019</span> <span class="keyword">lea</span> <span class="literal">edi</span>,[<span class="literal">ebp</span>-<span class="number">50h</span>]</div><div class="line">0040101C <span class="keyword">mov</span> <span class="number">ecx</span>,<span class="number">14h</span></div><div class="line"><span class="number">00401021</span> <span class="keyword">mov</span> <span class="number">eax</span>,<span class="number">0CCCCCCCCh</span>  <span class="comment">;把局部变量区域初始化成0cccccccch，0cccccccch 实际是INT 3.这是一个中断指令。</span></div><div class="line"><span class="number">00401026</span> <span class="keyword">rep</span> stos <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">edi</span>]  <span class="comment">;因为局部变量不可能被执行，如果执行了必然程序有错，这时发生中断来提示开发者。这是VC 编译DEBUG 版本的特点。</span></div><div class="line"><span class="number">9</span>: <span class="keyword">int</span> num1 = <span class="number">56</span><span class="comment">; //栈</span></div><div class="line"><span class="number">00401028</span> <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">4</span>],<span class="number">38h</span>  //<span class="number">38h</span> = <span class="number">56</span>，在栈存储时候已数组形式，下同</div><div class="line"><span class="number">10</span>: <span class="keyword">int</span> num2 = <span class="number">78</span><span class="comment">;</span></div><div class="line">0040102F <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">8</span>],<span class="number">4Eh</span></div><div class="line"><span class="number">11</span>:</div><div class="line"><span class="number">12</span>: <span class="keyword">int</span> *m<span class="comment">;</span></div><div class="line"><span class="number">13</span>: <span class="keyword">int</span> *n<span class="comment">;</span></div><div class="line"><span class="number">14</span>: m = (<span class="keyword">int</span> *)malloc(sizeof(<span class="keyword">int</span>))<span class="comment">;</span></div><div class="line"><span class="number">00401036</span> <span class="keyword">push</span> <span class="number">4</span>  <span class="comment">;压入参数，为sizeof(int)大小</span></div><div class="line"><span class="number">00401038</span> <span class="keyword">call</span> malloc (<span class="number">00401190</span>)</div><div class="line"><span class="number">0040103D</span> <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">4</span> // <span class="comment">;堆栈平衡</span></div><div class="line"><span class="number">00401040</span> <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">0Ch</span>],<span class="number">eax</span></div><div class="line"><span class="number">15</span>: n = (<span class="keyword">int</span> *)malloc(sizeof(<span class="keyword">int</span>))<span class="comment">;</span></div><div class="line"><span class="number">00401043</span> <span class="keyword">push</span> <span class="number">4</span>   <span class="comment">;压入参数，为sizeof(int)大小</span></div><div class="line"><span class="number">00401045</span> <span class="keyword">call</span> malloc (<span class="number">00401190</span>)</div><div class="line">0040104A <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">4</span> // <span class="comment">;堆栈平衡</span></div><div class="line"><span class="number">0040104D</span> <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">10h</span>],<span class="number">eax</span></div><div class="line"><span class="number">16</span>: *m = <span class="number">1</span><span class="comment">;</span></div><div class="line"><span class="number">00401050</span> <span class="keyword">mov</span> <span class="number">eax</span>,<span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">0Ch</span>]</div><div class="line"><span class="number">00401053</span> <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="number">eax</span>],<span class="number">1</span>  <span class="comment">; *m = 1</span></div><div class="line"><span class="number">17</span>: *n = <span class="number">2</span><span class="comment">;</span></div><div class="line"><span class="number">00401059</span> <span class="keyword">mov</span> <span class="number">ecx</span>,<span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">10h</span>]</div><div class="line">0040105C <span class="keyword">mov</span> <span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="number">ecx</span>],<span class="number">2</span>  <span class="comment">;*n = 2</span></div><div class="line"><span class="number">18</span>: printf(&quot<span class="comment">;全局变量a:%ld\n&quot;,&amp;a);</span></div><div class="line"><span class="number">00401062</span> <span class="keyword">push</span> offset _a (00424a30)</div><div class="line"><span class="number">00401067</span> <span class="keyword">push</span> offset string &quot<span class="comment">;\xc8\xab\xbe\xd6\xb1\xe4\xc1\xbfa:%ld\n&quot; (00422068)</span></div><div class="line">0040106C <span class="keyword">call</span> printf (<span class="number">00401110</span>)  <span class="comment">;调用printf</span></div><div class="line"><span class="number">00401071</span> <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">19</span>: printf(&quot<span class="comment">;全局变量b:%ld\n&quot;,&amp;b);</span></div><div class="line"><span class="number">00401074</span> <span class="keyword">push</span> offset _b (00424a34)</div><div class="line"><span class="number">00401079</span> <span class="keyword">push</span> offset string &quot<span class="comment">;\xc8\xab\xbe\xd6\xb1\xe4\xc1\xbfb:%ld\n&quot; (00422054)</span></div><div class="line">0040107E <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line"><span class="number">00401083</span> <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">20</span>: printf(&quot<span class="comment">;栈num1:%ld\n&quot;,&amp;num1);</span></div><div class="line"><span class="number">00401086</span> <span class="keyword">lea</span> <span class="number">edx</span>,[<span class="literal">ebp</span>-<span class="number">4</span>]</div><div class="line"><span class="number">00401089</span> <span class="keyword">push</span> <span class="number">edx</span></div><div class="line">0040108A <span class="keyword">push</span> offset string &quot<span class="comment">;\xd5\xbbnum1:%ld\n&quot; (00422044)</span></div><div class="line">0040108F <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line"><span class="number">00401094</span> <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">21</span>: printf(&quot<span class="comment">;栈num2:%ld\n&quot;,&amp;num2);</span></div><div class="line"><span class="number">00401097</span> <span class="keyword">lea</span> <span class="number">eax</span>,[<span class="literal">ebp</span>-<span class="number">8</span>]</div><div class="line">0040109A <span class="keyword">push</span> <span class="number">eax</span></div><div class="line">0040109B <span class="keyword">push</span> offset string &quot<span class="comment">;\xd5\xbbnum2:%ld\n&quot; (00422034)</span></div><div class="line">004010A0 <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line">004010A5 <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">22</span>: printf(&quot<span class="comment">;堆m:%ld\n&quot;,m);</span></div><div class="line">004010A8 <span class="keyword">mov</span> <span class="number">ecx</span>,<span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">0Ch</span>]</div><div class="line">004010AB <span class="keyword">push</span> <span class="number">ecx</span></div><div class="line">004010AC <span class="keyword">push</span> offset string &quot<span class="comment">;\xb6\xd1m:%ld\n&quot; (00422028)</span></div><div class="line">004010B1 <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line">004010B6 <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">23</span>: printf(&quot<span class="comment">;堆n:%ld\n&quot;,n);</span></div><div class="line">004010B9 <span class="keyword">mov</span> <span class="number">edx</span>,<span class="preprocessor">dword</span> <span class="preprocessor">ptr</span> [<span class="literal">ebp</span>-<span class="number">10h</span>]</div><div class="line">004010BC <span class="keyword">push</span> <span class="number">edx</span></div><div class="line">004010BD <span class="keyword">push</span> offset string &quot<span class="comment">;\xb6\xd1n:%ld\n&quot; (0042201c)</span></div><div class="line">004010C2 <span class="keyword">call</span> printf (<span class="number">00401110</span>)</div><div class="line">004010C7 <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">8</span></div><div class="line"><span class="number">24</span>:</div><div class="line"><span class="number">25</span>: }</div><div class="line">004010CA <span class="keyword">pop</span> <span class="literal">edi</span></div><div class="line">004010CB <span class="keyword">pop</span> <span class="literal">esi</span></div><div class="line">004010CC <span class="keyword">pop</span> <span class="number">ebx</span>  <span class="comment">;平衡</span></div><div class="line">004010CD <span class="keyword">add</span> <span class="literal">esp</span>,<span class="number">50h</span> <span class="comment">;与开始对应</span></div><div class="line">004010D0 <span class="keyword">cmp</span> <span class="literal">ebp</span>,<span class="literal">esp</span></div><div class="line">004010D2 <span class="keyword">call</span> __chkesp (<span class="number">00403110</span>)</div><div class="line">004010D7 <span class="keyword">mov</span> <span class="literal">esp</span>,<span class="literal">ebp</span></div><div class="line">004010D9 <span class="keyword">pop</span> <span class="literal">ebp</span></div><div class="line">004010DA <span class="keyword">ret</span>  <span class="comment">;堆栈平衡</span></div></pre></td></tr></table></figure>
-
-<p>读者可能惊奇，为啥全局变量里没有a,b的赋值呢？这是因为，全局变量在编译器链接时候，链接器将初始化好的全局数据放在可执行文件的数据段了。</p>
-<p>借用《加密与解密》里面的图片一张，描述下函数堆栈创建吧：</p>
-<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121007203655.jpg" alt=""></p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
 
 <nav id="pagination">
   
@@ -463,6 +480,10 @@
   <ul class="entry">
     
       <li>
+        <a href="/2014/12/01/learn-emacs-note/">Emacs学习笔记</a>
+      </li>
+    
+      <li>
         <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
       </li>
     
@@ -484,10 +505,6 @@
     
       <li>
         <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
-      </li>
-    
-      <li>
-        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
       </li>
     
   </ul>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   
-  <title>归档：2012/10 | armsword的涅槃之地</title>
+  <title>Emacs学习笔记 | armsword的涅槃之地</title>
   <meta name="author" content="armsword">
   
   <meta name="description" content="程序员,搜索引擎,网络编程,后台开发,北邮人,阿里巴巴,神马搜索,Linux,C,C++,Python">
@@ -11,7 +11,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  
+  <meta property="og:title" content="Emacs学习笔记"/>
   <meta property="og:site_name" content="armsword的涅槃之地"/>
 
   
@@ -48,97 +48,71 @@
 <div class="clearfix"></div>
 </header>
   <div id="content" class="inner">
-    <div id="main-col" class="alignleft"><div id="wrapper">
-<h2 class="archive-title">2012/10</h2>
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-12-01T09:17:49.000Z"><a href="/2014/12/01/learn-emacs-note/">12月 1 2014</a></time>
+      
+      
+  
+    <h1 class="title">Emacs学习笔记</h1>
+  
 
+    </header>
+    <div class="entry">
+      
+        <p>团队师兄给我说，我们团队统一使用Emacs编程，因为那边是结对编程，所以作为一枚Emacs门外汉，还是需要在明年入职前，熟悉下Emacs的基本操作的，今天折腾了一小会，感觉要比Vim复杂好多，并且总是感觉自己手不够大，命令也要比Vim难记住，索性写篇笔记记录下吧。</p>
+<h2 id="安装Emacs">安装Emacs</h2>
+<p>Ubuntu已支持最新版本，命令直接安装即可：</p>
+<pre><code><span class="built_in">sudo</span> apt-get install emacs
+</code></pre><p>即可成功安装，目前是GNU Emacs 24.3.1版本。</p>
+<h2 id="熟悉快捷键">熟悉快捷键</h2>
+<p>在Emacs的快捷键中，C表示Ctrl键，M表示Alt键，快捷键C-x C-f代表的含义就是：先按下Ctrl不放，然后按下x键；接着放手，再按下Ctrl键不放，最后按下f键。</p>
+<ul>
+<li><strong>新建文件</strong>：C-x C-f</li>
+<li><strong>保存文件</strong>：C-x C-s</li>
+<li><p><strong>退出文件</strong>：C-x C-c</p>
+</li>
+<li><p><strong>选中</strong>：C-@</p>
+</li>
+<li><strong>复制</strong>：M-w</li>
+<li><strong>剪切</strong>：C-w</li>
+<li><strong>粘贴</strong>：C-y</li>
+<li><strong>撤销</strong>：C-x u</li>
+</ul>
 
-  <div class="archive">
-    
-      <article class="post">
-        <div class="post-content">
-          <header>
-            <div class="icon"></div>
-            <time datetime="2012-10-09T06:06:59.000Z"><a href="/2012/10/09/manual-for-pe-files-and-segments/">10月 9 2012</a></time>
-            
-              <h1 class="title"><a href="/2012/10/09/manual-for-pe-files-and-segments/">手工为PE文件加区段</a></h1>
-            
-          </header>
-        </div>
-      </article>
-    
-      <article class="post">
-        <div class="post-content">
-          <header>
-            <div class="icon"></div>
-            <time datetime="2012-10-08T12:09:33.000Z"><a href="/2012/10/08/pe-view-tools/">10月 8 2012</a></time>
-            
-              <h1 class="title"><a href="/2012/10/08/pe-view-tools/">模仿Stud_PE写了个PE查看工具</a></h1>
-            
-          </header>
-        </div>
-      </article>
-    
-      <article class="post">
-        <div class="post-content">
-          <header>
-            <div class="icon"></div>
-            <time datetime="2012-10-08T08:46:21.000Z"><a href="/2012/10/08/learning-pe-file-format/">10月 8 2012</a></time>
-            
-              <h1 class="title"><a href="/2012/10/08/learning-pe-file-format/">简单学习下PE文件格式</a></h1>
-            
-          </header>
-        </div>
-      </article>
-    
-      <article class="post">
-        <div class="post-content">
-          <header>
-            <div class="icon"></div>
-            <time datetime="2012-10-07T12:39:06.000Z"><a href="/2012/10/07/order-of-variables-in-the-memory-allocation/">10月 7 2012</a></time>
-            
-              <h1 class="title"><a href="/2012/10/07/order-of-variables-in-the-memory-allocation/">变量在内存的分配顺序</a></h1>
-            
-          </header>
-        </div>
-      </article>
-    
-      <article class="post">
-        <div class="post-content">
-          <header>
-            <div class="icon"></div>
-            <time datetime="2012-10-06T14:43:29.000Z"><a href="/2012/10/06/some-common-winsock-api-function/">10月 6 2012</a></time>
-            
-              <h1 class="title"><a href="/2012/10/06/some-common-winsock-api-function/">一些常用的Winsock API函数</a></h1>
-            
-          </header>
-        </div>
-      </article>
-    
-      <article class="post">
-        <div class="post-content">
-          <header>
-            <div class="icon"></div>
-            <time datetime="2012-10-03T11:47:11.000Z"><a href="/2012/10/03/file-manipulation/">10月 3 2012</a></time>
-            
-              <h1 class="title"><a href="/2012/10/03/file-manipulation/">Windows下文件操作的一些常用函数</a></h1>
-            
-          </header>
-        </div>
-      </article>
-    
-      <article class="post">
-        <div class="post-content">
-          <header>
-            <div class="icon"></div>
-            <time datetime="2012-10-02T12:24:07.000Z"><a href="/2012/10/02/based-on-csocket-class-gadgets/">10月 2 2012</a></time>
-            
-              <h1 class="title"><a href="/2012/10/02/based-on-csocket-class-gadgets/">基于CSocket类的文件传输小软件</a></h1>
-            
-          </header>
-        </div>
-      </article>
-    
+      
+    </div>
+    <footer>
+      
+        
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
   </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="Emacs学习笔记" data-url="http://armsword.com/2014/12/01/learn-emacs-note/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
 </div></div>
     <aside id="sidebar" class="alignright">
   <div class="search">

@@ -55,6 +55,73 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2014-02-13T08:34:57.000Z"><a href="/2014/02/13/osi-model-communicate-example/">2月 13 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/02/13/osi-model-communicate-example/">OSI参考模型通信处理举例</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>我们以生活中最常见的发送邮件作为例子。假定用户A要给用户B发送一封内容为“早上好”邮件。网络究竟会进行哪些处理呢？我们由上至下进行分析。</p>
+<p>应用层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/201402131508201.jpg" alt=""></p>
+<p>用户A在主机上新建一封电子邮件，指定收件人为B，并输入邮件内容为“早上好”。收发邮件的这款软件从功能上可以分为两大类：一部分是与通信相关的，另一部分是与通信无关的。例如用户A从键盘输入“早上好”的这一部分就属于与通信无关的功能，而将“早上好”的内容发送给收件人B 则是其与通信相关的功能。因此，此处的“输入电子邮件内容后发送给目标地址”也就相当于应用层。</p>
+<p>从用户输入完所要发送的内容并点击“发送”按钮的那一刻开始，就进入了应用层协议的处理。该协议会在所要传送数据的前端附加一个首部（标签）信息。该首部标明了邮件内容为“早上好”和收件人为“B”。这一附有首部信息的数据传送给主机B以后由该主机上的收发邮件软件通过“收信”功能获取内容。主机B 上的应用收到主机A发过来的数据后，分析其数据首部与数据正文，并将邮件保存到硬盘或是其他非易失性存储器以备进行相应的处理。如果主机B 上收件人的邮箱空间已满无法接收新的邮件，则会返回一个错误给发送方。对这类异常的处理也正属于应用层需要解决的问题。</p>
+<p>表示层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150820.jpg" alt=""></p>
+<p>表示层的“表示”有“表现”、“演示”的意思，因此更关注数据的具体表现形式。此外，所使用的应用软件本身的不同也会导致数据的表现形式截然不同。例如有的字处理软件创建的文件只能由该字处理厂商所提供的特定版本的软件才来打开读取。</p>
+<p>那么，电子邮件中如果遇到此类问题该如何解决呢？如果用户A与用户B所使用的邮件客户端软件完全一致，就能够顺利收取和阅读邮件，不会遇到类似的问题。但是这在现实生活当中是不大可能的。让所有用户千篇一律地使用同一款客户端软件对使用者来说也是极不方便的一件事情。</p>
+<p>解决这类问题有以下几种方法。首先是利用表示层，将数据从“某个计算机特定的数据格式”转换为“网络通用的标准数据格式”后再发送出去。接收端主机收到数据以后将这些网络标准格式的数据恢复为“该计算机特定的数据格式”，然后再进行相应的处理。</p>
+<p>在前面这个例子中，由于数据被转换为通用标准的格式后再进行处理，使得异构的机型之间也能保持数据的一致性。这也正是表示层的作用所在。即表示层是进行“统一的网络数据格式”与“某一台计算机或某一款软件特有的数据格式”之间相互转换的分层。</p>
+<p>此例中的“早上好”这段文字根据其编码格式被转换成为了“统一的网络数据格式”。即便是一段简单的文字流，也可以有众多复杂的编码格式。就拿文字来说，有UTF-8、UTF-16 ISO-XXX等很多编码格式。如果未能按照特定格式编码，那么在接收端就是收到邮件也可能会是乱码。表示层与表示层之间为了识别编码格式也会附加首部信息，从而将实际传输的数据转交给下一层去处理。</p>
+<p>会话层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150821.jpg" alt=""></p>
+<p>下面，我们来分析在两端主机的会话层之间是如何高效地进行数据交互、采用何种方法传输数据的。</p>
+<p>假定用户A新建了5封电子邮件准备发给用户B。这5封邮件的发送顺序可以有很多种。例如，可以每发一封邮件时建立一次连接，随后断开连接。还可以一经建立好连接后就将5封邮件连续发送给对方。甚至可以同时建立好5个连接，将5封邮件同时发送给对方。决定采用何种连接方法是会话层的主要责任。</p>
+<p>会话层也像应用层或表示层那样，在其收到的数据前端附加首部或标签信息后再转发给下一层。而这些首部或标签中记录着数据传送顺序的信息。</p>
+<p>到此为止，我们通过例子说明了在应用层写入的数据会经由表示层格式化编码、再由会话层标记发送顺序后才被发送出去的大致过程。然而，会话层只对何时建立连接、何时发送数据等问题进行管理，并不具有实际传输数据的功能。真正负责在网络上传输具体数据的是会话层以下各层。</p>
+<p>传输层：</p>
+<p>主机A确保与主机B之间的通信并准备发送数据。这一过程叫做“建立连接”。有了这个通信连接就可以使主机A发送的电子邮件到达主机B中，并由主机B 的邮件处理程序获取最终数据。此外，当通信传输结束后，有必要将连接断开。</p>
+<p>如上，进行建立连接或断开连接的处理，在两个主机之间创建逻辑上的通信连接即是传输层的主要作用。此外，传输层为确保所传输的数据到达目标地址，会在通信两端的计算机之间进行确认，如果数据没有到达，它会负责进行重发。</p>
+<p>例如，主机A将“早上好”这一数据发送给主机B。期间可能会因为某些原因导致数据被破坏，或由于发生某种网络异常致使只有一部分数据到达目标地址。假设主机B只收到了“早上”这一部分数据，那么它会在收到数据后将自己没有收到“早上”之后那部分数据的事实告知主机A，主机A得知这个情况后会将后面的“好”重发给主机B，并再次确认对端是否收到。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150822.jpg" alt=""></p>
+<p>由此可见，保证数据传输的可靠性是传输层的一个重要作用。为了确保可靠性，在这一层也会为所要传输的数据附加首部以识别这一分层的数据。然而，实际上将数据传输给对端的处理是由网络层来完成的。</p>
+<p>网络层：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150823.jpg" alt=""></p>
+<p>网络层的作用是在网络与网络相互连接的环境中，将数据从发送端主机发送到接收端主机。两端主机之间虽然有众多数据链路，但能够将数据从主机A送到主机B也都是网络层的功劳，如下图所示：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150824.jpg" alt=""></p>
+<p>在实际发送数据时，目的地址至关重要。这个地址是进行通信的网络中唯一指定的序号。也可以把它想象为我们日常生活中使用的电话号码。只要这个目的地址确定了，就可以在众多计算机中选出该目标地址所对应的计算机发送数据。基于这个地址，就可以在网络层进行数据包的发送处理。而有了地址和网络层的包发送处理，就可以将数据发送到世界上任何一台互联设备。网络层中也会将其从上层收到的数据和地址信息等一起发送给下面的数据链路层，进行后面的处理。</p>
+<p>数据链路层、物理层：</p>
+<p>通信传输实际上是通过物理的传输介质实现的。数据链路层的作用就是在这些通过传输介质互联的设备之间进行数据处理。物理层中，将数据的0、1转换为电压和脉冲光传输给物理的传输介质，而相互直连的设备之间使用地址实现传输。而这种地址被成为MAC地址，也可称为物理地址或硬件地址。采用MAC地址，目的是为了识别连接到同一个传输介质上的设备。因此，在这一分层中将包含MAC地址信息的首部附加到从网络层转发过来的数据上，将其发送到网络。网络层与数据链路层都是基于目标地址将数据发送给接收端的，但是网络层负责将整个数据发送给最终目标地址，而数据链路层则只负责发送一个分段内的数据。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/02/20140213150825.jpg" alt=""></p>
+<p>主机B 端的处理：</p>
+<p>接收端主机B 上的处理流程正好与主机A相反，它从物理层开始将接收到的数据逐层发给上一分层进行处理，从而使用户B 最终在主机B 上使用邮件客户端软件接收用户A 发送过来的邮件，并可以读取相应内容为“早上好”。</p>
+<p>参考文献：</p>
+<p>《图解TCP/IP：第5版》</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2014-01-01T13:43:51.000Z"><a href="/2014/01/01/get-baidu-music-addr/">1月 1 2014</a></time>
       
       
@@ -392,64 +459,6 @@
 </article>
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2013-11-10T15:58:57.000Z"><a href="/2013/11/10/undefined-reference-to/">11月 10 2013</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2013/11/10/undefined-reference-to/">使用g++编译C/C++程序，链接时出现undefined reference to错误</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>题目说是g++编译C/C++程序，其实是我这个程序是C、C++混着用的，这是错误的根源，弄了几个小时才发现问题根源，记录下吧：</p>
-<p>通常链接时出现 undefined reference to 错误，一般是以下原因造成的：</p>
-<p>1.链接时缺失相关目标文件（.o）</p>
-<p>此时，注意缺少的目标文件或者相对应.c/cpp文件是否是跟在gcc语句后面</p>
-<p>2.链接时缺少相关的库文件（静态库或动态库）</p>
-<p>这个一般是动态库出问题，可以用ldconfig查看下，并且gcc链接语句里要有相应的.a或.so文件。</p>
-<p>3.库文件链接顺序出错</p>
-<p>这个其实看函数调用顺序吧，调用函数的顺序与库文件相同。</p>
-<p>4.在C++中链接C语言相关的库</p>
-<p>在C++中直接调用C语言库的函数，会导致出现undefined reference to错误，这是因为C++要对函数名重新命名（与C不一样），导致找不到C语言函数，所以需要在包含的头文件里包含extern “C” 。</p>
-<p>本来我以为第四种是我今天问题出现的主要原因，我在main函数里调用其他函数，出现了 undefined reference to 错误，详情如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">undefined reference to `looptopo(char*, <span class="symbol">std:</span><span class="symbol">:vector&lt</span>;<span class="symbol">std:</span><span class="symbol">:basic_string&lt</span>;char, <span class="symbol">std:</span><span class="symbol">:char_traits&lt</span>;char&gt;, <span class="symbol">std:</span><span class="symbol">:allocator&lt</span>;char&gt; &gt;, <span class="symbol">std:</span><span class="symbol">:allocator&lt</span>;<span class="symbol">std:</span><span class="symbol">:basic_string&lt</span>;char, <span class="symbol">std:</span><span class="symbol">:char_traits&lt</span>;char&gt;, <span class="symbol">std:</span><span class="symbol">:allocator&lt</span>;char&gt; &gt; &gt; &gt;&amp;, char const*)<span class="string">'</span></div></pre></td></tr></table></figure>
-
-<p>因为我调用了mysql以及net-snmp，这些是C函数库，链接时候可能会找不到对应的函数，但是，我更改后（添加了extern “C”）也没解决，更改方法如下：</p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/11/201311102340.png" alt=""></p>
-<p>但是，这样依然没解决问题，并且第四种如果出问题，也应该不会报我自己定义的函数未找到，后来仔细查找，终于找到了问题所在。主要原因是函数声明与定义不一致导致的：</p>
-<p>头文件里声明：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> looptopo(<span class="keyword">char</span> *topoip,<span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; &amp;vector_type,<span class="keyword">const</span> <span class="keyword">char</span> *mib_type);</div></pre></td></tr></table></figure>
-
-<p>函数定义：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> looptopo(<span class="keyword">char</span> *topoip,<span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; &amp;vector_type,<span class="keyword">char</span> *mib_type)</div><div class="line"></div><div class="line">{<span class="comment">//省略}</span></div></pre></td></tr></table></figure>
-
-<p>你会发现头文件里函数声明，第三个参数与定义不一样，一个为const，一个为no-const，将函数定义改为如下，问题解决：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> looptopo(<span class="keyword">char</span> *topoip,<span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; &amp;vector_type,<span class="keyword">const</span> <span class="keyword">char</span> *mib_type)</div></pre></td></tr></table></figure>
-
-<p>我想了想，这种情况产生的原因，因为第三个参数的实参是const类型，而声明也是const类型，所以函数编译时候是不会报错的，但是链接时候，因为C++ 是可以函数重载的，所以找不到对应的函数，导致报错。</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
 
 <nav id="pagination">
   
@@ -502,6 +511,10 @@
   <ul class="entry">
     
       <li>
+        <a href="/2014/12/01/learn-emacs-note/">Emacs学习笔记</a>
+      </li>
+    
+      <li>
         <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
       </li>
     
@@ -523,10 +536,6 @@
     
       <li>
         <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
-      </li>
-    
-      <li>
-        <a href="/2014/08/16/gdb-search-virtual-table/">使用GDB查找虚函数表</a>
       </li>
     
   </ul>
