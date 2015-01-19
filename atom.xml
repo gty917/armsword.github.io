@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2015-01-19T17:09:10.381Z</updated>
+  <updated>2015-01-19T19:35:54.090Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://armsword.com/2014/12/01/learn-emacs-note/"/>
     <id>http://armsword.com/2014/12/01/learn-emacs-note/</id>
     <published>2014-12-01T09:17:49.000Z</published>
-    <updated>2015-01-19T16:29:27.000Z</updated>
+    <updated>2015-01-19T19:35:42.000Z</updated>
     <content type="html"><![CDATA[<p>团队师兄给我说，我们团队统一使用Emacs编程，因为那边是结对编程，所以作为一枚Emacs门外汉，还是需要在明年入职前，熟悉下Emacs的基本操作的，今天折腾了一小会，感觉要比Vim复杂好多，并且总是感觉自己手不够大，命令也要比Vim难记住，索性写篇笔记记录下吧。</p>
 <h2 id="安装Emacs">安装Emacs</h2>
 <p>Ubuntu已支持最新版本，命令直接安装即可：</p>
@@ -37,7 +37,16 @@
 <li><strong>剪切</strong>：C-w</li>
 <li><strong>粘贴</strong>：C-y</li>
 <li><strong>撤销</strong>：C-x u</li>
+<li><strong>删除一行</strong>：C-k</li>
 <li><strong>搜索</strong>：向前搜索 C-s，向后搜索 C-r</li>
+<li><strong>上移</strong>：C-p</li>
+<li><strong>下移</strong>：C-n</li>
+<li><strong>左移</strong>：C-b</li>
+<li><strong>下移</strong>：C-f</li>
+<li><strong>移动到行首</strong>：C-a</li>
+<li><strong>移动到行尾</strong>：C-e</li>
+<li><strong>切换Buffer</strong>：C-x b</li>
+<li><strong>显示Buffer列表</strong>：C-x C-b</li>
 </ul>
 ]]></content>
     <summary type="html">
