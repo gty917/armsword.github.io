@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2015-01-22T08:22:46.426Z</updated>
+  <updated>2015-01-22T08:26:34.069Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://armsword.com/2014/12/01/learn-emacs-note/"/>
     <id>http://armsword.com/2014/12/01/learn-emacs-note/</id>
     <published>2014-12-01T09:17:49.000Z</published>
-    <updated>2015-01-22T08:22:37.000Z</updated>
+    <updated>2015-01-22T08:26:25.000Z</updated>
     <content type="html"><![CDATA[<p>团队师兄给我说，我们团队统一使用Emacs编程，因为那边是结对编程，所以作为一枚Emacs门外汉，还是需要在明年入职前，熟悉下Emacs的基本操作的，今天折腾了一小会，感觉要比Vim复杂好多，并且总是感觉自己手不够大，命令也要比Vim难记住，索性写篇笔记记录下吧。</p>
 <h2 id="安装Emacs">安装Emacs</h2>
 <p>Ubuntu已支持最新版本，命令直接安装即可：</p>
@@ -51,7 +51,8 @@
 <li><strong>跳转到第一行</strong>：C-Home</li>
 </ul>
 <p>跳转到指定行我自己定义了M-x快捷键。</p>
-<p>为了阅读源代码，安装了Global插件，使用gtags命令，生成4个文件，快捷键为：</p>
+<p>为了阅读源代码，安装了Global插件<br>    sudo apt-get install global</p>
+<p>使用gtags命令，生成4个文件，快捷键为：</p>
 <ul>
 <li><strong>跳转到符号定义</strong>：M-x.</li>
 <li><strong>回到之前位置</strong>：M-*</li>
