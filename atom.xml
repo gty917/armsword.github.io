@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2015-01-22T08:29:33.799Z</updated>
+  <updated>2015-01-26T08:53:17.819Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -13,6 +13,69 @@
   </author>
   
   <generator uri="http://zespia.tw/hexo/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[jwsmtp源码剖析]]></title>
+    <link href="http://armsword.com/2015/01/26/jwsmtp-analyse/"/>
+    <id>http://armsword.com/2015/01/26/jwsmtp-analyse/</id>
+    <published>2015-01-26T05:50:48.000Z</published>
+    <updated>2015-01-26T08:52:11.000Z</updated>
+    <content type="html"><![CDATA[<p>前段时间事情太多了，忙着写毕业论文，考试，然后又被抽到了盲审，不过好在有惊无险，最后也申请答辩成功，如果盲审顺利的话，4月份就可以毕业了。不过这段时间总算可以看代码、看书了，感觉自己操作系统方面有些不扎实，索性买了本孙钟秀的《操作系统教程》看，之后顺便阅读和分析了jwSMTP源码，这里写篇文章记录下。本文不想对代码细节作太多分析，因为代码比较好读，并且文章末尾我会放出我注释过的源码链接，所以此文多介绍下原理吧。</p>
+<h2 id="jwSMTP">jwSMTP</h2>
+<p>jwSMTP是一个由C++编写的发送邮件的库，支持Linux、Windows等平台。可使用HTML或纯文本方式发送邮件。也可添加附件，支持多个收件人。并且支持LOGIN和PLAIN两种服务器验证方式。</p>
+<h2 id="两种调用方式">两种调用方式</h2>
+<h3 id="第一种方式">第一种方式</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">mailer mail(“myfriend<span class="keyword">@friend</span>.com”, <span class="comment">// who the mail is too</span></div><div class="line">“someone<span class="keyword">@somewhere</span>.net”, <span class="comment">// who the mail is from</span></div><div class="line">“There <span class="keyword">is</span> always room <span class="keyword">for</span> FooBar”, <span class="comment">// subject for the email</span></div><div class="line">“Foo\nBar”, <span class="comment">// content of the message</span></div><div class="line">“ns.somewhere.net”); <span class="comment">// the nameserver to contact</span></div><div class="line"><span class="comment">// to query for an MX record</span></div><div class="line">mail.send( );</div></pre></td></tr></table></figure>
+
+<h3 id="第二种方式">第二种方式</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">mailer mail(“myfriend<span class="keyword">@friend</span>.com”, <span class="comment">// who the mail is too</span></div><div class="line">“someone<span class="keyword">@somewhere</span>.net”, <span class="comment">// who the mail is from</span></div><div class="line">“There <span class="keyword">is</span> always room <span class="keyword">for</span> FooBar”, <span class="comment">// subject for the email</span></div><div class="line">vec, <span class="comment">// content of the message</span></div><div class="line">“mail.somewhere.net”, <span class="comment">// the smtp server to mail to</span></div><div class="line">mailer::SMTP_PORT, <span class="comment">// default smtp port (25)</span></div><div class="line"><span class="literal">false</span>); <span class="comment">// do not query MX records,</span></div><div class="line"><span class="comment">// mail directly to mail.somewhere.net</span></div></pre></td></tr></table></figure>
+
+<p>主要区别是一个查询MX record，一个不查询MX record，直接发送给SMTP Server。</p>
+<h2 id="base64编码">base64编码</h2>
+<p>Base64是网络上最常见的用于传输8Bit字节代码的编码方式之一，设计此种编码是为了使二进制数据可以通过非纯8bit的传输层传输，Base64编码可用于在HTTP环境下传递较长的标识信息，另一方面，采用Base64编码具有不可读性，即所编码的数据不会被人用肉眼所直接看到。<br>电子邮件的主题，MIME都会用到base64编码。我们现在说下其原理：</p>
+<p>Base64编码方法：</p>
+<ul>
+<li>base64的编码都是按字符串长度，以每3个8bit的字符为一组，然后针对每组，首先获取每个字符的ASCII编码，然后将ASCII编码转换成8bit的二进制，得到一组3*8=24bit的字节，然后再将这24bit划分为4个6bit的字节，并在每个6bit的字节前面都填两个高位0，得到4个8bit的字节，然后将这4个8bit的字节转换成10进制，对照Base64编码表，得到对应编码后的字符。</li>
+<li>不是3的整数倍的，需要补齐而出现的0，转化成十进制的时候就不能按常规用base64编码表来对应，可以理解成为一种特殊的“异常”，编码应该对应“=”。<br>代码base64.cpp/base64.h是对Base64编码的实现，更多原理请参考下参考链接关于base64编码的原理与实现一文。打开一封Email，查看其原始信息，一般为如下所示：</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="label">Date:</span> Thu, <span class="number">25</span> <span class="keyword">Dec</span> <span class="number">2014</span> <span class="number">06</span>:<span class="number">33</span>:<span class="number">07</span> +<span class="number">0800</span> </div><div class="line"><span class="label">From:</span> A&lt;A@yeah.net&gt;</div><div class="line"><span class="label">To:</span> <span class="string">"B"</span>&lt;b<span class="localvars">@126</span>.com&gt; </div><div class="line"><span class="label">Subject:</span> </div><div class="line"><span class="built_in">X</span>-mailer: Foxmail <span class="number">5.0</span> beta2 [cn] </div><div class="line">Mime-Version: <span class="number">1.0</span> </div><div class="line">Content-Type: text/plain<span class="comment">; </span></div><div class="line">charset=<span class="string">"gb2312"</span> </div><div class="line">Content-Transfer-Encoding: base64 </div><div class="line"></div><div class="line">xOO6w6OsU25haVgNCg0KoaGhodXiysfSu7j2QmFzZTY0tcSy4srU08q8/qOhDQoNCkJlc3QgV2lz </div><div class="line">aGVzIQ0KIAkJCQkNCqGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaEgICAgICAgICAgICAgICBl </div><div class="line">U1g/IQ0KoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoSAgICAgICAgICAgICAgIHNuYWl4QHll </div><div class="line">YWgubmV0DQqhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhICAgICAgICAgMjAwMy0x </div><div class="line">Mi0yNQ0K</div></pre></td></tr></table></figure>
+
+<h2 id="程序流程">程序流程</h2>
+<p>程序一般为先设置发件人信息，之后设置收件人信息，对应的函数为setsender()和addrecipient()函数，此处没什么可说的。之后是setmessage/setmessageHTML函数，两者的主要区别是不是需要base64编码，方法前面已说，此处主要说下checkRFCcompat()函数，此函数主要功能是：将消息结尾改为CRLF（\r\n）形式，之后注意此处：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span>(message.size() == <span class="number">1</span>) {</div><div class="line">   <span class="keyword">if</span>(*(message.<span class="keyword">begin</span>()) == <span class="string">'.'</span>)</div><div class="line">      message.push_back(<span class="string">'.'</span>);</div><div class="line">}</div><div class="line"><span class="keyword">else</span> <span class="keyword">if</span>(message.size() == <span class="number">2</span>) {</div><div class="line">   <span class="keyword">if</span>(*(message.<span class="keyword">begin</span>()) == <span class="string">'.'</span>) {</div><div class="line">      it = message.<span class="keyword">begin</span>();</div><div class="line">      it = message.insert(it, <span class="string">'.'</span>);</div><div class="line">   }</div><div class="line">}</div><div class="line"><span class="keyword">else</span> {</div><div class="line">   <span class="keyword">if</span>(*(message.<span class="keyword">begin</span>()) == <span class="string">'.'</span>) {         </div><div class="line">      it = message.<span class="keyword">begin</span>();</div><div class="line">      it = message.insert(it, <span class="string">'.'</span>);</div><div class="line">   }</div><div class="line">   <span class="keyword">for</span>(it = message.<span class="keyword">begin</span>()+<span class="number">2</span>; it != message.<span class="keyword">end</span>(); ++it) {</div><div class="line">      <span class="regexp">//</span> follow the rfc. <span class="constant">Add</span> <span class="string">'.'</span> <span class="keyword">if</span> the first character on a line is <span class="string">'.'</span></div><div class="line">      <span class="keyword">if</span>(*it == <span class="string">'\n'</span>) {</div><div class="line">         <span class="keyword">if</span>( ((it + <span class="number">1</span>) != message.<span class="keyword">end</span>()) && (*(it +<span class="number">1</span>) == <span class="string">'.'</span>) ) {</div><div class="line">            it = message.insert(it + <span class="number">1</span>, <span class="string">'.'</span>);</div><div class="line">            ++it; <span class="regexp">//</span> step past</div><div class="line">         }</div><div class="line">      }</div><div class="line">   }</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>此处是根据<a href="https://www.ietf.org/rfc/rfc2821.txt" target="_blank" rel="external">RFC2821</a>（SMTP协议）的4.5.2 Transparency编写的，内容为下：</p>
+<ol>
+<li><p>Before sending a line of mail text, the SMTP client checks the first character of the line.  If it is a period, one additional period is inserted at the beginning of the line.</p>
+</li>
+<li><p>When a line of mail text is received by the SMTP server, it checks the line.  If the line is composed of a single period, it is treated as the end of mail indicator.  If the first character is a period and there are other characters on the line, the first character is deleted.</p>
+</li>
+</ol>
+<p>然后就是每一行消息不能超过1000个字符，见RFC2821的text line小节。</p>
+<p>之后的一些setsubject、setserver、addrecipent等等函数，都不做解释了，都是用来添加/删除主机、设置服务器、增加/删除收件人列表相关的，很好明白。我们重点说下邮件发送函数send()里的operator()()函数，如果lookupMXRecord为真，就调用gethostaddresses()函数，用来查询MX记录，这涉及到DNS协议相关知识，请查DNS小节。如果为fasle，则直接连接SMTP server，operator()()和makesmtpmessage()函数主要是完成了如下流程（并不完全一致，仅参考）：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">C： telnet smtp.163.com 25 （连接到163的SMTP服务器，协议规定SMTP服务器的端口号为25）</div><div class="line">S： Trying 202.108.5.83...</div><div class="line">    Connected to smtp.163.split.netease.com.</div><div class="line">    Escape character is '^]'.</div><div class="line">    220 163.com Anti-spam GT for Coremail System (163com[071018]) （220 表示连接成功）</div><div class="line">C： HELO smtp.163.com （协议规定的握手过程，格式为HELO + 服务器名称）</div><div class="line">S： 250 OK （250 表示握手成功）</div><div class="line">C： AUTH LOGIN （AUTH LOGIN 是用户登录命令）</div><div class="line">S: 334 dXNlcm5hbWU6 （334表示服务器接受）</div><div class="line">C： tommy_mail （输入明文用户名）</div><div class="line">S： 535 Error: authentication failed （服务器拒绝，因为SMTP要求用户名和密码都通过64位编码后再发送）</div><div class="line">C： AUTH LOGIN （重新要求SMTP登录）</div><div class="line">S: 334 dXNlcm5hbWU6 </div><div class="line">C: dG9tb<span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span>FpbA== （用编码后的内容发送）</div><div class="line">S： 334 UGFzc3dvcmQ6 （334表示接受）</div><div class="line">C： <span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span>aXZldXA= （编码后的密码）</div><div class="line">S： 235 Authentication successful （235 登录成功）</div><div class="line">C： MAIL FROM:<span class="variable">&lt;A@163.com&gt;</span> （MAIL FROM：<span class="variable">&lt;&gt;</span>格式，用来记录发送者）</div><div class="line">S： 250 Mail OK （250 系统常用确认信息）</div><div class="line">C： RCPT TO:<span class="variable">&lt;B@126.com&gt;</span> （接收者邮箱，可多次使用以实现发送给多个人）</div><div class="line">S： 250 Mail OK</div><div class="line">C： DATA （DATA明令表示以下为邮件正文）</div><div class="line">S： 354 End data with <span class="variable">&lt;CR&gt;</span><span class="variable">&lt;LF&gt;</span>.<span class="variable">&lt;CR&gt;</span><span class="variable">&lt;LF&gt;</span></div><div class="line">C： TO:11<span class="comment">@11 （发送给谁，这里可自由撰写，也是伪造邮件的一个入口，欺骗一般人可以，但会读源码的人欺骗不了）</span></div><div class="line">FROM:22<span class="comment">@22 （发送者是谁，可串改）</span></div><div class="line">SUBJECT:TEST MAIL SMTP （邮件主题）</div><div class="line">             </div><div class="line">hello world （空一行写邮件正文）</div><div class="line">. （正文以.结束）</div><div class="line">S： 250 Mail OK queued as smtp3,DdGowLBLAjqD6_JIg1hfBA==.63235S2 1223879684 （服务器接受）</div><div class="line">C： noop （空操作，延迟退出时间）</div><div class="line">S： 250 OK</div><div class="line">C： quit （退出SMTP服务器连接）</div><div class="line">S： 221 Bye</div></pre></td></tr></table></figure>
+
+<h2 id="DNS协议">DNS协议</h2>
+<p>调用gethostaddresses()函数，用来查询MX记录，这涉及到DNS协议相关知识，本函数可以使用nslookup命令模拟，我本地模拟如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">imlinuxer@imlinuxer:~$ nslookup </div><div class="line">&gt; set <span class="variable">type=</span>mx</div><div class="line">&gt; mail.qq.com</div><div class="line">Server:		<span class="number">127.0</span>.<span class="number">1.1</span></div><div class="line">Address:	<span class="number">127.0</span>.<span class="number">1.1</span><span class="comment">#53</span></div><div class="line"></div><div class="line">Non-authoritative answer:</div><div class="line">*** Can't find mail.qq.com: No answer</div><div class="line"></div><div class="line">Authoritative answers can be found from:</div><div class="line">mail.qq.com</div><div class="line">	<span class="variable">origin =</span> qq.com</div><div class="line">	mail <span class="variable">addr =</span> webmaster.qq.com</div><div class="line">	<span class="variable">serial =</span> <span class="number">1186990741</span></div><div class="line">	<span class="variable">refresh =</span> <span class="number">300</span></div><div class="line">	<span class="variable">retry =</span> <span class="number">600</span></div><div class="line">	<span class="variable">expire =</span> <span class="number">86400</span></div><div class="line">	<span class="variable">minimum =</span> <span class="number">86400</span></div></pre></td></tr></table></figure>
+
+<p>DNS的协议为<a href="http://www.ietf.org/rfc/rfc1035.txt" target="_blank" rel="external">rfc1035</a>，但是枯燥难懂，可以查看参考链接的DNS消息格式，比较容易理解。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> dns[<span class="number">512</span>] = {<span class="number">1</span>,<span class="number">1</span>,   <span class="number">1</span>,<span class="number">0</span>,      <span class="number">0</span>,<span class="number">1</span>,      <span class="number">0</span>,<span class="number">0</span>, <span class="number">0</span>,<span class="number">0</span>, <span class="number">0</span>,<span class="number">0</span>};</div></pre></td></tr></table></figure>
+
+<p>比如此处即为DNS Header消息头部信息。<br>之后几段代码是请求部分格式，代码里我已详细注释，之后发送请求，解析应答即可。</p>
+<h2 id="SMTP验证方式">SMTP验证方式</h2>
+<p>比较简单，原理见此：<a href="http://blog.csdn.net/mhfh611/article/details/9470599" target="_blank" rel="external">SMTP验证方式种类（LOGIN、PLAIN、CRAM-MD5）</a><br>jwSMTP代码只实现了两种验证方式：LOGIN和PLAIN。</p>
+<p>说的有点多了，感觉很多原理都解释了，逻辑稍微有一点混乱，主要是自己不是那么擅长组织语言，如果读者有兴趣，可以多了解下原理，知道SMTP和DNS原理，基本上代码就不需要多看了。</p>
+<p>最后扔出我的中文源码剖析代码，在Github上：</p>
+<p><a href="https://github.com/armsword/Source/tree/master/jwSMTP" target="_blank" rel="external">https://github.com/armsword/Source/tree/master/jwSMTP</a></p>
+<h2 id="参考链接">参考链接</h2>
+<p><a href="http://www.cnblogs.com/hongru/archive/2012/01/14/2321397.html" target="_blank" rel="external">关于base64编码的原理与实现</a><br><a href="http://blog.csdn.net/zhangchaomao1987528/article/details/8719733" target="_blank" rel="external">POP3 SMTP协议分析学习笔记</a><br><a href="http://www.cnblogs.com/cobbliu/archive/2013/04/02/2996333.html" target="_blank" rel="external">DNS消息格式</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>前段时间事情太多了，忙着写毕业论文，考试，然后又被抽到了盲审，不过好在有惊无险，最后也申请答辩成功，如果盲审顺利的话，4月份就可以毕业了。不过这段时间总算可以看代码、看书了，感觉自己操作系统方面有些不扎实，索性买了本孙钟秀的《操作系统教程》看，之后顺便阅读和分析了jwSMT]]>
+    </summary>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[Emacs学习笔记]]></title>
@@ -896,88 +959,6 @@ timeout &gt; 0 等待timeout毫秒，如果已超时但是还没有一个描述�
 ]]></content>
     <summary type="html">
     <![CDATA[<p>在Socket编程时，为了处理大量客户的连接请求，需要使用非阻塞I/O和端口复用，select、poll和epoll是Linux API提供的I/O复用方式。其实在*nix下的网络并发方法向来不缺，比如典型的Apache模型（Process Per Connection，简]]>
-    </summary>
-    
-      <category term="Linux" scheme="http://armsword.com/categories/Linux/"/>
-    
-  </entry>
-  
-  <entry>
-    <title><![CDATA[常用的socket并发方法总结]]></title>
-    <link href="http://armsword.com/2014/03/06/socket-concurrency/"/>
-    <id>http://armsword.com/2014/03/06/socket-concurrency/</id>
-    <published>2014-03-06T15:13:09.000Z</published>
-    <updated>2014-11-22T16:11:10.000Z</updated>
-    <content type="html"><![CDATA[<p>套接字相关函数默认是采用阻塞方式操作，而大多数情况下，程序不仅仅只拥有一个套接字。因此当进程以阻塞方式操作其中之一时，必将导致不能使用其他套接字。如果用户希望这些套接字同时工作，就必须设计并发打套接字程序，即在一个套接字读写的同时保证另一个套接字也能正常操作。</p>
-<p>以下几种方法是常用的并发模型：</p>
-<p>1.非阻塞并发模型</p>
-<p>I/O阻塞是影响进程并发的重要原因，进程一旦进入阻塞，就不能再执行任何操作。比如进程调用输入函数后，在默认情况下就必需一直阻塞直到产生满足条件的数据为止。</p>
-<p>套接字也是一种I/O设备，它有四类阻塞，分别是输入类（read，recv和recvfrom等）、输出类（write和send）、连接申请类（connect）和连接处理（accept），其中UDP协议数据发送函数sendto不产生阻塞。</p>
-<p>当套接字调用以上函数时，将导致进程阻塞。因此把套接字函数的阻塞模式更改为非阻塞模式，是实现并发套接字程序的一种方法。</p>
-<p>函数fcntl设置套接字描述符的O_NONBLOCK标志后，即可将I/O方式更改为非阻塞方式。此时如果输入函数（read、recv、recvfrom）、输出函数（write、send）或者连接处理函数（accept）的成功条件不满足，将立即返回-1并置errno为EAGAIN错误，如果连接申请函数（connect）的成功条件不满足，将返回-1并置errno为EINPROGRESS错误。</p>
-<p>如：将套接字描述符nSock设置为非阻塞方式：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> nType;</div><div class="line">nType = <span class="keyword">fcntl</span>(nSock,F_GETFL,<span class="number">0</span>);</div><div class="line"><span class="keyword">fcntl</span>(nSock,F_SETFL,nType|O_NONBLOCK);</div></pre></td></tr></table></figure>
-
-<p>首先读取了描述符的信息，然后在此基础上增加了非阻塞标志。</p>
-<p>2.信号驱动模型</p>
-<p>Windows下有消息驱动的概念，在<em>nix环境下也存在着类似的机制，不过不是消息去驱动方式，而是信号驱动I/O模式。在这种模式下，进程可以一边做其他的事，一边等待信号。当文件描述符就绪时，</em>inx内核会向进程发送SIGIO信号（某些系统是SIGPOLL信号），进程获取该信号并调用预先准备的处理函数执行I/O操作。当函数调用完毕后，进程回到接收信号前的代码处继续工作。</p>
-<p>在一个套接字上实现信号驱动的步骤如下：</p>
-<p>（1）为信号SIGIO设计处理函数并捕获信号</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void <span class="func"><span class="keyword">func</span><span class="params">(int sig)</span></span> <span class="comment">//信号处理函数</span></div><div class="line">{</div><div class="line"> ......</div><div class="line"> signal(<span class="type">SIGIO</span>,<span class="func"><span class="keyword">func</span></span>);</div><div class="line">}</div><div class="line"></div><div class="line">......</div><div class="line">signal(<span class="type">SIGIO</span>,<span class="func"><span class="keyword">func</span></span>); <span class="comment">//捕获信号SIGIO</span></div></pre></td></tr></table></figure>
-
-<p>（2）设定套接字的归属主，设置接收SIGIO信号的进程或进程组</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function">fcntl</span>(nSock,F_SETOWN,<span class="function">getpid</span>()); <span class="comment">//设置接收信号的进程</span></div><div class="line">或者</div><div class="line"><span class="function">fcntl</span>(nSock,F_SETOWN,<span class="function">getpgrp</span>()); <span class="comment">//设置接收信号的进程组</span></div></pre></td></tr></table></figure>
-
-<p>（3）设置套接字的异步I/O属性</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> nType;</div><div class="line">nType = <span class="keyword">fcntl</span>(nSock,F_GETFL,<span class="number">0</span>);</div><div class="line"><span class="keyword">fcntl</span>(nSock,F_SETFL,nType|O_ASYNC);</div></pre></td></tr></table></figure>
-
-<p>套接字信号驱动的设置非常简单，但在实践中却难以实现。因为UNIX内核并不仅仅在套接字有输入时才发送SIGIO信号，在套接字连接、输出、错误和其他状态变化时均发送该信号，这样就直接导致了进程在接收信号后无法正确地判断下一步的行为。</p>
-<p>3.超时并发模型</p>
-<p>超时也是防止阻塞的一种手段，它可以保证进程不被永远挂起。阻塞函数的超时时间长度决定了进程的并发程序，超时时间越小，并发度越高，超时时间越大，则并发度越低。</p>
-<p>（1）通过套接字选项设置超时</p>
-<p>可以通过套接字选项SO_SNDTIMEO和SO_RCVTIMEO分别设置套接字描述符上的写入和读取操作的超时时间。但本方法有如下缺陷：</p>
-<p>&lt;1&gt;只能设置套接字描述符上的读取和写入操作的超时时间，不能设置connect和accept等连接操作的超时。</p>
-<p>&lt;2&gt;某些版本的*nix不支持这两个套接字选项。</p>
-<p>（2）通过信号SIGALRM设置超时</p>
-<p>在*nix下的阻塞函数一般都有在进程接收到任意信号后中断返回的传统，套接字函数也不例外，利用这个特性使用定时器信号SIGALRM实现套接字的超时处理。</p>
-<p>步骤如下：</p>
-<p>&lt;1&gt;定义超时标志。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> nTimeOut = <span class="number">0</span>;</div></pre></td></tr></table></figure>
-
-<p>静态整型变量nTimeOut代表函数超时，默认取值为0表示没有超时，取值为1时表示已经超时。</p>
-<p>&lt;2&gt;为信号SIGALRM设计处理函数。</p>
-<p>进程捕获定时器信号SIGALRM后将调用函数OnTimeOut进行处理：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> OnTimeout(<span class="keyword">int</span> nSignal)</div><div class="line">{</div><div class="line"> <span class="keyword">signal</span>(nSignal,SIG_IGN); <span class="comment">//超时一次后就忽略信号SIGALARM，防止循环超时</span></div><div class="line"> nTimeOut = <span class="number">1</span>; <span class="comment">//设置超时标识为“已超时”</span></div><div class="line"> <span class="keyword">return</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>&lt;3&gt;捕获信号SIGALRM并设置定时器。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function">signal</span>(SIGALRM,OnTimeOut); <span class="comment">//捕获信号SIGALRM</span></div><div class="line"><span class="function">alarm</span>(TIMEOUT); <span class="comment">//TIMEOUT秒后发送定时器信号SIGALRM</span></div></pre></td></tr></table></figure>
-
-<p>&lt;4&gt;调用套接字阻塞处理函数，比如套接字接收（recv、read、recvfrom）、发送（send、write）、连接申请（connect）或接收连接（accept）。</p>
-<p>&lt;5&gt;取消定时器并忽略信号SIGALRM</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">alarm(<span class="number">0</span>);</div><div class="line">signal(SIGALRM,SIG_IGN);</div><div class="line"><span class="keyword">if</span>(nTimeOut == <span class="number">1</span>) <span class="comment">//超时处理</span></div><div class="line"><span class="keyword">else</span> <span class="comment">//非超时处理</span></div></pre></td></tr></table></figure>
-
-<p>（3）通过信号SIGALRM与跳转设置超时</p>
-<p>&lt;1&gt;定义超时标志和跳转结构</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> nTimeOut = <span class="number">0</span>;</div><div class="line">jmp_buf env;</div></pre></td></tr></table></figure>
-
-<p>&lt;2&gt;为信号SIGALRM设置处理函数</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//在处理函数中除了更改超时标志外，还增加了跳转语句，如函数OnTimeOut所示：</span></div><div class="line"><span class="keyword">void</span> OnTimeout(<span class="keyword">int</span> nSignal)</div><div class="line">{</div><div class="line"> <span class="keyword">signal</span>(nSignal,SIG_IGN); <span class="comment">//超时一次后就忽略信号SIGALARM，防止循环超时</span></div><div class="line"> nTimeOut = <span class="number">1</span>; <span class="comment">//设置超时标识为“已超时”</span></div><div class="line"> longjmp(env,<span class="number">1</span>); <span class="comment">//语句跳转</span></div><div class="line"> <span class="keyword">return</span>; <span class="comment">//本句实际上已经不会执行了</span></div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>&lt;3&gt;记录跳转点</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">setjmp(<span class="keyword">env</span>);</div></pre></td></tr></table></figure>
-
-<p>&lt;4&gt;超时判断</p>
-<p>&lt;5&gt;捕获信号SIGALRM并设置定时器</p>
-<p>&lt;6&gt;调用套接字阻塞处理函数，比如套接字接收（recv、read、recvfrom）、发送（send、write）、连接申请（connect）或接收连接（accept）等。</p>
-<p>&lt;7&gt;取消定时器并忽略信号SIGALRM。</p>
-<p>4.多路复用并发模型</p>
-<p>如select，多路复用函数把一些文件描述符集合在一起，如果某个文件描述符的状态发生变化，比如进入“写就绪”或者“读就绪”状态，函数select会立即返回，并且通知进程读取或写入数据，如果没有I/O到达，进程将进入阻塞，直到函数select超时退出为止。</p>
-<p>select/poll/epoll是Socket并发常用的方法，等有空再总结吧。</p>
-<p>&nbsp;</p>
-]]></content>
-    <summary type="html">
-    <![CDATA[<p>套接字相关函数默认是采用阻塞方式操作，而大多数情况下，程序不仅仅只拥有一个套接字。因此当进程以阻塞方式操作其中之一时，必将导致不能使用其他套接字。如果用户希望这些套接字同时工作，就必须设计并发打套接字程序，即在一个套接字读写的同时保证另一个套接字也能正常操作。</p>
-<p]]>
     </summary>
     
       <category term="Linux" scheme="http://armsword.com/categories/Linux/"/>

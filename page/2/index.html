@@ -55,6 +55,45 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2014-08-30T10:34:35.000Z"><a href="/2014/08/30/find-the-invaded-reason/">8月 30 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>刚吃完午饭，回到宿舍，就听同学说，自己实验室服务器（在实验室公司机房里）被入侵了，已经乱成一团了，他们找了很长时间，没找到原因。然后，我本来打算写完英文简历后，再去趟实验室公司看看，结果还没一会，导师就跟我打电话，让我速度去趟实验室公司，让我打车过去，我学校（从我宿舍开始）离实验室公司走路也就20分钟，我想可能导师也着急了，于是我匆忙赶往公司。</p>
+<p>师弟师妹们跟我说下情况，由于他们经验也不充足，所以描述的事情情况，让我刚开始思维走了很多弯路。他们说，Linux系统被植入木马了，MySQL表被删除了很多，也添加了很多新的数据，删不掉，删除表数据之后立马又重新出现，巴拉巴拉。。。</p>
+<p>于是我刚开始的任务就是查看Linux下的进程，端口，历史登录信息，使用了iptraf做流量检测等等，当时想既然删除表数据，又重新出现，是不是使用了定时脚本，心不在焉的找了半天，没查出原因。</p>
+<p>后来，从历史记录中发现是黑客从局域网里面一台设备（IP为192.168.3.139）登录了Linux服务器。于是大家就开始查找这台局域网IP为192.168.3.139的设备。大家把所有网线拔掉，排除法等等方式也没找到，当时，我在我的找工作群里随口问了句，什么原因能导致局域网里存在一个IP，但是确发现不了设备，大家说，应该是路由器。因为公司这边的路由器IP为192.168.2.1和192.168.3.1，与有问题的那台设备IP不同，我就困惑了，后来我在linux和window下ping那个IP，TTL值分别为64和63，我心里感觉肯定是路由有问题。</p>
+<p>后来，师弟师妹们又一起查看公司的每台设备，终于在一工位下面发现了问题，有台无线路由器，于是用iptraf做了测试，发现正是这台无线路由器被人入侵了。</p>
+<p>所以，整个过程就是，由于实验室这边的IP是固定IP，黑客入侵了公司的无线路由器，而路由器使用的是默认密码，之后通过无线路由器，扫描局域网IP，查找一些危险端口，恰巧师弟师妹这段时间在做一个Web项目，程序部署在那台Linux服务器上，此项目涉及到文件上传，图片上传等功能，而经验不丰富的师弟师妹，没有对文件上传做些漏洞检测，也没有对SQL做些过滤，于是MySQL里被塞满了SQL命令，Web文件里的Upload文件夹上传了很多后缀为PHP的jpg网页木马。之后又通过该路由对局域网其他机器进行DDos等等，所以出现断网现象。</p>
+<p>话说，现在的无线路由器越来越智能，但是也给某些人留下了有机可乘的地方，我感觉公司在对服务器做好安全防护的同时，也应该多注意下无线路由这些智能设备的配置和管理，根据最近1、2年发生的安全事件看，安全部门在互联网公司地位是越来越高了。</p>
+<p>随手记，最后说下工作情况吧，由于微软STC部门可能不怎么招人了，那就希望自己能顺利拿到阿里（杭州）的Offer吧，最好A档以上，为了保险，师兄也帮我内推了下网易游戏，找工作这事缘分也蛮重要的，目前我面试比较慢热，临场发挥不是太好，还需多锻炼下。</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2014-08-16T10:04:28.000Z"><a href="/2014/08/16/gdb-search-virtual-table/">8月 16 2014</a></time>
       
       
@@ -419,50 +458,6 @@
 </article>
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2014-05-15T07:33:44.000Z"><a href="/2014/05/15/c-let-url-encode-and-decode/">5月 15 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/05/15/c-let-url-encode-and-decode/">用C语言实现URL Encode 和 Decode</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>这几天在用C语言实现一个轻量级 CGI Server，还差一小部分就完成了，昨天晚上在实现URL Decode功能，怎么也实现不了，当时感觉累了，智商就跟不上了，今天起床后，重新实现了该部分代码，发现是我对URL 编码和解码部分理解不够深入，这里记录下。</p>
-<p>我这里简单说下原理，不懂的看下参考资料里的详细解释，URL链接里的中文是以UTF-8编码的，URL 链接里的编码规则为：</p>
-<ul>
-<li>将空格转换为加号（+）。</li>
-<li>对0-9,a-z,A-Z之间的字符保持不变。</li>
-<li>对于所有其他的字符，用这个字符的当前字符集编码在内存中的十六进制格式表示，并在每个字节前加上一个百分号（%）。如字符“+”用%2B表示，字符“=”用%3D表示，字符“&amp;”用%26表示，而“我爱你中国”用%e6%88%91%e7%88%b1%e4%bd%a0%e4%b8%ad%e5%9b%bd表示。<br>所以，对于%e4%b8%ad我们想解码的话，只需要把e4 b8 ad 各字符分别转换为对应的二进制即可，即，e = 1110 4 = 0100 等等，之后组合起来，按照UTF-8编码对应的规则，即可解释出对应的中文（或其他语言），详细原理可以查看参考链接。</li>
-</ul>
-<p>我们这里写下C语言实现的Encode代码，Decode我就懒的打了。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include &lt;stdio&gt;</span></div><div class="line"><span class="comment">#include &lt;stdlib&gt;</span></div><div class="line"><span class="comment">#include &lt;string.h&gt;</span></div><div class="line"><span class="comment">#include &lt;ctype.h&gt;</span></div><div class="line"></div><div class="line">char from_hex(char ch)</div><div class="line">{</div><div class="line">	<span class="keyword">return</span> isdigit(ch) ? ch - <span class="string">'0'</span>: tolower(ch) - <span class="string">'a'</span> + <span class="number">10</span>;</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"></div><div class="line">	char *url = &quot;<span class="variable">%e6</span><span class="variable">%88</span><span class="variable">%91</span><span class="variable">%e7</span><span class="variable">%88</span><span class="variable">%b1</span><span class="variable">%e4</span><span class="variable">%bd</span><span class="variable">%a0</span><span class="variable">%e4</span><span class="variable">%b8</span><span class="variable">%ad</span><span class="variable">%e5</span><span class="variable">%9b</span><span class="variable">%bd</span>&quot;;</div><div class="line">	<span class="keyword">printf</span>(&quot;<span class="variable">%s</span>\n&quot;,url);</div><div class="line">	<span class="keyword">if</span>(strstr(url,&quot;<span class="variable">%&</span>quot;))</div><div class="line">	{</div><div class="line">		char *buf = malloc(strlen(url) + <span class="number">1</span>);</div><div class="line">		char *pstr = url;</div><div class="line">		char *pbuf = buf;</div><div class="line">		<span class="keyword">while</span>(*pstr)</div><div class="line">		{</div><div class="line">			<span class="keyword">if</span>(*pstr == <span class="string">'%'</span>)</div><div class="line">			{</div><div class="line">				<span class="keyword">if</span>(pstr[<span class="number">1</span>] &amp;&amp; pstr[<span class="number">2</span>])</div><div class="line">				{</div><div class="line">					*pbuf++ = from_hex(pstr[<span class="number">1</span>]) &<span class="keyword">lt</span>;&<span class="keyword">lt</span>; <span class="number">4</span> | from_hex(pstr[<span class="number">2</span>]);</div><div class="line">					pstr += <span class="number">2</span>;</div><div class="line">				}</div><div class="line">			}</div><div class="line">			<span class="keyword">else</span> <span class="keyword">if</span>(*pstr == <span class="string">'+'</span>)</div><div class="line">			{</div><div class="line">				*pbuf++ = <span class="string">' '</span>;</div><div class="line">			}</div><div class="line">			<span class="keyword">else</span></div><div class="line">			{</div><div class="line">				*pbuf++ = *pstr;</div><div class="line">			}</div><div class="line">			pstr++;</div><div class="line">		}</div><div class="line">		*pbuf = <span class="string">'&#92;&#48;'</span>;</div><div class="line">		<span class="keyword">printf</span>(&quot;<span class="variable">%s</span>\n&quot;,buf);</div><div class="line">		free(buf);</div><div class="line">	}</div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>结果输出为：<br>%e6%88%91%e7%88%b1%e4%bd%a0%e4%b8%ad%e5%9b%bd<br>我爱你中国</p>
-<p>参考链接：</p>
-<p><a href="http://www.ruanyifeng.com/blog/2010/02/url_encoding.html" target="_blank" rel="external">http://www.ruanyifeng.com/blog/2010/02/url_encoding.html</a></p>
-<p><a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html" target="_blank" rel="external">http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html</a></p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
 
 <nav id="pagination">
   
@@ -515,6 +510,10 @@
   <ul class="entry">
     
       <li>
+        <a href="/2015/01/26/jwsmtp-analyse/">jwsmtp源码剖析</a>
+      </li>
+    
+      <li>
         <a href="/2014/12/01/learn-emacs-note/">Emacs学习笔记</a>
       </li>
     
@@ -536,10 +535,6 @@
     
       <li>
         <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
-      </li>
-    
-      <li>
-        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
       </li>
     
   </ul>

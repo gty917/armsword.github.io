@@ -55,6 +55,178 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2013-06-23T09:16:21.000Z"><a href="/2013/06/23/note-effective-cpp/">6月 23 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/23/note-effective-cpp/">《Effective C++》读书笔记</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>据传，Lippman把程序员分为看过Effective C++的和没看过的两大类。其实，与C++经典书籍如《C++ Primer》（基础知识）和《Thinking in C++》（进阶）比起来要薄很多。这本书又有个名字叫做改善程序和设计的55个做法，所以从这可以看出其基本是面向工程的，简单做个读书笔记。</p>
+<p><em>1. 让自己习惯c++</em></p>
+<p>1.初始化是给予对象初值的过程，对用户自定义类型的对象而言，初始化由构造函数执行。默认构造函数是一个可被调用而不带任何实参者，这样的构造函数要不没有参数，要不就是每个参数都有缺省值。</p>
+<p>如下就为默认构造函数：</p>
+<p>class B{</p>
+<p>public:</p>
+<p>explicit B(int x=0,bool b=true);</p>
+<p>};</p>
+<p>构造函数被声明为explicit，可阻止它们被用来执行隐式类型转换，但它们仍可被用来执行显示类型转换。它们禁止编译器执行非预期的类型转换，鼓励使用。</p>
+<p>2.copy构造函数（拷贝构造函数）被用来“以同型对象初始化自我对象”，copy assignment操作符（拷贝赋值操作符）被用来“从另一个同型对象中拷贝其值到自我对象”。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">class Widget {</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="title">Widget</span>(); <span class="comment">//default构造函数</span></div><div class="line"> Widget(<span class="keyword">const</span> Widget& rhs); <span class="comment">//copy 构造函数</span></div><div class="line"> Widget& <span class="keyword">operator</span>=(<span class="keyword">const</span> Widget& rhs); <span class="comment">//copy assignment 操作符</span></div><div class="line"> ...</div><div class="line">};</div><div class="line">Widget wl; <span class="comment">//调用default 构造函数</span></div><div class="line">Widget w2 (wl) ; <span class="comment">//调用copy 构造函数</span></div><div class="line">wl = w2; <span class="comment">//调用copy assignment 操作符</span></div></pre></td></tr></table></figure>
+
+<p>当看到赋值符号时请小心，因为“=”语法也可用来调用copy构造函数：</p>
+<p>Widget w3 = w2;  //调用copy构造函数！</p>
+<p>幸运的是“copy构造”很容易和“copy赋值”区别。如果一个新对象被定义（例如上面的w3），一定会有个构造函数被调用，不可能调用赋值操作。如果没有新对象被定义（如前述的“w1=w2”语句），就不会有构造函数被调用，那么当然就是赋值操作符被调用。</p>
+<p><em>条款01：视c++ 为一个语言联邦</em></p>
+<p><em>条款02：尽量以const, enum, inline替换 #define</em></p>
+<p><em>1.这个条款可以改为“宁可以编译器替换预处理器”比较好。</em></p>
+<p><em>2.为了将常量的作用域限制于class内，你必须让它成为class的一个成员，而为确保此常量至多只有一份实体，必须让它成为一个static成员：</em></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">GanmePlayer</span></span>{</div><div class="line"><span class="keyword">private</span>:</div><div class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> NumTurns = <span class="number">5</span>; <span class="comment">//常量声明式</span></div><div class="line"><span class="comment">//或者 enum{NumTurns = 5}; //enum结构体定义的是常量，但并不是在预编译的时候进行替换，而是在运行时，从enum定义的常量存储区取定义的常量值。</span></div><div class="line"><span class="keyword">int</span> socres[NumTurns]; <span class="comment">//使用该常量</span></div><div class="line">...</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>所以：</p>
+<p>对于单纯常量，最好以const对象或enums替换#define。</p>
+<p>对于形似函数的宏(macros)，最好改用inline函数替换#define。</p>
+<p><em>条款03：尽可能使用const</em></p>
+<p>1.const语法：如果关键字const出现在星号左边，表示被指物是常量；如果出现在星号右边，表示指针是常量；如果出现在星号两边，表示被指物和指针都是常量。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">char</span>* p = greeting;</div><div class="line"></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span> *p = greeting ; <span class="comment">//non-const pointer,const data</span></div><div class="line"></div><div class="line"><span class="keyword">char</span>* <span class="keyword">const</span> p = greeting; <span class="comment">//const pointer,non-const data</span></div><div class="line"></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="keyword">const</span> p = greeting; <span class="comment">//const pointer,const data</span></div></pre></td></tr></table></figure>
+
+<p>2. STL迭代器系以指针为根据塑模出来，所以迭代器的作用就像个T<em>指针。声明迭代器为const就像声明指针为const一样（即声明一个T</em> const指针），表示这个迭代器不得不指向不同的东西，但它所指的东西的值是可以改动的。如果希望迭代器所指的东西不可被改动（即希望STL模拟一个const T* 指针），需要的是const_iterator。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">std::vector&lt;<span class="type">int</span>&gt; vec;</div><div class="line">...</div><div class="line"><span class="keyword">const</span> std::vector&lt;<span class="type">int</span>&gt;::<span class="keyword">iterator</span> iter = vec.begin( ); //iter的作用像个T* <span class="keyword">const</span></div><div class="line">*iter = <span class="number">10</span>; //没问题，改变iter 所指物</div><div class="line">++iter; //错误! iter 是<span class="keyword">const</span></div><div class="line">std::vector&lt;<span class="type">int</span>&gt;::<span class="keyword">const</span> <span class="keyword">iterator</span> clter = vec.begin( ); //cIter的作用像个<span class="keyword">const</span> T*</div><div class="line">*clter = <span class="number">10</span>; //错误! *cIter是<span class="keyword">const</span></div><div class="line">++clter; //没问题，改变cIter</div><div class="line"></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>3.在C++中，mutable是为了突破const的限制而设置的，被mutable修饰的变量，将永远处于可变的状态，即使在一个const函数中。比如在const成员函数中，不能改变成员变量的值，使用mutable解决。</p>
+<p><em>条款04：确定对象被使用前已先被初始化</em></p>
+<p>1.为内置对象进行手工初始化，因为C++不保证初始化它们。</p>
+<p>2.构造函数最好使用成员初值列，而不要在构造函数本体内使用赋值操作。初值列列出的成员变量，其排列次序应该和它们在class中的声明次序相同。</p>
+<p>3.为免除“跨编译单元之初始化次序”问题，请以local static 对象替换non-local static 对象。</p>
+<p><em>2. 构造/析构/赋值运算</em></p>
+<p><em>条款05：了解c++ 默默编写并调用哪些函数</em></p>
+<p>1.编译器可以暗自为class创建default构造函数、copy构造函数、copy assignment操作符，以及析构函数。</p>
+<p>如果你写下：</p>
+<p>class Empty();</p>
+<p>这就好像你写下这样的代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class Empty {</div><div class="line">public:</div><div class="line">Empty() { <span class="keyword">...</span> } //default构造函数</div><div class="line">Empty(const Empty& rhs) { <span class="keyword">...</span> ) //copy构造函数</div><div class="line">~Empty( ) { <span class="keyword">...</span> } //析构函数</div><div class="line">Empty& operator=(const Empty& rhs) { <span class="keyword">...</span> } //copy assignment操作符</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p><em>条款06：若不想使用编译器自动生成的函数，就该明确拒绝</em></p>
+<p><em>条款07：为多态基类声明virtual析构函数</em></p>
+<p>1.任何类只要带有虚函数都几乎确定应该也有一个虚析构函数。</p>
+<p>2.欲实现出virtual函数，对象必须携带某些信息，主要用来在运行期决定哪一个虚函数该被调用。这份信息通常是由一个所谓vptr(virtual table pointer)指针指出。vptr指向一个由函数指针构成的数组，称为vtbl(virtual table)，每一个带有virtual函数的class都有一个相应的vtbl。当对象调用某一virtual函数，实际被调用的函数取决于该对象的vptr所指的那个vtbl——编译器在其中寻找适当的函数指针。</p>
+<p>带多态性质的base classes应该声明一个virtual析构函数，如果class带有任何virtual函数，它就应该拥有一个virtual析构函数。</p>
+<p>3.Classes的设计目的如果不是作为base classes使用，或不是为了具备多态性，就不该声明virtual析构函数。</p>
+<p><em>条款08：别让异常逃离析构函数</em></p>
+<p><em>条款09：绝不在构造和析构过程中调用virtual函数</em></p>
+<p><em>条款10：令operator= 返回一个reference to *this</em></p>
+<p><em>条款11：在operator= 中处理“自我赋值”</em></p>
+<p><em>条款12：复制对象时勿忘其每一个成分</em></p>
+<p><em>3. 资源管理</em></p>
+<p>C++程序中最常使用的资源就是动态内存分配，但内存只是必须管理的众多资源之一。其他常见的资源还包括文件描述符、互斥锁、图形界面中的字型和笔刷、数据库连接以及网络sockets。不论哪一种资源，重要的是，当你不再使用它时，必须将它还给系统。</p>
+<p><em>条款13：以对象管理资源</em></p>
+<p>两个常被使用的RAII classes 分别是tr1::shared_ptr和auto_ptr。前者通常是较佳选择，因为其copy行为比较直观。若选择auto_ptr，复制动作会使它（被复制物）null。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">void f()</div><div class="line">{</div><div class="line">std::auto_ptr&lt;Investment&gt; pInv(createInvestment());</div><div class="line"> //调用factory函数</div><div class="line"> //一如以往地使用pInv</div><div class="line"><span class="keyword">...</span> //经由auto_ptr的析构函数自动删除pInv</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void f()</div><div class="line">{</div><div class="line"><span class="keyword">...</span></div><div class="line">std::tr1::shared_ptr&lt;Investment&gt;</div><div class="line">pInv(createInvestment()); //调用factory函数</div><div class="line"> //使用pInv一如以往</div><div class="line"><span class="keyword">...</span> //经由shared_ptr的析构函数自动删除pInv</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p><em>条款14：在资源管理类中小心coping行为指向</em></p>
+<p><em>条款15：在资源管理类中提供对原始资源的访问</em></p>
+<p><em>条款16：成对使用new和delete时要采取相同形式</em></p>
+<p>当你对着一个指针使用delete，唯一能够让delete知道内存中是否存在一个“数组大小记录”的办法就是：由你来告诉它。如果你使用delete时加上中括号(方括号)，delete便认定指针指向一个数组，否则它便认定指针指向单一对象。</p>
+<p><em>条款17：以独立语句将newed对象置入智能指针</em></p>
+<p>以独立语句将new对象存储于(置入)智能指针内，如果不这样做，一旦异常被抛出，有可能导致</p>
+<p><em>4. 设计与声明</em></p>
+<p><em>条款18：让接口容易被正确使用，不易被误用</em></p>
+<p>tr1::shared_ptr支持定制型删除器，这可防范DLL问题，可被用来自动解除互斥锁等等。</p>
+<p><em>条款19：设计class犹如设计type</em></p>
+<p><em>条款20：宁以pass-by-reference-to-const替换pass-by-value</em></p>
+<p>1.缺省情况下C++以by value方式（一个继承自C的方式）传递对象至（或来自）函数。除非你另外指定，否则函数参数都是以实际实参的复件（副本）为初值，而调用端所获得亦是函数返回值的一个复件。</p>
+<p>2.尽量以pass-by-reference-to-const替换pass-by-value，前者通常比较高效，并可避免切割问题（slicing problem），以上规则并不适用于内置类型，以及STL的迭代器和函数对象。对它们而言，pass-by-value往往比较恰当。</p>
+<p><em>条款21：必须返回对象时，别妄想返回其reference</em></p>
+<p>1.绝不要返回pointer或reference指向一个local stack对象或返回reference指向一个heap-allocated对象（delete操作是根据不同的类型调用不同的析构函数），或返回pointer或reference指向一个local static对象而有可能同时需要多个这样的对象(多线程)。</p>
+<p><em>条款22：将成员变量声明为private</em></p>
+<p><em>条款23：宁以non-member、non-friend替换member函数</em></p>
+<p><em>条款24：若所有参数皆需类型转换，请为此采用non-member函数</em></p>
+<p><em>条款25：考虑写出一个不抛异常的swap函数</em></p>
+<p><em>5. 实现</em></p>
+<p>太快定义变量可能造成效率上的拖延：过度使用转型(casts)可能导致代码变慢又难维护，又招来微妙难解的错误；返回对象“内部数据之号码牌（handles）”可能会破坏封装并留给客户虚吊号码牌（dangling handles）；未考虑异常带来的冲击则可能导致资源泄漏和数据败坏；过度热心地inlining可能引起代码膨胀；过度耦合（coupling）则可能导致让人不满意的冗长建置时间（build times）。</p>
+<p><em>条款26：尽可能延后变量定义式的出现时间</em></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">std::string encryptPassword(const std::string& password)</div><div class="line">{</div><div class="line"> using namespace std;</div><div class="line"> string encrypted;</div><div class="line"> <span class="keyword">if</span>(password.length() &lt; MinimumPasswordLength)</div><div class="line"> {</div><div class="line"> throw logic_error(<span class="string">"Password is too short"</span>);</div><div class="line"> }</div><div class="line"> <span class="keyword">...</span></div><div class="line"> <span class="keyword">return</span> encrypted;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>对象encrypted在此函数中并非完全未使用，但如果有个异常被丢出，它就真的没被使用。也就是说如果函数encryptPassword丢出异常，你仍得付出encrypted的构造成本和析构成本。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">std::string encryptPassword(const std::string& password)</div><div class="line">{</div><div class="line"> using namespace std;</div><div class="line"> <span class="keyword">if</span>(password.length() &lt; MinimumPasswordLength)</div><div class="line"> {</div><div class="line"> throw logic_error(<span class="string">"Password is too short"</span>);</div><div class="line"> }</div><div class="line"> string encrypted;</div><div class="line"> <span class="keyword">...</span></div><div class="line"> <span class="keyword">return</span> encrypted;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p><em>条款27：尽量少做转型动作</em></p>
+<p>1.const_cast通常被用来将对象的常量性转除（cast away the constness）。它也是唯一有此能力的C++-style转型操作符。<br>2.dynamic_cast主要用来执行“安全向下转型”(safe downcasting)，也就是用来决定某对象是否归属继承体系中的某个类型。它是唯一无法由旧式语法执行的动作，也是唯一可能耗费重大运行成本的转型动作。<br>3.reinterpret_cast意图执行低级转型，实际动作（及结果）可能取决于编译器，这也就表示它不可移植。例如将一个pointer to int 转型为一个int，这一类转型在低级代码以外很少见。<br>4.static_cast用来强迫隐式转换（implicit conversions），例如将non-const对象转为const对象，或将int转为double等等。它也可以用来执行上述多种转换的反向转换，例如将oid*指针转为typed指针，将pointer-to-base转为pointer-to-derived，但无法将const转为non-const ——这个只有const_cast才办得到。</p>
+<p><em>条款28：避免返回handles指向对象内部成分</em></p>
+<p><em>条款29：为“异常安全”而努力是值得的</em></p>
+<p><em>条款30：透彻了解inlining的里里外外</em></p>
+<p>1.inline造成的代码膨胀亦会导致额外的换页行为（paging），降低指令高速缓存装置的击中率（instruction cache hit rate），以及伴随这些而来的效率损失。</p>
+<p>2.inline函数无法随着程序库的升级而升级，换句话说如果f是程序库内的一个inline函数，客户将“f函数本体”编进其程序中，一旦程序库设计者决定改变f，所有用到f的客户端程序都必须重新编译，因为inline执行在编译阶段。</p>
+<p><em>条款31：将文件间的编译依存关系降至最低</em></p>
+<p><em>6. 继承与面向对象设计</em></p>
+<p>虚函数意味“接口必须被继承”，non-virtual函数意味“接口和实现都必须被继承”。</p>
+<p><em>条款32：确定你的public继承塑模出is-a关系</em></p>
+<p>1.公开继承意味”is-a”(是一种)的关系。如果你令class D(“Derived”)以public形式继承class B(“Base”)，你便是告诉C++编译器，每一个类型为D的对象同时也是一个类型为B的对象，反之不成立。</p>
+<p><em>条款33：避免遮掩继承而来的名称</em></p>
+<p>derived classes内的名称会遮掩base classes内的名称，为了让被遮掩的名称再见天日，可使用using声明式。</p>
+<p><em>条款34：区分接口继承和实现继承</em></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">class Shape{</div><div class="line">public:</div><div class="line"> virtual void draw() const = <span class="number">0</span>;</div><div class="line"> virtual void error(const std::string& msg);</div><div class="line"> int objectID() const;</div><div class="line"> <span class="keyword">...</span></div><div class="line">};</div><div class="line"></div><div class="line">class Rectangle:public Shape{ <span class="keyword">...</span> };</div><div class="line">class Ellipse:public Shape{ <span class="keyword">...</span> };</div></pre></td></tr></table></figure>
+
+<p>1.声明一个pure virtual函数的目的是为了让derived classes只继承函数接口，pure virtual 函数有两个最突出的特性：它们必须被任何“继承了它们”的具象class重新声明，而且它们在抽象class中通常没有定义。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">Shape<span class="subst">*</span> ps <span class="subst">=</span> <span class="literal">new</span> Shape; <span class="comment">//错误!Shape是抽象的</span></div><div class="line">Shape<span class="subst">*</span> ps1 <span class="subst">=</span> <span class="literal">new</span> Rectangle; <span class="comment">//没问题</span></div><div class="line">ps1<span class="subst">-&gt;</span>draw(); <span class="comment">//调用Rectangle::draw</span></div><div class="line">Shape<span class="subst">*</span> ps2 <span class="subst">=</span> <span class="literal">new</span> Ellipse; <span class="comment">//没问题</span></div><div class="line">ps2<span class="subst">-&gt;</span>draw(); <span class="comment">//调用Ellipse::draw</span></div><div class="line">ps1<span class="subst">-&gt;</span>Shape<span class="tag">::draw</span>(); <span class="comment">//调用Shape::draw</span></div><div class="line">ps2<span class="subst">-&gt;</span>Shape<span class="tag">::draw</span>(); <span class="comment">//调用Shape::draw</span></div></pre></td></tr></table></figure>
+
+<p>2.简朴的 impure virtual函数背后的故事和 pure virtual 函数有点不同。一如往常，derived classes 继承其函数接口，但 impure virtual 函数会提供一份实现代码，derived classes 可能覆写(override)它。声明简朴的（非纯）impure virtual 函数的目的，是让derived classes 继承该函数的接口和缺省实现。<br>3.如果成员函数是个non-virtual函数，意味是它并不打算在derived classes中有不同的行为。声明non-virtual函数的目的是为了令derived classes 继承函数的接口及一份强制性实现。</p>
+<p><em>条款35：考虑virtual函数以外的其他选择</em></p>
+<p><em>条款36：绝不重新定义继承而来的non-virtual函数</em></p>
+<p><em>条款37：绝不重新定义继承而来的缺省参数值</em></p>
+<p>1.只能继承两种函数：virtual和non-virtual函数，然后重新定义一个继承而来的non-virtual函数永远是错误的。<br>2.不能重新定义一个继承而来的缺省参数值，因为缺省参数值都是静态绑定，而virtual函数——唯一应该覆写的东西—<br>—却是动态绑定。</p>
+<p><em>条款38：通过复合塑模出has-a或”根据某物实现出”</em></p>
+<p><em>条款39：明智而审慎地使用private继承</em></p>
+<p>1.通常C++官方勒令默默安插一个char到空对象内，然而齐位要求（alignment）可能造成编译器为类似HoldsAnInt这样的class加上一些衬垫（padding），所以有可能HoldsAnInt对象不只获得一个char大小，也许实际上被放大到足够又存放一个int。</p>
+<p><em>条款40：明智而审慎地使用多重继承</em></p>
+<p><em>7. 模板与泛型编程</em></p>
+<p><em>条款41：了解隐式接口和编译期多态</em></p>
+<p><em>条款42：了解typename的双重意义</em></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span>&lt;class T&gt; class <span class="type">Widget</span>; //使用<span class="string">"class"</span></div><div class="line"><span class="keyword">template</span>&lt;typename T&gt; class <span class="type">Widget</span>; //使用<span class="string">"typename"</span></div></pre></td></tr></table></figure>
+
+<p>这两种没有什么不同，然后C++并不总是把class和typename视为等价，有时候你一定得使用typename。</p>
+<p><em>条款43：学习处理模板化基类内的名称</em></p>
+<p><em>条款44：将与参数无关的代码抽离templates</em></p>
+<p><em>条款45：运用成员函数模板接受所有兼容类型</em></p>
+<p><em>条款46：需要类型转换时请为模板定义非成员函数</em></p>
+<p><em>条款47：请使用traits classes表现类型信息</em></p>
+<p><em>条款48：认识template元编程</em></p>
+<p><em>8. 定制new和delete</em></p>
+<p><em>条款49：了解new-handler的行为</em></p>
+<p>1.set_new_handler允许客户指定一个函数，在内存分配无法获得满足时被调用。</p>
+<p><em>条款50：了解new和delete的合理替换时机</em></p>
+<p><em>条款51：编写new和delete时需固守常规</em></p>
+<p><em>条款52：写了placement new也要写placement delete</em></p>
+<p><em>9. 杂项讨论</em></p>
+<p><em>条款53：不要轻忽编译器的警告</em></p>
+<p><em>条款54：让自己熟悉包括TR1在内的标准程序库</em></p>
+<p><em>条款55：让自己熟悉Boost</em></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2013-06-19T12:22:29.000Z"><a href="/2013/06/19/install-vim-and-plugins/">6月 19 2013</a></time>
       
       
@@ -363,125 +535,6 @@
 </article>
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2013-04-12T09:51:23.000Z"><a href="/2013/04/12/lamp-install/">4月 12 2013</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2013/04/12/lamp-install/">Ubuntu 12.10环境下Apache、MySql和PHP的安装和配置</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>需要修改下实验室的网站，而windows下的WAMP环境出了点问题，于是就在刚安装的ubuntu 12.10 环境下安装下 Apache 、MySql和PHP环境。虽然之前知道linux下apache、mysql以及PHP的安装和配置过程，但是还是简单记录下刚才的安装和配置环境过程吧，以下环境安装都是默认情况。</p>
-<p>1、Apache</p>
-<p>安装：sudo apt-get install apache2</p>
-<p>默认安装在etc/apache2文件夹下，执行文件在/usr/sbin/apache2\apache2ctl\apachectl</p>
-<p>/etc/apache2下：</p>
-<p>apache2.conf  ———— 全局配置文件</p>
-<p>conf.d （文件夹） ———— 该目录存放一些一般性的配置</p>
-<p>httpd.conf      ———— 用户配置文件（默认没有此文件）</p>
-<p>默认情况下，网站文件在/var/www目录下，通过DocumenRoot 关键字的设置，可以把任意目录指定为网页文件的根目录。</p>
-<p>虚拟主机的配置文件放在/etc/apache2/sites-available目录下的default文件。</p>
-<p>Apache2的开启、关闭以及重启命令：</p>
-<p>sudo service apache2 start/stop/restart  或者 sudo apache2ctl -k start</p>
-<p>2、MySql</p>
-<p>安装：</p>
-<p>sudo apt-get install mysql-server</p>
-<p>安装文件以及执行文件都与apache2相似，服务端在/etc/mysql ，配置文件是 /etc/mysql/my.cnf 数据库存储在/usr/lib/mysql文件夹下。执行文件在/usr/sbin/mysqld</p>
-<p>连接：</p>
-<p>mysql -u root -p</p>
-<p>-u选项用来指定登录的用户，后面的root表示采用root帐号登录。 -p表示采用密码验证的方式登录。</p>
-<p>数据库进程的开启关闭和重启：</p>
-<p>sudo service mysql start/stop</p>
-<p>apache和mysql的服务程序在etc/init.d文件夹下。</p>
-<p>简单的数据库操作：</p>
-<p>（1）创建数据库</p>
-<p>命令：create database</p>
-<p>例如：建立一个名为linuxer的数据库</p>
-<p>mysql&gt; create database linuxer;</p>
-<p>（2）显示所有的数据库</p>
-<p>命令：show databases （注意：最后有个s）</p>
-<p>mysql&gt; show databases;</p>
-<p>（3）删除数据库</p>
-<p>命令：drop database</p>
-<p>例如：删除名为linuxer的数据库</p>
-<p>mysql&gt; drop database linuxer;</p>
-<p>（4）连接数据库</p>
-<p>命令： use</p>
-<p>例如：如果linuxer数据库存在，尝试存取它：</p>
-<p>mysql&gt; use linuxer;</p>
-<p>屏幕提示：Database changed</p>
-<p>（5）当前选择（连接）的数据库</p>
-<p>mysql&gt; select database();</p>
-<p>（6）当前数据库包含的表信息：</p>
-<p>mysql&gt; show tables; （注意：最后有个s）</p>
-<p>（7）建表</p>
-<p>命令：create table ( [,.. ]);</p>
-<p>mysql&gt; CREATE TABLE <code>helloworld</code> (<br>-&gt; <code>id</code> int(10) UNSIGNED NOT NULL AUTO_INCREMENT,<br>-&gt; <code>name</code> varchar(20) DEFAULT NULL ,<br>-&gt; PRIMARY KEY (<code>id</code>)<br>-&gt; ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;</p>
-<p>（8）获取表结构</p>
-<p>命令： desc 表名，或者show columns from 表名</p>
-<p>mysql&gt; DESCRIBE 表名</p>
-<p>mysql&gt; desc 表名;</p>
-<p>mysql&gt; show columns from 表名;</p>
-<p>（9）删除表</p>
-<p>命令：drop table</p>
-<p>例如：删除表名为 linuxer 的表</p>
-<p>mysql&gt; drop table linuxer;</p>
-<p>（10）插入数据</p>
-<p>命令：insert into [( [,.. ])] values ( 值1 )[, ( 值n )]</p>
-<p>（11）查询表中的数据</p>
-<p>1)、查询所有行</p>
-<p>mysql&gt; select * from linuxer;</p>
-<p>2）、查询前几行数据</p>
-<p>mysql&gt; select * from linuxer order by id limit 0,2;</p>
-<p>（12）删除表中数据</p>
-<p>命令：delete from 表名 where 表达式</p>
-<p>例如：删除表 linuxer中编号为1 的记录</p>
-<p>mysql&gt; delete from linuxer where id=1;</p>
-<p>（13）修改表中数据：update 表名 set 字段=新值,… where 条件</p>
-<p>mysql&gt; update linuxer set name=”helloworld” where id=1;</p>
-<p>（14）在表中增加字段：</p>
-<p>命令：alter table 表名 add字段 类型其他;</p>
-<p>例如：在表linuxer中添加了一个字段test，类型为int(4)，默认值为0</p>
-<p>mysql&gt; alter table linuxer add test int(4) default ”0”</p>
-<p>（15）更改表名：</p>
-<p>命令：rename table 原表名 to 新表名;</p>
-<p>例如：在表linuxer名字更改为YourName</p>
-<p>mysql&gt; rename table linuxer to YourName;</p>
-<p>3、PHP</p>
-<p>安装：</p>
-<p>sudo apt-get install php5</p>
-<p>sudo apt-get install libapache2-mod-php5</p>
-<p>让PHP能与MySql一起工作，需要安装下PHP-MySql软件包：</p>
-<p>sudo apt-get install libapache2-mod-auth-mysql</p>
-<p>sudo apt-get install php5-mysql</p>
-<p>编辑下/etc/php5/apache2/php.in，取消对 ;extension = mysql.so 的注释 ===&gt; extension = mysql.so</p>
-<p>安装phpmyadmin：</p>
-<p>默认安装在/usr/share/phpmyadmin</p>
-<p>安装完毕后在浏览器上输入：127.0.0.1/phpmyadmin ，会发现not found（当然，我们服务器目录下没此文件呗），所以我们做下软链接：</p>
-<p>sudo ln -s /usr/share/phpadmin   /var/www</p>
-<p>输入在安装phpmyadmin时候输入的密码就可以登录了。</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
 
 <nav id="pagination">
   
@@ -534,6 +587,10 @@
   <ul class="entry">
     
       <li>
+        <a href="/2015/01/26/jwsmtp-analyse/">jwsmtp源码剖析</a>
+      </li>
+    
+      <li>
         <a href="/2014/12/01/learn-emacs-note/">Emacs学习笔记</a>
       </li>
     
@@ -555,10 +612,6 @@
     
       <li>
         <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
-      </li>
-    
-      <li>
-        <a href="/2014/08/30/find-the-invaded-reason/">记一次查找实验室服务器被诡异的入侵原因</a>
       </li>
     
   </ul>

@@ -1,0 +1,282 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>jwsmtp源码剖析 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员,搜索引擎,网络编程,后台开发,北邮人,阿里巴巴,神马搜索,Linux,C,C++,Python">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="jwsmtp源码剖析"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2015-01-26T05:50:48.000Z"><a href="/2015/01/26/jwsmtp-analyse/">1月 26 2015</a></time>
+      
+      
+  
+    <h1 class="title">jwsmtp源码剖析</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>前段时间事情太多了，忙着写毕业论文，考试，然后又被抽到了盲审，不过好在有惊无险，最后也申请答辩成功，如果盲审顺利的话，4月份就可以毕业了。不过这段时间总算可以看代码、看书了，感觉自己操作系统方面有些不扎实，索性买了本孙钟秀的《操作系统教程》看，之后顺便阅读和分析了jwSMTP源码，这里写篇文章记录下。本文不想对代码细节作太多分析，因为代码比较好读，并且文章末尾我会放出我注释过的源码链接，所以此文多介绍下原理吧。</p>
+<h2 id="jwSMTP">jwSMTP</h2>
+<p>jwSMTP是一个由C++编写的发送邮件的库，支持Linux、Windows等平台。可使用HTML或纯文本方式发送邮件。也可添加附件，支持多个收件人。并且支持LOGIN和PLAIN两种服务器验证方式。</p>
+<h2 id="两种调用方式">两种调用方式</h2>
+<h3 id="第一种方式">第一种方式</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">mailer mail(“myfriend<span class="keyword">@friend</span>.com”, <span class="comment">// who the mail is too</span></div><div class="line">“someone<span class="keyword">@somewhere</span>.net”, <span class="comment">// who the mail is from</span></div><div class="line">“There <span class="keyword">is</span> always room <span class="keyword">for</span> FooBar”, <span class="comment">// subject for the email</span></div><div class="line">“Foo\nBar”, <span class="comment">// content of the message</span></div><div class="line">“ns.somewhere.net”); <span class="comment">// the nameserver to contact</span></div><div class="line"><span class="comment">// to query for an MX record</span></div><div class="line">mail.send( );</div></pre></td></tr></table></figure>
+
+<h3 id="第二种方式">第二种方式</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">mailer mail(“myfriend<span class="keyword">@friend</span>.com”, <span class="comment">// who the mail is too</span></div><div class="line">“someone<span class="keyword">@somewhere</span>.net”, <span class="comment">// who the mail is from</span></div><div class="line">“There <span class="keyword">is</span> always room <span class="keyword">for</span> FooBar”, <span class="comment">// subject for the email</span></div><div class="line">vec, <span class="comment">// content of the message</span></div><div class="line">“mail.somewhere.net”, <span class="comment">// the smtp server to mail to</span></div><div class="line">mailer::SMTP_PORT, <span class="comment">// default smtp port (25)</span></div><div class="line"><span class="literal">false</span>); <span class="comment">// do not query MX records,</span></div><div class="line"><span class="comment">// mail directly to mail.somewhere.net</span></div></pre></td></tr></table></figure>
+
+<p>主要区别是一个查询MX record，一个不查询MX record，直接发送给SMTP Server。</p>
+<h2 id="base64编码">base64编码</h2>
+<p>Base64是网络上最常见的用于传输8Bit字节代码的编码方式之一，设计此种编码是为了使二进制数据可以通过非纯8bit的传输层传输，Base64编码可用于在HTTP环境下传递较长的标识信息，另一方面，采用Base64编码具有不可读性，即所编码的数据不会被人用肉眼所直接看到。<br>电子邮件的主题，MIME都会用到base64编码。我们现在说下其原理：</p>
+<p>Base64编码方法：</p>
+<ul>
+<li>base64的编码都是按字符串长度，以每3个8bit的字符为一组，然后针对每组，首先获取每个字符的ASCII编码，然后将ASCII编码转换成8bit的二进制，得到一组3*8=24bit的字节，然后再将这24bit划分为4个6bit的字节，并在每个6bit的字节前面都填两个高位0，得到4个8bit的字节，然后将这4个8bit的字节转换成10进制，对照Base64编码表，得到对应编码后的字符。</li>
+<li>不是3的整数倍的，需要补齐而出现的0，转化成十进制的时候就不能按常规用base64编码表来对应，可以理解成为一种特殊的“异常”，编码应该对应“=”。<br>代码base64.cpp/base64.h是对Base64编码的实现，更多原理请参考下参考链接关于base64编码的原理与实现一文。打开一封Email，查看其原始信息，一般为如下所示：</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="label">Date:</span> Thu, <span class="number">25</span> <span class="keyword">Dec</span> <span class="number">2014</span> <span class="number">06</span>:<span class="number">33</span>:<span class="number">07</span> +<span class="number">0800</span> </div><div class="line"><span class="label">From:</span> A&lt;A@yeah.net&gt;</div><div class="line"><span class="label">To:</span> <span class="string">"B"</span>&lt;b<span class="localvars">@126</span>.com&gt; </div><div class="line"><span class="label">Subject:</span> </div><div class="line"><span class="built_in">X</span>-mailer: Foxmail <span class="number">5.0</span> beta2 [cn] </div><div class="line">Mime-Version: <span class="number">1.0</span> </div><div class="line">Content-Type: text/plain<span class="comment">; </span></div><div class="line">charset=<span class="string">"gb2312"</span> </div><div class="line">Content-Transfer-Encoding: base64 </div><div class="line"></div><div class="line">xOO6w6OsU25haVgNCg0KoaGhodXiysfSu7j2QmFzZTY0tcSy4srU08q8/qOhDQoNCkJlc3QgV2lz </div><div class="line">aGVzIQ0KIAkJCQkNCqGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaEgICAgICAgICAgICAgICBl </div><div class="line">U1g/IQ0KoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoSAgICAgICAgICAgICAgIHNuYWl4QHll </div><div class="line">YWgubmV0DQqhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhICAgICAgICAgMjAwMy0x </div><div class="line">Mi0yNQ0K</div></pre></td></tr></table></figure>
+
+<h2 id="程序流程">程序流程</h2>
+<p>程序一般为先设置发件人信息，之后设置收件人信息，对应的函数为setsender()和addrecipient()函数，此处没什么可说的。之后是setmessage/setmessageHTML函数，两者的主要区别是不是需要base64编码，方法前面已说，此处主要说下checkRFCcompat()函数，此函数主要功能是：将消息结尾改为CRLF（\r\n）形式，之后注意此处：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span>(message.size() == <span class="number">1</span>) {</div><div class="line">   <span class="keyword">if</span>(*(message.<span class="keyword">begin</span>()) == <span class="string">'.'</span>)</div><div class="line">      message.push_back(<span class="string">'.'</span>);</div><div class="line">}</div><div class="line"><span class="keyword">else</span> <span class="keyword">if</span>(message.size() == <span class="number">2</span>) {</div><div class="line">   <span class="keyword">if</span>(*(message.<span class="keyword">begin</span>()) == <span class="string">'.'</span>) {</div><div class="line">      it = message.<span class="keyword">begin</span>();</div><div class="line">      it = message.insert(it, <span class="string">'.'</span>);</div><div class="line">   }</div><div class="line">}</div><div class="line"><span class="keyword">else</span> {</div><div class="line">   <span class="keyword">if</span>(*(message.<span class="keyword">begin</span>()) == <span class="string">'.'</span>) {         </div><div class="line">      it = message.<span class="keyword">begin</span>();</div><div class="line">      it = message.insert(it, <span class="string">'.'</span>);</div><div class="line">   }</div><div class="line">   <span class="keyword">for</span>(it = message.<span class="keyword">begin</span>()+<span class="number">2</span>; it != message.<span class="keyword">end</span>(); ++it) {</div><div class="line">      <span class="regexp">//</span> follow the rfc. <span class="constant">Add</span> <span class="string">'.'</span> <span class="keyword">if</span> the first character on a line is <span class="string">'.'</span></div><div class="line">      <span class="keyword">if</span>(*it == <span class="string">'\n'</span>) {</div><div class="line">         <span class="keyword">if</span>( ((it + <span class="number">1</span>) != message.<span class="keyword">end</span>()) && (*(it +<span class="number">1</span>) == <span class="string">'.'</span>) ) {</div><div class="line">            it = message.insert(it + <span class="number">1</span>, <span class="string">'.'</span>);</div><div class="line">            ++it; <span class="regexp">//</span> step past</div><div class="line">         }</div><div class="line">      }</div><div class="line">   }</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>此处是根据<a href="https://www.ietf.org/rfc/rfc2821.txt" target="_blank" rel="external">RFC2821</a>（SMTP协议）的4.5.2 Transparency编写的，内容为下：</p>
+<ol>
+<li><p>Before sending a line of mail text, the SMTP client checks the first character of the line.  If it is a period, one additional period is inserted at the beginning of the line.</p>
+</li>
+<li><p>When a line of mail text is received by the SMTP server, it checks the line.  If the line is composed of a single period, it is treated as the end of mail indicator.  If the first character is a period and there are other characters on the line, the first character is deleted.</p>
+</li>
+</ol>
+<p>然后就是每一行消息不能超过1000个字符，见RFC2821的text line小节。</p>
+<p>之后的一些setsubject、setserver、addrecipent等等函数，都不做解释了，都是用来添加/删除主机、设置服务器、增加/删除收件人列表相关的，很好明白。我们重点说下邮件发送函数send()里的operator()()函数，如果lookupMXRecord为真，就调用gethostaddresses()函数，用来查询MX记录，这涉及到DNS协议相关知识，请查DNS小节。如果为fasle，则直接连接SMTP server，operator()()和makesmtpmessage()函数主要是完成了如下流程（并不完全一致，仅参考）：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">C： telnet smtp.163.com 25 （连接到163的SMTP服务器，协议规定SMTP服务器的端口号为25）</div><div class="line">S： Trying 202.108.5.83...</div><div class="line">    Connected to smtp.163.split.netease.com.</div><div class="line">    Escape character is '^]'.</div><div class="line">    220 163.com Anti-spam GT for Coremail System (163com[071018]) （220 表示连接成功）</div><div class="line">C： HELO smtp.163.com （协议规定的握手过程，格式为HELO + 服务器名称）</div><div class="line">S： 250 OK （250 表示握手成功）</div><div class="line">C： AUTH LOGIN （AUTH LOGIN 是用户登录命令）</div><div class="line">S: 334 dXNlcm5hbWU6 （334表示服务器接受）</div><div class="line">C： tommy_mail （输入明文用户名）</div><div class="line">S： 535 Error: authentication failed （服务器拒绝，因为SMTP要求用户名和密码都通过64位编码后再发送）</div><div class="line">C： AUTH LOGIN （重新要求SMTP登录）</div><div class="line">S: 334 dXNlcm5hbWU6 </div><div class="line">C: dG9tb<span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span>FpbA== （用编码后的内容发送）</div><div class="line">S： 334 UGFzc3dvcmQ6 （334表示接受）</div><div class="line">C： <span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span>aXZldXA= （编码后的密码）</div><div class="line">S： 235 Authentication successful （235 登录成功）</div><div class="line">C： MAIL FROM:<span class="variable">&lt;A@163.com&gt;</span> （MAIL FROM：<span class="variable">&lt;&gt;</span>格式，用来记录发送者）</div><div class="line">S： 250 Mail OK （250 系统常用确认信息）</div><div class="line">C： RCPT TO:<span class="variable">&lt;B@126.com&gt;</span> （接收者邮箱，可多次使用以实现发送给多个人）</div><div class="line">S： 250 Mail OK</div><div class="line">C： DATA （DATA明令表示以下为邮件正文）</div><div class="line">S： 354 End data with <span class="variable">&lt;CR&gt;</span><span class="variable">&lt;LF&gt;</span>.<span class="variable">&lt;CR&gt;</span><span class="variable">&lt;LF&gt;</span></div><div class="line">C： TO:11<span class="comment">@11 （发送给谁，这里可自由撰写，也是伪造邮件的一个入口，欺骗一般人可以，但会读源码的人欺骗不了）</span></div><div class="line">FROM:22<span class="comment">@22 （发送者是谁，可串改）</span></div><div class="line">SUBJECT:TEST MAIL SMTP （邮件主题）</div><div class="line">             </div><div class="line">hello world （空一行写邮件正文）</div><div class="line">. （正文以.结束）</div><div class="line">S： 250 Mail OK queued as smtp3,DdGowLBLAjqD6_JIg1hfBA==.63235S2 1223879684 （服务器接受）</div><div class="line">C： noop （空操作，延迟退出时间）</div><div class="line">S： 250 OK</div><div class="line">C： quit （退出SMTP服务器连接）</div><div class="line">S： 221 Bye</div></pre></td></tr></table></figure>
+
+<h2 id="DNS协议">DNS协议</h2>
+<p>调用gethostaddresses()函数，用来查询MX记录，这涉及到DNS协议相关知识，本函数可以使用nslookup命令模拟，我本地模拟如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">imlinuxer@imlinuxer:~$ nslookup </div><div class="line">&gt; set <span class="variable">type=</span>mx</div><div class="line">&gt; mail.qq.com</div><div class="line">Server:		<span class="number">127.0</span>.<span class="number">1.1</span></div><div class="line">Address:	<span class="number">127.0</span>.<span class="number">1.1</span><span class="comment">#53</span></div><div class="line"></div><div class="line">Non-authoritative answer:</div><div class="line">*** Can't find mail.qq.com: No answer</div><div class="line"></div><div class="line">Authoritative answers can be found from:</div><div class="line">mail.qq.com</div><div class="line">	<span class="variable">origin =</span> qq.com</div><div class="line">	mail <span class="variable">addr =</span> webmaster.qq.com</div><div class="line">	<span class="variable">serial =</span> <span class="number">1186990741</span></div><div class="line">	<span class="variable">refresh =</span> <span class="number">300</span></div><div class="line">	<span class="variable">retry =</span> <span class="number">600</span></div><div class="line">	<span class="variable">expire =</span> <span class="number">86400</span></div><div class="line">	<span class="variable">minimum =</span> <span class="number">86400</span></div></pre></td></tr></table></figure>
+
+<p>DNS的协议为<a href="http://www.ietf.org/rfc/rfc1035.txt" target="_blank" rel="external">rfc1035</a>，但是枯燥难懂，可以查看参考链接的DNS消息格式，比较容易理解。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> dns[<span class="number">512</span>] = {<span class="number">1</span>,<span class="number">1</span>,   <span class="number">1</span>,<span class="number">0</span>,      <span class="number">0</span>,<span class="number">1</span>,      <span class="number">0</span>,<span class="number">0</span>, <span class="number">0</span>,<span class="number">0</span>, <span class="number">0</span>,<span class="number">0</span>};</div></pre></td></tr></table></figure>
+
+<p>比如此处即为DNS Header消息头部信息。<br>之后几段代码是请求部分格式，代码里我已详细注释，之后发送请求，解析应答即可。</p>
+<h2 id="SMTP验证方式">SMTP验证方式</h2>
+<p>比较简单，原理见此：<a href="http://blog.csdn.net/mhfh611/article/details/9470599" target="_blank" rel="external">SMTP验证方式种类（LOGIN、PLAIN、CRAM-MD5）</a><br>jwSMTP代码只实现了两种验证方式：LOGIN和PLAIN。</p>
+<p>说的有点多了，感觉很多原理都解释了，逻辑稍微有一点混乱，主要是自己不是那么擅长组织语言，如果读者有兴趣，可以多了解下原理，知道SMTP和DNS原理，基本上代码就不需要多看了。</p>
+<p>最后扔出我的中文源码剖析代码，在Github上：</p>
+<p><a href="https://github.com/armsword/Source/tree/master/jwSMTP" target="_blank" rel="external">https://github.com/armsword/Source/tree/master/jwSMTP</a></p>
+<h2 id="参考链接">参考链接</h2>
+<p><a href="http://www.cnblogs.com/hongru/archive/2012/01/14/2321397.html" target="_blank" rel="external">关于base64编码的原理与实现</a><br><a href="http://blog.csdn.net/zhangchaomao1987528/article/details/8719733" target="_blank" rel="external">POP3 SMTP协议分析学习笔记</a><br><a href="http://www.cnblogs.com/cobbliu/archive/2013/04/02/2996333.html" target="_blank" rel="external">DNS消息格式</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="jwsmtp源码剖析" data-url="http://armsword.com/2015/01/26/jwsmtp-analyse/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>22</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>13</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Python/">Python</a><small>2</small></li>
+  
+    <li><a href="/categories/SDK-MFC/">SDK/MFC</a><small>3</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>4</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2015/01/26/jwsmtp-analyse/">jwsmtp源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/12/01/learn-emacs-note/">Emacs学习笔记</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://dreamshield.net/" target="_blank" title="DreamShield">DreamShield</a></li>
+<li><a href="http://blog.purplecow.me" target="_blank" title="PurpleCow">PurpleCow</a></li>
+<li><a href="http://cstdlib.com" target="_blank" title="徐小夫">徐小夫</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft"> 
+  
+  &copy; 2015 armsword
+  
+</div>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-41325190-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+<div class="clearfix"></div>
+</footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>
