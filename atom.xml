@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2015-01-26T08:58:34.831Z</updated>
+  <updated>2015-01-26T09:05:25.814Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://armsword.com/2015/01/26/jwsmtp-analyse/"/>
     <id>http://armsword.com/2015/01/26/jwsmtp-analyse/</id>
     <published>2015-01-26T05:50:48.000Z</published>
-    <updated>2015-01-26T08:58:22.000Z</updated>
+    <updated>2015-01-26T09:05:12.000Z</updated>
     <content type="html"><![CDATA[<p>前段时间事情太多了，忙着写毕业论文，考试，然后又被抽到了盲审，不过好在有惊无险，最后也在学院提交三月中旬申请答辩成功，如果盲审顺利的话，4月份就可以毕业了。不过这段时间总算可以看代码、看书了，感觉自己操作系统方面有些不扎实，索性买了本孙钟秀的《操作系统教程》看，之后顺便阅读和分析了jwSMTP源码，这里写篇文章记录下。本文不想对代码细节作太多分析，因为代码比较好读，并且文章末尾我会放出我注释过的源码链接，所以此文多介绍下原理吧。</p>
 <h2 id="jwSMTP">jwSMTP</h2>
 <p>jwSMTP是一个由C++编写的发送邮件的库，支持Linux、Windows等平台。可使用HTML或纯文本方式发送邮件。也可添加附件，支持多个收件人。并且支持LOGIN和PLAIN两种服务器验证方式。</p>
@@ -59,7 +59,7 @@
 <p>调用gethostaddresses()函数，用来查询MX记录，这涉及到DNS协议相关知识，本函数可以使用nslookup命令模拟，我本地模拟如下：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">imlinuxer@imlinuxer:~$ nslookup </div><div class="line">&gt; set <span class="variable">type=</span>mx</div><div class="line">&gt; mail.qq.com</div><div class="line">Server:		<span class="number">127.0</span>.<span class="number">1.1</span></div><div class="line">Address:	<span class="number">127.0</span>.<span class="number">1.1</span><span class="comment">#53</span></div><div class="line"></div><div class="line">Non-authoritative answer:</div><div class="line">*** Can't find mail.qq.com: No answer</div><div class="line"></div><div class="line">Authoritative answers can be found from:</div><div class="line">mail.qq.com</div><div class="line">	<span class="variable">origin =</span> qq.com</div><div class="line">	mail <span class="variable">addr =</span> webmaster.qq.com</div><div class="line">	<span class="variable">serial =</span> <span class="number">1186990741</span></div><div class="line">	<span class="variable">refresh =</span> <span class="number">300</span></div><div class="line">	<span class="variable">retry =</span> <span class="number">600</span></div><div class="line">	<span class="variable">expire =</span> <span class="number">86400</span></div><div class="line">	<span class="variable">minimum =</span> <span class="number">86400</span></div></pre></td></tr></table></figure>
 
-<p>DNS的协议为<a href="http://www.ietf.org/rfc/rfc1035.txt" target="_blank" rel="external">rfc1035</a>，但是枯燥难懂，可以查看参考链接的DNS消息格式，比较容易理解。</p>
+<p>DNS查询的过程一般是：客户向DNS服务器的53端口发送UDP报文，DNS服务器收到后进行处理，并把结果记录仍以UDP报文的形式返回过来。除了报文头是固定的12字节外，其他每一部分的长度均为不定字节数。我们只关心的是报文头、问题、回答这三个部分<br>DNS的协议为<a href="http://www.ietf.org/rfc/rfc1035.txt" target="_blank" rel="external">rfc1035</a>，但是枯燥难懂，可以查看参考链接的DNS消息格式，比较容易理解。</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> dns[<span class="number">512</span>] = {<span class="number">1</span>,<span class="number">1</span>,   <span class="number">1</span>,<span class="number">0</span>,      <span class="number">0</span>,<span class="number">1</span>,      <span class="number">0</span>,<span class="number">0</span>, <span class="number">0</span>,<span class="number">0</span>, <span class="number">0</span>,<span class="number">0</span>};</div></pre></td></tr></table></figure>
 
 <p>比如此处即为DNS Header消息头部信息。<br>之后几段代码是请求部分格式，代码里我已详细注释，之后发送请求，解析应答即可。</p>
