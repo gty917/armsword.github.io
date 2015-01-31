@@ -55,6 +55,43 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2013-12-05T11:27:16.000Z"><a href="/2013/12/05/regular-expression-operations/">12月 5 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/12/05/regular-expression-operations/">Regular expression operations</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>之前接触过正则表达式，但是用的不熟练，原因主要是自己一直用C/C++开发，用正则时候比较少，所以也就没有达到熟能生巧的地步。这几天，用python做点东西，需要用到正则，python在文本处理方面是一把利器，你懂的，所以，就把网上那个非常有名的《正则表达式30分钟入门教程》和《python 正则表达式指南》重温了下，这里把里面的内容摘抄下，主要是方便自己查阅。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/201312502.png" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/12/201312504.png" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/12/201312506.png" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/12/201312508.png" alt=""></p>
+<p>由于我们使用python的正则，不同语言下，正则是稍微有些差异的。这里贴个网友们整理的python下的正则语法图片。我仔细看下，应该是参考<a href="http://docs.python.org/2/library/re.html#module-re" target="_blank" rel="external">http://docs.python.org/2/library/re.html#module-re</a> 这里的，不过挺一目了然的。水印是原博主的博客地址，后面我也会放出地址，想看完整版的可以去查看原帖。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/pyre.png" alt=""></p>
+<p>参考链接：</p>
+<p><a href="http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html" target="_blank" rel="external">《Python正则表达式指南》</a></p>
+<p><a href="http://deerchao.net/tutorials/regex/regex.htm" target="_blank" rel="external">《正则表达式30分钟入门指南》</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2013-12-04T15:21:39.000Z"><a href="/2013/12/04/kdd-note/">12月 4 2013</a></time>
       
       
@@ -498,48 +535,6 @@ void put(K key, T data);
 </article>
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2013-09-14T14:20:46.000Z"><a href="/2013/09/14/io-synchronous-and-blocking/">9月 14 2013</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2013/09/14/io-synchronous-and-blocking/">IO模型以及同步、异步与阻塞、非阻塞的区别</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>1.同步、异步：你总是做完一件再去做另一件，不管是否需要时间等待，这就是同步；异步呢则反之，你可以同时做几件事，并非一定需要一件事做完再做另一件事。同步简单理解成一问一答同步进行，异步可以简单理解为不必等一个问题有答了再去问另一个问题，尽管问，有答了再通知你。<br>在实际的程序中：<br>同步消息通知机制：就好比简单的read/write 操作,它们需要等待这两个操作成功才能返回。<br>同步, 是由处理消息者自己去等待消息是否被触发。<br>异步消息通知机制：类似于select/poll 之类的多路复用IO 操作，当所关注的消息被触发时,由消息触发机制通知触发对消息的处理。<br>异步, 由触发机制来通知处理消息者。</p>
-<p>2.阻塞、非阻塞：阻塞调用是指调用结果返回之前，当前线程会被挂起。函数只有在得到结果之后才会返回。非阻塞：指在不能立刻得到结果之前，该函数不会阻塞当前线程，而会立刻返回。可以简单理解为需要做一件事能不能立即得到返回应答，如果不能立即获得返回，需要等待，那就阻塞了，否则就可以理解为非阻塞。<br>有人也许会把阻塞调用和同步调用等同起来，实际上他是不同的。<br>对于同步调用来说，很多时候当前线程还是激活的，只是从逻辑上当前函数没有返回而已。<br>socket接收数据函数recv是一个阻塞调用的例子。<br>当socket工作在阻塞模式的时候， 如果没有数据的情况下调用该函数，则当前线程就会被挂起，直到有数据为止</p>
-<p>3.Unix网络编程中说到：<br>将IO模型分为五类：阻塞IO，非阻塞IO，IO复用，信号驱动，异步IO。<br>基本 Linux I/O 模型的简单矩阵：</p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/09/figure1.gif" alt=""><br>阻塞I/O模型：<br>最流行的I/O模型是阻塞I/O模型，缺省情形下，所有文件操作都是阻塞的。我们以套接口为例来讲解此模型。在进程空间中调用recvfrom，其系统调用直到数据报到达且被拷贝到应用进程的缓冲区中或者发生错误才返回，期间一直在等待。我们就说进程在从调用recvfrom开始到它返回的整段时间内是被阻塞的。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201391401.jpg" alt=""><br>非阻塞I/O模型：<br>进程把一个套接口设置成非阻塞是在通知内核：当所请求的I/O操作不能满足要求时候，不把本进程投入睡眠，而是返回一个错误。也就是说当数据没有到达时并不等待，而是以一个错误返回。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309142.jpg" alt=""><br>I/O复用模型：<br>linux提供select/poll，进程通过将一个或多个fd传递给select或poll系统调用，阻塞在select；这样select/poll可以帮我们侦测许多fd是否就绪。但是select/poll是顺序扫描fd是否就绪，而且支持的fd数量有限。linux还提供了一个epoll系统调用，epoll是基于事件驱动方式，而不是顺序扫描,当有fd就绪时，立即回调函数rollback；<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309143.jpg" alt=""><br>信号驱动异步I/O模型：<br>首先开启套接口信号驱动I/O功能, 并通过系统调用sigaction安装一个信号处理函数（此系统调用立即返回，进程继续工作，它是非阻塞的）。当数据报准备好被读时，就为该进程生成一个SIGIO信号。随即可以在信号处理程序中调用recvfrom来读数据报，井通知主循环数据已准备好被处理中。也可以通知主循环，让它来读数据报。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309144.jpg" alt=""><br>异步I/O模型（AIO模型）：<br>告知内核启动某个操作，并让内核在整个操作完成后(包括将数据从内核拷贝到用户自己的缓冲区)通知我们。这种模型与信号驱动模型的主要区别是：信号驱动I/O：由内核通知我们何时可以启动一个I/O操作；异步I/O模型：由内核通知我们I/O操作何时完成。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309145.jpg" alt=""><br>具体的可以查看参考链接(2)。</p>
-<p>4.通常，我们写服务器处理模型的程序时，有以下几种模型：<br>（1）每收到一个请求，创建一个新的进程，来处理该请求；<br>（2）每收到一个请求，创建一个新的线程，来处理该请求；<br>（3）每收到一个请求，放入一个事件列表，让主进程通过非阻塞I/O方式来处理请求<br>上面的几种方式，各有千秋，<br>第（1）中方法，由于创建新的进程的开销比较大，所以，会导致服务器性能比较差,但实现比较简单。<br>第（2）种方式，由于要涉及到线程的同步，有可能会面临死锁等问题。<br>第（3）种方式，在写应用程序代码时，逻辑比前面两种都复杂。<br>综合考虑各方面因素，一般普遍认为第（3）种方式是大多数网络服务器采用的方式，这也是接下来要讨论的重点—事件驱动处理库。</p>
-<p>select 模型：<br>①最大并发数限制，因为一个进程所打开的 FD（文件描述符）是有限制的，由 FD_SETSIZE 设置，默认值是1024/2048，因此Select模型的最大并发数就被相应限制了。<br>②效率问题，select 每次调用都会线性扫描全部的FD集合这样效率就会呈现线性下降，把 FD_SETSIZE 改大的后果就是，大家都慢慢来，什么？都超时了。<br>③内核/用户空间内存拷贝问题，如何让内核把FD消息通知给用户空间呢？在这个问题上select 采取了内存拷贝方法。</p>
-<p>总结为：1.连接数受限 2.查找配对速度慢 3.数据由内核拷贝到用户态</p>
-<p>poll 模型：<br>基本上效率和select是相同的，select缺点的②和③它都没有改掉。</p>
-<p>epoll模型：<br>①epoll没有最大并发连接的限制，上限是最大可以打开文件的数目，这个数字一般远大于 2048, 一般来说这个数目和系统内存关系很大 ，具体数目可以 cat /proc/sys/fs/file-max 察看。</p>
-<p>②效率提升，epoll最大的优点就在于它只管你“活跃”的连接,而跟连接总数无关，因此在实际的网络环境中,epoll 的效率就会远远高于select和poll。</p>
-<p>③内存拷贝,epoll在这点上使用了“共享内存”,这个内存拷贝也省略了。</p>
-<p>参考链接：<br>(1)《怎样理解阻塞非阻塞与同步异步的区别》<a href="http://www.zhihu.com/question/19732473" target="_blank" rel="external">http://www.zhihu.com/question/19732473</a><br>(2)《Unix Network Programming Vol1 1002003, 3Ed》 <a href="http://english.tebyan.net/newindex.aspx?pid=31159&amp;BookID=23760&amp;PageIndex=92&amp;Language=3" target="_blank" rel="external">http://english.tebyan.net/newindex.aspx?pid=31159&amp;BookID=23760&amp;PageIndex=92&amp;Language=3</a><br>(3)<a href="http://blog.chinaunix.net/uid-26000296-id-3754118.html" target="_blank" rel="external">http://blog.chinaunix.net/uid-26000296-id-3754118.html</a><br>(4)<a href="http://blog.csdn.net/colzer/article/details/8169075" target="_blank" rel="external">http://blog.csdn.net/colzer/article/details/8169075</a></p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
 
 <nav id="pagination">
   
@@ -592,6 +587,10 @@ void put(K key, T data);
   <ul class="entry">
     
       <li>
+        <a href="/2015/01/31/baidu-lossless-music-downloader/">写了一个Chrome插件 - 百度无损音乐下载插件</a>
+      </li>
+    
+      <li>
         <a href="/2015/01/26/jwsmtp-analyse/">jwSMTP源码剖析</a>
       </li>
     
@@ -613,10 +612,6 @@ void put(K key, T data);
     
       <li>
         <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
-      </li>
-    
-      <li>
-        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
       </li>
     
   </ul>

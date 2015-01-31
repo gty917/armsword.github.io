@@ -55,6 +55,68 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2014-09-03T17:56:57.000Z"><a href="/2014/09/04/redis-ae-analyse/">9月 4 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>很久之前就看过AE库了，不过这东西好久不看，也忘得差不多了，正好要找工作了，简历上写了之前的项目用过这个AE事件库，索性我就又把AE库看了一遍，本来表达能力就差，复习下吧。</p>
+<p>先上张图，下图左侧是ae.c文件里所有的函数，一目了然。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/09/201409040835.png" alt=""></p>
+<p>AE事件库包含文件事件和时间事件，其包含2个源文件ae.c和ae.h，当然还有四个不同的多用复用封装的文件：ae_epoll.c、ae_select.c、ae_evport.c、ae_kqueue.c。一般常用的是ae_select.c（跨平台用），linux下多用ae_epoll.c。我们就以ae_epoll.c为例吧。</p>
+<p>我们先说说文中用到的几个结构体：</p>
+<p>aeEventLoop 核心数据结构，每个aeEventLoop对应一个event loop。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* State of an event based program */</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeEventLoop {</div><div class="line">    <span class="keyword">int</span> maxfd;   <span class="comment">/* 现在注册的最大文件描述符 */</span></div><div class="line">    <span class="keyword">int</span> setsize; <span class="comment">/* 跟踪文件描述符的最大数量 */</span></div><div class="line">    <span class="built_in">long</span> <span class="built_in">long</span> timeEventNextId;  <span class="comment">//下一个timer的id</span></div><div class="line">    time_t lastTime;     <span class="comment">/* 用来诊断系统时间偏差 */</span></div><div class="line">    aeFileEvent *events; <span class="comment">/* 用于保存epoll需要关注的文件事件的fd、触发条件、注册函数 */</span></div><div class="line">    aeFiredEvent *fired; <span class="comment">/* poll_wait之后获得可读或者可写的fd数组，通过aeFiredEvent-&gt;fd再定位到events*/</span></div><div class="line">    aeTimeEvent *timeEventHead; <span class="comment">//以链表形式保存多个时间事件，每隔一段时间机会触发注册的函数</span></div><div class="line">    <span class="keyword">int</span> stop;  <span class="comment">//停止运行的标志</span></div><div class="line">    <span class="keyword">void</span> *apidata; <span class="comment">/* This is used for polling API specific data */</span></div><div class="line">    aeBeforeSleepProc *beforesleep;  <span class="comment">//阻塞地等待下一个事件发生之前要执行的函数</span></div><div class="line">} aeEventLoop;</div></pre></td></tr></table></figure>
+
+<p>aeFileEvent是文件事件结构体，mask是要捕获的事件的掩码（读|写），rfileProc和wfileProc分别指处理文件读和写事件的函数，clientData是函数用的参数。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* File event structure */</span></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">aeFileEvent</span> </span>{</div><div class="line">    int mask; <span class="comment">/* one of AE_(READABLE|WRITABLE) */</span></div><div class="line">    aeFileProc *rfileProc;</div><div class="line">    aeFileProc *wfileProc;</div><div class="line">    <span class="keyword">void</span> *clientData;</div><div class="line">} aeFileEvent;</div></pre></td></tr></table></figure>
+
+<p>aeFiredEvent指的已准备好的文件事件的结构体，包括fd（文件描述符）和mask（掩码）：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* A fired event */</span></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">aeFiredEvent</span> </span>{</div><div class="line">    int fd;</div><div class="line">    int mask;</div><div class="line">} aeFiredEvent;</div></pre></td></tr></table></figure>
+
+<p>aeTimeEvent 是时间事件用到的结构体，id是指的这个定时器的id，when_sec、when_ms分别指的秒和毫秒，timeproc是时间处理函数，finalizerProc是定时器被删除的时候的回调函数，next指的下一个结点，定时器事件是一个链表形式存储的各个时间事件，无序的。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* Time event structure */</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeTimeEvent {</div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> <span class="keyword">id</span>; <span class="comment">/* time event identifier. */</span></div><div class="line">    <span class="keyword">long</span> when_sec; <span class="comment">/* seconds */</span></div><div class="line">    <span class="keyword">long</span> when_ms; <span class="comment">/* milliseconds */</span></div><div class="line">    aeTimeProc *timeProc;</div><div class="line">    aeEventFinalizerProc *finalizerProc;</div><div class="line">    <span class="keyword">void</span> *clientData;</div><div class="line">    <span class="keyword">struct</span> aeTimeEvent *next;</div><div class="line">} aeTimeEvent;</div></pre></td></tr></table></figure>
+
+<p>下面这个结构体用在epoll创建，aeCreateApi()里使用：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">aeApiState</span> </span>{</div><div class="line">    int epfd;</div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span> *events;</span></div><div class="line">} aeApiState;</div></pre></td></tr></table></figure>
+
+<p>下面来说说程序流程吧，再说aeMain()函数之前，我先说下一些准备动作吧，分别为aeCreateEventLoop()、aeCreateTimeEvent()、aeCreateFileEvent()和aeSetBeforeSleepProc()。 aeCreateEventLoop()创建一个aeEventLoop结构体，做些初始化，之后调用函数aeApiCreate()，如上述结构体，epfd由epoll_create创建，*events 保存epoll_wait返回的事件组。 aeCreateFileEvent()为fd注册一个文件事件，使用epoll_ctl加入到全局的epoll fd 进行监控，之后再指定事件可读写处理函数。 aeCreateTimeEvent()注册一个时间事件，使用aeAddMillisecondsToNow()加入时间事件。 beforesleep 就是个回调函数，sleep之前调用的函数，有些事情是每次循环必须做的，并非文件和时间事件。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">void aeSetBeforeSleepProc(aeEventLoop <span class="keyword">*</span>eventLoop, aeBeforeSleepProc <span class="keyword">*</span>beforesleep) {</div><div class="line">    eventLoop-&gt;beforesleep = beforesleep;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>下面说说核心循环函数aeMain()吧：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="literal">void</span> aeMain(aeEventLoop <span class="subst">*</span>eventLoop) {</div><div class="line">    eventLoop<span class="subst">-&</span><span class="literal">gt</span>;stop <span class="subst">=</span> <span class="number">0</span>;</div><div class="line">    <span class="keyword">while</span> (<span class="subst">!</span>eventLoop<span class="subst">-&</span><span class="literal">gt</span>;stop) {</div><div class="line">        <span class="keyword">if</span> (eventLoop<span class="subst">-&</span><span class="literal">gt</span>;beforesleep <span class="subst">!=</span> <span class="built_in">NULL</span>)</div><div class="line">            eventLoop<span class="subst">-&</span><span class="literal">gt</span>;beforesleep(eventLoop);</div><div class="line">        aeProcessEvents(eventLoop, AE_ALL_EVENTS);</div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>由stop来决定是否停止，beforesleep可以决定它是否停止，但redis里beforesleep就是一个实现，做的工作只是保证aeProcessEvents要用到的fd都准备好。aeProcessEvents一般会阻塞的（有例外）等待事件（时间和文件事件）的发生，然后做一些处理，代码如下所示：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div></pre></td><td class="code"><pre><div class="line">* The function returns <span class="keyword">the</span> <span class="type">number</span> <span class="keyword">of</span> events processed. */</div><div class="line">int aeProcessEvents(aeEventLoop *eventLoop, int flags)</div><div class="line">{</div><div class="line">    int processed = <span class="number">0</span>, numevents;</div><div class="line"></div><div class="line">    /* Nothing <span class="keyword">to</span> do? <span class="constant">return</span> ASAP */</div><div class="line">    <span class="keyword">if</span> (!(flags &amp; AE_TIME_EVENTS) &amp;&amp; !(flags &amp; AE_FILE_EVENTS)) <span class="constant">return</span> <span class="number">0</span>;</div><div class="line"></div><div class="line">    /* Note <span class="keyword">that</span> we want call select() even <span class="keyword">if</span> there are no</div><div class="line">     * <span class="type">file</span> events <span class="keyword">to</span> process <span class="keyword">as</span> long <span class="keyword">as</span> we want <span class="keyword">to</span> process <span class="property">time</span></div><div class="line">     * events, <span class="keyword">in</span> order <span class="keyword">to</span> sleep <span class="keyword">until</span> <span class="keyword">the</span> next <span class="property">time</span> event <span class="keyword">is</span> ready</div><div class="line">     * <span class="keyword">to</span> fire. */</div><div class="line">    <span class="keyword">if</span> (eventLoop-&gt;maxfd != -<span class="number">1</span> ||</div><div class="line">        ((flags &amp; AE_TIME_EVENTS) &amp;&amp; !(flags &amp; AE_DONT_WAIT))) {</div><div class="line">        int j;</div><div class="line">        aeTimeEvent *shortest = NULL;</div><div class="line">        struct timeval tv, *tvp;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (flags &amp; AE_TIME_EVENTS &amp;&amp; !(flags &amp; AE_DONT_WAIT))</div><div class="line">            shortest = aeSearchNearestTimer(eventLoop);</div><div class="line">        <span class="keyword">if</span> (shortest) {</div><div class="line">            long now_sec, now_ms;</div><div class="line"></div><div class="line">            /* Calculate <span class="keyword">the</span> <span class="property">time</span> missing <span class="keyword">for</span> <span class="keyword">the</span> nearest</div><div class="line">             * timer <span class="keyword">to</span> fire. */</div><div class="line">            aeGetTime(&amp;now_sec, &amp;now_ms);</div><div class="line">            tvp = &amp;tv;</div><div class="line">            tvp-&gt;tv_sec = shortest-&gt;when_sec - now_sec;</div><div class="line">            <span class="keyword">if</span> (shortest-&gt;when_ms &lt; now_ms) {</div><div class="line">                tvp-&gt;tv_usec = ((shortest-&gt;when_ms+<span class="number">1000</span>) - now_ms)*<span class="number">1000</span>;</div><div class="line">                tvp-&gt;tv_sec <span class="comment">--;</span></div><div class="line">            } <span class="keyword">else</span> {</div><div class="line">                tvp-&gt;tv_usec = (shortest-&gt;when_ms - now_ms)*<span class="number">1000</span>;</div><div class="line">            }</div><div class="line">            <span class="keyword">if</span> (tvp-&gt;tv_sec &lt; <span class="number">0</span>) tvp-&gt;tv_sec = <span class="number">0</span>;</div><div class="line">            <span class="keyword">if</span> (tvp-&gt;tv_usec &lt; <span class="number">0</span>) tvp-&gt;tv_usec = <span class="number">0</span>;</div><div class="line">        } <span class="keyword">else</span> {</div><div class="line">            /* If we have <span class="keyword">to</span> check <span class="keyword">for</span> events <span class="keyword">but</span> need <span class="keyword">to</span> <span class="constant">return</span></div><div class="line">             * ASAP because <span class="keyword">of</span> AE_DONT_WAIT we need <span class="keyword">to</span> <span class="keyword">set</span> <span class="keyword">the</span> <span class="keyword">timeout</span></div><div class="line">             * <span class="keyword">to</span> zero */</div><div class="line">            <span class="keyword">if</span> (flags &amp; AE_DONT_WAIT) {</div><div class="line">                tv.tv_sec = tv.tv_usec = <span class="number">0</span>;</div><div class="line">                tvp = &amp;tv;</div><div class="line">            } <span class="keyword">else</span> {</div><div class="line">                /* Otherwise we can block */</div><div class="line">                tvp = NULL; /* wait forever */</div><div class="line">            }</div><div class="line">        }</div><div class="line"></div><div class="line">        numevents = aeApiPoll(eventLoop, tvp);</div><div class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; numevents; j++) {</div><div class="line">            aeFileEvent *fe = &amp;eventLoop-&gt;events[eventLoop-&gt;fired[j].fd];</div><div class="line">            int mask = eventLoop-&gt;fired[j].mask;</div><div class="line">            int fd = eventLoop-&gt;fired[j].fd;</div><div class="line">            int rfired = <span class="number">0</span>;</div><div class="line"></div><div class="line">	    /* note <span class="keyword">the</span> fe-&gt;mask &amp; mask &amp; ... code: maybe an already processed</div><div class="line">             * event removed an element <span class="keyword">that</span> fired <span class="keyword">and</span> we still didn't</div><div class="line">             * processed, so we check <span class="keyword">if</span> <span class="keyword">the</span> event <span class="keyword">is</span> still valid. */</div><div class="line">            <span class="keyword">if</span> (fe-&gt;mask &amp; mask &amp; AE_READABLE) {</div><div class="line">                rfired = <span class="number">1</span>;</div><div class="line">                fe-&gt;rfileProc(eventLoop,fd,fe-&gt;clientData,mask);</div><div class="line">            }</div><div class="line">            <span class="keyword">if</span> (fe-&gt;mask &amp; mask &amp; AE_WRITABLE) {</div><div class="line">                <span class="keyword">if</span> (!rfired || fe-&gt;wfileProc != fe-&gt;rfileProc)</div><div class="line">                    fe-&gt;wfileProc(eventLoop,fd,fe-&gt;clientData,mask);</div><div class="line">            }</div><div class="line">            processed++;</div><div class="line">        }</div><div class="line">    }</div><div class="line">    /* Check <span class="property">time</span> events */</div><div class="line">    <span class="keyword">if</span> (flags &amp; AE_TIME_EVENTS)</div><div class="line">        processed += processTimeEvents(eventLoop);</div><div class="line"><span class="command"></span></div><div class="line">    return processed; /* <span class="constant">return</span> <span class="keyword">the</span> <span class="type">number</span> <span class="keyword">of</span> processed <span class="type">file</span>/<span class="property">time</span> events */</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>注意参数flags，当为AE_DONT_WAIT时就表示是不阻塞的检查关注的事件是否发生了，如果没发生则直接返回0。<br>aeProcessEvents处理过程如下：<br>首先通过调用aeSearchNearestTimer找到离现在最近的定时器是什么时候，这个地方其实做的不好，不如libevent的定时器，需要O(N)得到最短时间，可以改为最小堆保存时间，然后将得到的时间作为参数传给aeApiPoll，作为其timeout参数，来返回命中的文件事件数目，查看eventLoop-&gt;fired，可以取出命中事件的详细信息，然后调用rfileProc或wfileProc做事件读写处理，最后再调用processTimeEvents处理已经触发了的定时器事件，然后返回所有已处理的事件（文件和时间）总和。<br>最后，参考链接里的那个Redis执行流程图还是挺有借鉴意义的，图片太大，我就不转过来了，参考链接在最下方。</p>
+<p>PS：边看边写，写到此处竟然又晚上两点多了，现在作息时间越来越乱，等拿到offer后，需要调整下生物钟了。</p>
+<p>参考链接：<a href="http://my.oschina.net/qichang/blog/32469" target="_blank" rel="external">http://my.oschina.net/qichang/blog/32469</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2014-08-30T10:34:35.000Z"><a href="/2014/08/30/find-the-invaded-reason/">8月 30 2014</a></time>
       
       
@@ -392,72 +454,6 @@
 </article>
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2014-05-18T09:22:17.000Z"><a href="/2014/05/18/light-cgi-server/">5月 18 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/05/18/light-cgi-server/">写了一个简单的CGI Server</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>之前看过一些开源程序的源码，也略微知道些Apache的CGI处理程序架构，于是用了一段时间，用C写了一个简单的CGI Server，代码算上头文件，一共1200行左右，难度中等偏上。麻雀虽小，五脏俱全。如果把程序里所涉及的HTTP协议，Linux下POSIX编程等等搞清楚，我想找工作中肯定是有足够的竞争力的，当然我也只是皮毛而已，不再班门弄斧了，下面简单的说下程序流程吧，方便小伙伴们阅读。</p>
-<p>程序源代码：<a href="https://github.com/armsword/LightCgiServer" target="_blank" rel="external">戳我</a></p>
-<p>在说程序流程之前，我先简单说下CGI吧，CGI这个东西比较老了，N年之前，没有PHP JSP等等动态脚本之前，这个是非常火的。只要能支持输入输出的程序，都可以编写CGI脚本，比如Apache就集成了CGI服务器功能，你可以使用Python编写简单的CGI脚本，可以参照前几天我发的文章，<a href="http://armsword.com/2014/05/07/let-apache-understand-python-cgi.html" target="_blank" rel="external">点击此处</a>，现在CGI 脚本基本上使用的比较少了，但是在一些对效率要求比较高的设计里还是可以看到一些身影，比如腾讯的QQ相册，QQ空间里就可以看到（你可以打开QQ空间，查看源码-查找CGI），他们的脚本应该是C/C++编写的，效率，你懂的，如果你想更多的了解CGI脚本相关，可以<a href="http://www.jdon.com/idea/cgi.htm" target="_blank" rel="external">点击此处</a>，推荐了解一些，但是不值得深入学习，那个精力不如学习PHP/Python了。。。</p>
-<p>其实说白了，CGI 扮演的就是在服务器和特定解释器之间输入输出协议的角色，每个来自用户的请求，Web服务器都会唤起特定语言解释器的命令行，执行CGI脚本。</p>
-<p>现在来介绍下此CGI Server，我不想长篇大论了，一幅图来描述其执行过程（字比较丑，凑合看吧），具体看代码吧：</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/05/20140518171043.jpg" alt=""></p>
-<p>&nbsp;</p>
-<p>如果你比较理解HTTP协议，大部分都没有难点，中文URL编码这个可以看<a href="http://armsword.com/2014/05/15/c-let-url-encode-and-decode.html" target="_blank" rel="external">上一篇文章</a>，可能唯一的难点是管道部分，这个使用了经典的fork-exece模型，关于管道，一张图能很好的解释：<br><img src="http://armsword.com/wp-content/uploads/2014/05/20140518171356.jpg" alt=""></p>
-<p>不过程序中使用了双管道，读写模型，如果你对此不理解，可以翻阅《Unix环境高级编程》。</p>
-<p>如果你对HTTP不慎了解，参考链接里的两篇文章，能帮助你更好的了解HTTP协议，其实HTTP1.1里面的难点，理解以下几句话就足够了：</p>
-<p>http协议规定头必然有2个连续的”\r\n”，就像Cookie后面就跟了2个\r\n，所以读取请求头的时候只要读到\r\n\r\n，那么前面就是头，后面就是实体。实体大小在上面有一个Content-Length标记。所以从\r\n\r\n后面读Content-Length大小后就结束了。所以服务端一般是1、判断状态码，http协议规定1xx 204 304肯定不包括实体，所以读到\r\n\r\n就不用再读；2、判断没有Content-Length；3、判断有没有chunked。有Content-Length直接读，而chunked的最后7个一定是\r\n0\r\n\r\n。</p>
-<p>chunked编码，这种编码一般是gzip压缩的</p>
-<pre><code><span class="status">HTTP/1.1 <span class="number">200</span> OK </span>
-<span class="attribute">Cache-Control</span>: <span class="string">private </span>
-<span class="attribute">Content-Type</span>: <span class="string">text/html; charset=utf-8 </span>
-<span class="attribute">Server</span>: <span class="string">Microsoft-IIS/7.5</span>
-<span class="attribute">X-AspNetMvc-Version</span>: <span class="string">2.0</span>
-<span class="attribute">X-AspNet-Version</span>: <span class="string">4.0.30319 </span>
-<span class="attribute">Set-Cookie</span>: <span class="string">Set-Cookie: X-Powered-By: ASP.NET </span>
-<span class="attribute">ntCoent-Length</span>: <span class="string">166137</span>
-<span class="attribute">Content-Encoding</span>: <span class="string">gzip </span>
-<span class="attribute">Transfer-Encoding</span>: <span class="string">chunked </span>
-
-<span class="http">
-
-<span class="r">2D23 
-...........}.s.G.......j....*u......y....%<span class="keyword">...</span>;QO.M.[....3..,<span class="keyword">...</span>
-.!..O....H-.<span class="string">"v..&amp;gt;.............=YY </span></span></span>
-</code></pre><p>&nbsp;<br>在处理chunked时候，像上面chunked\r\n\r\n后面是实体，第一行2D23就是一chunk的大小所以在2D23\r\n后面开始读2D23个然后会紧跟着\r\n，然后后面就是下一chunk的大小，直到最后一chunk是0大小。实体结束，最后再来一个\r\n。也就是说chunked的最后7个一定是\r\n0\r\n\r\n，本来判断读到\r\n0\r\n\r\n就结束应该没问题，但是为了保险起见，还是一次一次的读大小值再读取指定的大小数据。</p>
-<p>另外，此代码里有部分缺陷，一是我急于完成，某些结构设计不合理，所以可扩展性比较差。第二，有少部分内存泄漏，懒得修改了。毕竟，我也得忙着找工作，时间比较紧张，但是总的来说，如果你想找后台开发相关的职位，如果你没有更好的项目经验，此代码如果你能读懂，写到简历上，面试官肯定会问你的。</p>
-<p>能力和精力有限，希望能对你们有所帮助 ^-^</p>
-<p>参考链接：</p>
-<p>1.<a href="http://www.cnblogs.com/TankXiao/archive/2012/02/13/2342672.html" target="_blank" rel="external">http://www.cnblogs.com/TankXiao/archive/2012/02/13/2342672.html</a></p>
-<p>2.<a href="http://www.cnblogs.com/li0803/archive/2008/11/03/1324746.html" target="_blank" rel="external">http://www.cnblogs.com/li0803/archive/2008/11/03/1324746.html</a></p>
-<p>3.<a href="http://blog.csdn.net/laotse/article/details/5903651" target="_blank" rel="external">http://blog.csdn.net/laotse/article/details/5903651</a></p>
-<p>&nbsp;</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
 
 <nav id="pagination">
   
@@ -510,6 +506,10 @@
   <ul class="entry">
     
       <li>
+        <a href="/2015/01/31/baidu-lossless-music-downloader/">写了一个Chrome插件 - 百度无损音乐下载插件</a>
+      </li>
+    
+      <li>
         <a href="/2015/01/26/jwsmtp-analyse/">jwSMTP源码剖析</a>
       </li>
     
@@ -531,10 +531,6 @@
     
       <li>
         <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
-      </li>
-    
-      <li>
-        <a href="/2014/09/04/redis-ae-analyse/">Redis AE事件库源码剖析</a>
       </li>
     
   </ul>

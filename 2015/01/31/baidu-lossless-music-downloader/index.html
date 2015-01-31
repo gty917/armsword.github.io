@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   
-  <title>归档：2013/11 | armsword的涅槃之地</title>
+  <title>写了一个Chrome插件 - 百度无损音乐下载插件 | armsword的涅槃之地</title>
   <meta name="author" content="armsword">
   
   <meta name="description" content="程序员,搜索引擎,网络编程,后台开发,北邮人,阿里巴巴,神马搜索,Linux,C,C++,Python">
@@ -11,7 +11,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  
+  <meta property="og:title" content="写了一个Chrome插件 - 百度无损音乐下载插件"/>
   <meta property="og:site_name" content="armsword的涅槃之地"/>
 
   
@@ -48,25 +48,67 @@
 <div class="clearfix"></div>
 </header>
   <div id="content" class="inner">
-    <div id="main-col" class="alignleft"><div id="wrapper">
-<h2 class="archive-title">2013/11</h2>
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2015-01-30T16:18:13.000Z"><a href="/2015/01/31/baidu-lossless-music-downloader/">1月 31 2015</a></time>
+      
+      
+  
+    <h1 class="title">写了一个Chrome插件 - 百度无损音乐下载插件</h1>
+  
 
+    </header>
+    <div class="entry">
+      
+        <p>用了2-3天时间，学了下前端开发方面的基础知识，没怎么看教程，就是想实现某些功能或者遇到问题就去搜索解决，遇到了一些坑，但是收获也挺大的，于是随手写了个Chrome插件，可用来下载百度无损音乐的，比较简单，懒得讲啥原理了，这里只分享下已注释源码和使用方法吧。</p>
+<h3 id="程序地址">程序地址</h3>
+<p><a href="https://github.com/armsword/BDMusicDownloader/blob/master/BDMusicDownloader.zip?raw=true" target="_blank" rel="external">点击下载插件</a></p>
+<h3 id="使用方法">使用方法</h3>
+<p>本插件支持Chrome浏览器和UC 桌面浏览器，其他Webkit内核的浏览器应该也支持，但是我没做测试。</p>
+<h4 id="Linux系统下安装方法">Linux系统下安装方法</h4>
+<p>Linux下直接<a href="https://github.com/armsword/BDMusicDownloader/blob/master/BDMusicDownloader.zip?raw=true" target="_blank" rel="external">下载</a>此插件，之后解压后，在BDMusicDownloader文件夹下发现一个src.crx文件，将其拖入到Chrome浏览器-设置-扩展程序界面即可，当打开如以 <a href="http://music.baidu.com/song/" target="_blank" rel="external">http://music.baidu.com/song/</a> 开头的链接时，即下载音乐地址，会自动弹出插件，点击下载即可。如图所示：<br><img src="http://armsword.com/wp-content/uploads/2015/01/20150101.png" alt=""></p>
+<h3 id="Windows下安装方法">Windows下安装方法</h3>
+<p>从程序地址里下载安装插件，解压文件夹，注意，因为Chrome在Win下的安全限制，所以此文件夹不能删除，之后同上所示，但不是拖入src.crx文件，而是选中开发者模式-加载正在开发的插件-BDMusicDownloader，之后选中src文件，打开即可。如图以UC桌面浏览器为例：<br><img src="http://armsword.com/wp-content/uploads/2015/01/20150102.jpg" alt=""></p>
+<p>说句题外话，UC桌面浏览器真的还蛮好用的，支持Chrome插件（废话，使用的都是同一个内核），但是自带科学上网，打开Github速度就挺快的，推荐使用。</p>
+<h3 id="需要改进的地方">需要改进的地方</h3>
+<p>因为我前端经验太少，所以一些小细节没处理好，比如当音乐名字太长时，样式就比较难看了。因我忙着在回家前要把孙钟秀的《操作系统教程》读完，并且之前部门给我的入职前作业我还没完成，所以不打算再做太多修改了，感兴趣的东西可以帮忙修改下。</p>
+<h2 id="源码地址">源码地址</h2>
+<p><a href="https://github.com/armsword/BDMusicDownloader" target="_blank" rel="external">https://github.com/armsword/BDMusicDownloader</a></p>
+<p>代码已注释，有时间和感兴趣的同学，可以帮忙优化下界面。</p>
 
-  <div class="archive">
-    
-      <article class="post">
-        <div class="post-content">
-          <header>
-            <div class="icon"></div>
-            <time datetime="2013-11-10T15:58:57.000Z"><a href="/2013/11/10/undefined-reference-to/">11月 10 2013</a></time>
-            
-              <h1 class="title"><a href="/2013/11/10/undefined-reference-to/">使用g++编译C/C++程序，链接时出现undefined reference to错误</a></h1>
-            
-          </header>
-        </div>
-      </article>
-    
+      
+    </div>
+    <footer>
+      
+        
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
   </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="写了一个Chrome插件 - 百度无损音乐下载插件" data-url="http://armsword.com/2015/01/31/baidu-lossless-music-downloader/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
 </div></div>
     <aside id="sidebar" class="alignright">
   <div class="search">
