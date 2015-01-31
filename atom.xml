@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2015-01-31T06:14:59.623Z</updated>
+  <updated>2015-01-31T12:40:16.355Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -18,8 +18,8 @@
     <title><![CDATA[写了一个Chrome插件 - 百度无损音乐下载插件]]></title>
     <link href="http://armsword.com/2015/01/31/baidu-lossless-music-downloader/"/>
     <id>http://armsword.com/2015/01/31/baidu-lossless-music-downloader/</id>
-    <published>2015-01-30T16:18:13.000Z</published>
-    <updated>2015-01-31T06:05:57.000Z</updated>
+    <published>2015-01-31T12:39:13.000Z</published>
+    <updated>2015-01-31T12:39:52.000Z</updated>
     <content type="html"><![CDATA[<p>用了2-3天时间，学了下前端开发方面的基础知识，没怎么看教程，就是想实现某些功能或者遇到问题就去搜索解决，遇到了一些坑，但是收获也挺大的，于是随手写了个Chrome插件，可用来下载百度无损音乐的，比较简单，懒得讲啥原理了，这里只分享下已注释源码和使用方法吧。</p>
 <h3 id="程序地址">程序地址</h3>
 <p><a href="https://github.com/armsword/BDMusicDownloader/blob/master/BDMusicDownloader.zip?raw=true" target="_blank" rel="external">点击下载插件</a></p>
