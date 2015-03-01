@@ -323,86 +323,23 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2014-07-02T09:54:23.000Z"><a href="/2014/07/02/climb-a-ladder/">7月 2 2014</a></time>
+        <time datetime="2014-06-25T16:21:30.000Z"><a href="/2014/06/26/cpp-achieve-smart-pointer/">6月 26 2014</a></time>
       
       
   
-    <h1 class="title"><a href="/2014/07/02/climb-a-ladder/">各操作系统使用梯子教程</a></h1>
+    <h1 class="title"><a href="/2014/06/26/cpp-achieve-smart-pointer/">使用C++实现一简单智能指针类</a></h1>
   
 
     </header>
     <div class="entry">
       
-        <p>马上要找工作，论文也没写，算法也没准备好，实验室也忙的要死，按我性格肯定不会写这篇文章的，毕竟懂得搜索是程序员必须具备的最基础素质。但既然在微信上答应<a href="http://weibo.com/pennyliang" target="_blank" rel="external">梁博</a>写个详细的教程，那索性详细的写写吧。</p>
-<p>1.PPTP使用</p>
-<p>梁博的VPN地址：pennyjob.net 这个只开通了PPTP协议，所以我们只要在各系统下设置PPTP的登录方式就可以了。</p>
-<p>（1）Window 7</p>
-<p>1.打开“控制面板”-“网络和Internet”-“网络和共享中心” 点击“设置新的连接或网络”</p>
-<p>2.选择“连接到工作区”</p>
-<p>如图所示：</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702165157.png" alt=""></p>
-<p>&nbsp;</p>
-<p>3.如果已经存在其他连接，则在这一步选择“否，创建新连接”；如果没有，则这一步将被跳过（可能不会出现）</p>
-<p>4.选择“使用我的Internet连接（VPN）”，点击下一步</p>
-<p>5.“Internet地址栏”里输入服务器地址，如果使用梁博的VPN，就输入pennyjob.net，目标名称随便</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702165925.png" alt=""></p>
-<p>6.输入你的用户名和密码</p>
-<p>如果你使用了梁博的VPN，用户名为pennyjob，密码为pj1.</p>
-<p>7.打开已经设置好的VPN连接，然后点击属性按钮</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702170204.png" alt=""></p>
-<p>8.在安全选项卡中，VPN类型选择PPTP，数据加密选择“可选加密（没有加密也可以选择）”，然后点击“确认”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702170405.png" alt=""></p>
-<p>9.连接，访问下facebook.com试试，我用梁博的账号访问了下</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702170606.png" alt=""></p>
-<p>&nbsp;</p>
-<p>PS：PPTP是很脆弱的，容易受防火墙等因素影响，如果你按照上述流程弄完，依然无法访问，在命令行里输入netsh winsock reset ，之后重启下系统，再试试能否连接，如果不行的话，无解。（至少我认为无解，除了重装系统，貌似M$也没解决方案）。</p>
-<p>(2)Win XP</p>
-<p>我装有Win XP的机器现在系统在Ubuntu环境下跑着数据呢，不方便重启切换到Win XP下，所以无图，但是我会详细文字叙述，不好意思了，各位看官。</p>
-<p>1.打开网络连接，点击左上方的“创建一个新的链接”</p>
-<p>2.会出现“新建连接向导”，选择“链接到我的工作场所的网络”</p>
-<p>3.蹦出“新建连接向导”，选择“虚拟专用网络连接”，下一步</p>
-<p>4.填写链接名称，公司名随意填写，下一步</p>
-<p>5.选择“不拔初始连接”</p>
-<p>6.填写VPN服务器的名称地址，如果此处使用了梁博的VPN，填写pennyjob.net</p>
-<p>7.出现正在完成新建连接向导，选择“在我的桌面上添加一个到此连接的快捷方式”，点击完成</p>
-<p>8.在登录窗口选择“属性”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702171508.png" alt=""></p>
-<p>9.选择VPN属性为“PPTP VPN”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702171554.png" alt=""></p>
-<p>10.“安全”取消勾选“要求数据加密”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702171524.png" alt=""></p>
-<p>11.确定，之后就可以正常使用了。</p>
-<p>（3）安卓4.0（基本上大同小异，我就只能4.0举例了）</p>
-<p>1.打开设定，选择“更多”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172436.png" alt=""></p>
-<p>2.选择VPN</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172454.png" alt=""></p>
-<p>3.按图所示，高级设置不用管就行</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172601.png" alt=""></p>
-<p>4.输入用户和密码</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172625.png" alt=""></p>
-<p>5.访问下FB试试</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172709.png" alt=""></p>
-<p>（4）iPhone/iPad</p>
-<p>我没有iPhone/iPad，但是这个使用很简单，文字描述下就可以了，方法网上搜索的：</p>
-<p>1.点击桌面上“设置”</p>
-<p>2.点击“通用”，进入通用设置</p>
-<p>3.点击“网络”，进入网络设置</p>
-<p>4.点击“VPN”进入VPN设置，点击“添加VPN”</p>
-<p>5.点击PPTP设置</p>
-<p>描述随便写，服务器写VPN地址，账户和密码对应，加密级别选择“无”</p>
-<p>6.点击VPN开关，打开VPN，就可以了。</p>
-<p>PS：想修改DNS好像需要越狱吧，修不修改DNS影响不大，不想越狱的不用管了。（此行可忽略不计）</p>
-<p>（5）*inux系统</p>
-<p>这个不用我多说了吧，经常使用的，大家有自力更生能力，不会使用<a href="http://wen.lu" target="_blank" rel="external">http://wen.lu</a>搜索下哈。</p>
-<p>2.SSH</p>
-<p>我不建议使用SSH，如果执意使用的话，我这里分享网友写的一个教程：</p>
-<p><a href="http://www.zotob.org/1.html" target="_blank" rel="external">点我</a></p>
-<p>3.其实我是推荐使用shadowsocks的</p>
-<p>github地址：<a href="https://github.com/clowwindy/shadowsocks" target="_blank" rel="external">https://github.com/clowwindy/shadowsocks</a></p>
-<p>但是梁博服务端没有配置，他没要求我写，我就不写了，看官们有兴趣的看下github吧，有源码和各系统客户端。</p>
-<p>PS：梁博好人一个，但是大家拿到VPN后，请合理使用，少去下载视频、观看视频，这样会严重影响别人使用，Enjoy！</p>
-<p>&nbsp;</p>
+        <p>智能指针类与普通指针一样，但它借由自动化内存管理保证了安全性，避免了诸如悬挂指针、内存泄露和分配失败等问题。智能指针有好几种实现方式，STL和Boost库里都有实现，比如使用句柄类和引用计数方式。我们现在使用引用计数定义智能指针，智能指针类将一个计数器与类指向的对象相关联。使用计数跟踪该类有多少个对象共享同一指针。使用计数为0时，删除对象。使用计数有时也称为引用计数（reference count）。</p>
+<p>使用一个计数变量，并将其置一，每新增一个对象的引用，该变量会加一，移除一个引用则减一，即当对象作为另一对象的副本而创建时，复制构造函数复制指针并增加与之相应的使用计数的值。当对一个对象进行赋值时（=操作符），覆写=操作符，这样才能将一个旧的智能指针覆值给另一指针，旧的引用计数减一，新的智能指针的引用计数则加一。</p>
+<p>示例如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span> &lt;class T&gt;</div><div class="line">class <span class="type">SmartPointer</span></div><div class="line">{</div><div class="line">public:</div><div class="line">    <span class="type">SmartPointer</span>(T* <span class="keyword">ptr</span>)</div><div class="line">    {</div><div class="line">        <span class="keyword">ref</span> = <span class="keyword">ptr</span>;</div><div class="line">        ref_count = (unsigned*)malloc(sizeof(unsigned));</div><div class="line">        *ref_count = <span class="number">1</span>;</div><div class="line">    }        </div><div class="line"></div><div class="line">    <span class="type">SmartPointer</span>(<span class="type">SmartPointer</span>&lt;T&gt;&amp; sptr)</div><div class="line">    {</div><div class="line">        <span class="keyword">ref</span> = sptr.<span class="keyword">ref</span>;</div><div class="line">        ref_count = sptr.ref_count;</div><div class="line"></div><div class="line">        ++(*ref_count);</div><div class="line">    }</div><div class="line"></div><div class="line">    /* 覆写=运算符，这样才能将一个旧的智能指针赋值给另一指针，</div><div class="line">     * 旧的引用计数减一，新的智能指针的引用计数则加一。</div><div class="line">     */</div><div class="line">    <span class="type">SmartPointer</span>&lt;T&gt;&amp; operator=(<span class="type">SmartPointer</span>&lt;T&gt;&amp; sptr)</div><div class="line">    {</div><div class="line">        <span class="keyword">if</span>(this == &amp;sptr)</div><div class="line">        {</div><div class="line">            <span class="keyword">return</span> *this;</div><div class="line">        }</div><div class="line"></div><div class="line">        // 若已赋值为某个对象，则移除引用</div><div class="line">        <span class="keyword">if</span>(*ref_count &gt; <span class="number">0</span>)</div><div class="line">        {</div><div class="line">            remove();</div><div class="line">        }</div><div class="line"></div><div class="line">        <span class="keyword">ref</span> = sptr.<span class="keyword">ref</span>;</div><div class="line">        ref_count = sptr.ref_count;</div><div class="line">        ++(*ref_count);</div><div class="line">        <span class="keyword">return</span> *this;</div><div class="line">    }</div><div class="line"></div><div class="line">    ~<span class="type">SmartPointer</span>()</div><div class="line">    {</div><div class="line">        remove(); // 移除一个对象引用</div><div class="line">    }    </div><div class="line"></div><div class="line">    T getValue()</div><div class="line">    {</div><div class="line">        <span class="keyword">return</span> *<span class="keyword">ref</span>;</div><div class="line">    }</div><div class="line"></div><div class="line">protected:</div><div class="line">    <span class="type">void</span> remove()</div><div class="line">    {</div><div class="line">        --(*ref_count);</div><div class="line">        <span class="keyword">if</span>(*ref_count == <span class="number">0</span>)</div><div class="line">        {</div><div class="line">            delete <span class="keyword">ref</span>;</div><div class="line">            free(ref_count);</div><div class="line">            <span class="keyword">ref</span> = <span class="type">NULL</span>;</div><div class="line">            ref_count = <span class="type">NULL</span>;</div><div class="line">        }</div><div class="line">    }</div><div class="line"></div><div class="line">    T* <span class="keyword">ref</span>;</div><div class="line">    unsigned* ref_count;  </div><div class="line"></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>参考资料：<br>《C++ Primer》<br>《Crack The Interview》</p>
+<p></p>
 
       
     </div>
@@ -423,23 +360,52 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2014-06-25T16:21:30.000Z"><a href="/2014/06/26/cpp-achieve-smart-pointer/">6月 26 2014</a></time>
+        <time datetime="2014-05-18T09:22:17.000Z"><a href="/2014/05/18/light-cgi-server/">5月 18 2014</a></time>
       
       
   
-    <h1 class="title"><a href="/2014/06/26/cpp-achieve-smart-pointer/">使用C++实现一简单智能指针类</a></h1>
+    <h1 class="title"><a href="/2014/05/18/light-cgi-server/">写了一个简单的CGI Server</a></h1>
   
 
     </header>
     <div class="entry">
       
-        <p>智能指针类与普通指针一样，但它借由自动化内存管理保证了安全性，避免了诸如悬挂指针、内存泄露和分配失败等问题。智能指针有好几种实现方式，STL和Boost库里都有实现，比如使用句柄类和引用计数方式。我们现在使用引用计数定义智能指针，智能指针类将一个计数器与类指向的对象相关联。使用计数跟踪该类有多少个对象共享同一指针。使用计数为0时，删除对象。使用计数有时也称为引用计数（reference count）。</p>
-<p>使用一个计数变量，并将其置一，每新增一个对象的引用，该变量会加一，移除一个引用则减一，即当对象作为另一对象的副本而创建时，复制构造函数复制指针并增加与之相应的使用计数的值。当对一个对象进行赋值时（=操作符），覆写=操作符，这样才能将一个旧的智能指针覆值给另一指针，旧的引用计数减一，新的智能指针的引用计数则加一。</p>
-<p>示例如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">template</span> &lt;class T&gt;</div><div class="line">class <span class="type">SmartPointer</span></div><div class="line">{</div><div class="line">public:</div><div class="line">    <span class="type">SmartPointer</span>(T* <span class="keyword">ptr</span>)</div><div class="line">    {</div><div class="line">        <span class="keyword">ref</span> = <span class="keyword">ptr</span>;</div><div class="line">        ref_count = (unsigned*)malloc(sizeof(unsigned));</div><div class="line">        *ref_count = <span class="number">1</span>;</div><div class="line">    }        </div><div class="line"></div><div class="line">    <span class="type">SmartPointer</span>(<span class="type">SmartPointer</span>&lt;T&gt;&amp; sptr)</div><div class="line">    {</div><div class="line">        <span class="keyword">ref</span> = sptr.<span class="keyword">ref</span>;</div><div class="line">        ref_count = sptr.ref_count;</div><div class="line"></div><div class="line">        ++(*ref_count);</div><div class="line">    }</div><div class="line"></div><div class="line">    /* 覆写=运算符，这样才能将一个旧的智能指针赋值给另一指针，</div><div class="line">     * 旧的引用计数减一，新的智能指针的引用计数则加一。</div><div class="line">     */</div><div class="line">    <span class="type">SmartPointer</span>&lt;T&gt;&amp; operator=(<span class="type">SmartPointer</span>&lt;T&gt;&amp; sptr)</div><div class="line">    {</div><div class="line">        <span class="keyword">if</span>(this == &amp;sptr)</div><div class="line">        {</div><div class="line">            <span class="keyword">return</span> *this;</div><div class="line">        }</div><div class="line"></div><div class="line">        // 若已赋值为某个对象，则移除引用</div><div class="line">        <span class="keyword">if</span>(*ref_count &gt; <span class="number">0</span>)</div><div class="line">        {</div><div class="line">            remove();</div><div class="line">        }</div><div class="line"></div><div class="line">        <span class="keyword">ref</span> = sptr.<span class="keyword">ref</span>;</div><div class="line">        ref_count = sptr.ref_count;</div><div class="line">        ++(*ref_count);</div><div class="line">        <span class="keyword">return</span> *this;</div><div class="line">    }</div><div class="line"></div><div class="line">    ~<span class="type">SmartPointer</span>()</div><div class="line">    {</div><div class="line">        remove(); // 移除一个对象引用</div><div class="line">    }    </div><div class="line"></div><div class="line">    T getValue()</div><div class="line">    {</div><div class="line">        <span class="keyword">return</span> *<span class="keyword">ref</span>;</div><div class="line">    }</div><div class="line"></div><div class="line">protected:</div><div class="line">    <span class="type">void</span> remove()</div><div class="line">    {</div><div class="line">        --(*ref_count);</div><div class="line">        <span class="keyword">if</span>(*ref_count == <span class="number">0</span>)</div><div class="line">        {</div><div class="line">            delete <span class="keyword">ref</span>;</div><div class="line">            free(ref_count);</div><div class="line">            <span class="keyword">ref</span> = <span class="type">NULL</span>;</div><div class="line">            ref_count = <span class="type">NULL</span>;</div><div class="line">        }</div><div class="line">    }</div><div class="line"></div><div class="line">    T* <span class="keyword">ref</span>;</div><div class="line">    unsigned* ref_count;  </div><div class="line"></div><div class="line">};</div></pre></td></tr></table></figure>
+        <p>之前看过一些开源程序的源码，也略微知道些Apache的CGI处理程序架构，于是用了一段时间，用C写了一个简单的CGI Server，代码算上头文件，一共1200行左右，难度中等偏上。麻雀虽小，五脏俱全。如果把程序里所涉及的HTTP协议，Linux下POSIX编程等等搞清楚，我想找工作中肯定是有足够的竞争力的，当然我也只是皮毛而已，不再班门弄斧了，下面简单的说下程序流程吧，方便小伙伴们阅读。</p>
+<p>程序源代码：<a href="https://github.com/armsword/LightCgiServer" target="_blank" rel="external">戳我</a></p>
+<p>在说程序流程之前，我先简单说下CGI吧，CGI这个东西比较老了，N年之前，没有PHP JSP等等动态脚本之前，这个是非常火的。只要能支持输入输出的程序，都可以编写CGI脚本，比如Apache就集成了CGI服务器功能，你可以使用Python编写简单的CGI脚本，可以参照前几天我发的文章，<a href="http://armsword.com/2014/05/07/let-apache-understand-python-cgi.html" target="_blank" rel="external">点击此处</a>，现在CGI 脚本基本上使用的比较少了，但是在一些对效率要求比较高的设计里还是可以看到一些身影，比如腾讯的QQ相册，QQ空间里就可以看到（你可以打开QQ空间，查看源码-查找CGI），他们的脚本应该是C/C++编写的，效率，你懂的，如果你想更多的了解CGI脚本相关，可以<a href="http://www.jdon.com/idea/cgi.htm" target="_blank" rel="external">点击此处</a>，推荐了解一些，但是不值得深入学习，那个精力不如学习PHP/Python了。。。</p>
+<p>其实说白了，CGI 扮演的就是在服务器和特定解释器之间输入输出协议的角色，每个来自用户的请求，Web服务器都会唤起特定语言解释器的命令行，执行CGI脚本。</p>
+<p>现在来介绍下此CGI Server，我不想长篇大论了，一幅图来描述其执行过程（字比较丑，凑合看吧），具体看代码吧：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/05/20140518171043.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>如果你比较理解HTTP协议，大部分都没有难点，中文URL编码这个可以看<a href="http://armsword.com/2014/05/15/c-let-url-encode-and-decode.html" target="_blank" rel="external">上一篇文章</a>，可能唯一的难点是管道部分，这个使用了经典的fork-exece模型，关于管道，一张图能很好的解释：<br><img src="http://armsword.com/wp-content/uploads/2014/05/20140518171356.jpg" alt=""></p>
+<p>不过程序中使用了双管道，读写模型，如果你对此不理解，可以翻阅《Unix环境高级编程》。</p>
+<p>如果你对HTTP不慎了解，参考链接里的两篇文章，能帮助你更好的了解HTTP协议，其实HTTP1.1里面的难点，理解以下几句话就足够了：</p>
+<p>http协议规定头必然有2个连续的”\r\n”，就像Cookie后面就跟了2个\r\n，所以读取请求头的时候只要读到\r\n\r\n，那么前面就是头，后面就是实体。实体大小在上面有一个Content-Length标记。所以从\r\n\r\n后面读Content-Length大小后就结束了。所以服务端一般是1、判断状态码，http协议规定1xx 204 304肯定不包括实体，所以读到\r\n\r\n就不用再读；2、判断没有Content-Length；3、判断有没有chunked。有Content-Length直接读，而chunked的最后7个一定是\r\n0\r\n\r\n。</p>
+<p>chunked编码，这种编码一般是gzip压缩的</p>
+<pre><code><span class="status">HTTP/1.1 <span class="number">200</span> OK </span>
+<span class="attribute">Cache-Control</span>: <span class="string">private </span>
+<span class="attribute">Content-Type</span>: <span class="string">text/html; charset=utf-8 </span>
+<span class="attribute">Server</span>: <span class="string">Microsoft-IIS/7.5</span>
+<span class="attribute">X-AspNetMvc-Version</span>: <span class="string">2.0</span>
+<span class="attribute">X-AspNet-Version</span>: <span class="string">4.0.30319 </span>
+<span class="attribute">Set-Cookie</span>: <span class="string">Set-Cookie: X-Powered-By: ASP.NET </span>
+<span class="attribute">ntCoent-Length</span>: <span class="string">166137</span>
+<span class="attribute">Content-Encoding</span>: <span class="string">gzip </span>
+<span class="attribute">Transfer-Encoding</span>: <span class="string">chunked </span>
 
-<p>参考资料：<br>《C++ Primer》<br>《Crack The Interview》</p>
-<p></p>
+<span class="http">
+
+<span class="r">2D23 
+...........}.s.G.......j....*u......y....%<span class="keyword">...</span>;QO.M.[....3..,<span class="keyword">...</span>
+.!..O....H-.<span class="string">"v..&amp;gt;.............=YY </span></span></span>
+</code></pre><p>&nbsp;<br>在处理chunked时候，像上面chunked\r\n\r\n后面是实体，第一行2D23就是一chunk的大小所以在2D23\r\n后面开始读2D23个然后会紧跟着\r\n，然后后面就是下一chunk的大小，直到最后一chunk是0大小。实体结束，最后再来一个\r\n。也就是说chunked的最后7个一定是\r\n0\r\n\r\n，本来判断读到\r\n0\r\n\r\n就结束应该没问题，但是为了保险起见，还是一次一次的读大小值再读取指定的大小数据。</p>
+<p>另外，此代码里有部分缺陷，一是我急于完成，某些结构设计不合理，所以可扩展性比较差。第二，有少部分内存泄漏，懒得修改了。毕竟，我也得忙着找工作，时间比较紧张，但是总的来说，如果你想找后台开发相关的职位，如果你没有更好的项目经验，此代码如果你能读懂，写到简历上，面试官肯定会问你的。</p>
+<p>能力和精力有限，希望能对你们有所帮助 ^-^</p>
+<p>参考链接：</p>
+<p>1.<a href="http://www.cnblogs.com/TankXiao/archive/2012/02/13/2342672.html" target="_blank" rel="external">http://www.cnblogs.com/TankXiao/archive/2012/02/13/2342672.html</a></p>
+<p>2.<a href="http://www.cnblogs.com/li0803/archive/2008/11/03/1324746.html" target="_blank" rel="external">http://www.cnblogs.com/li0803/archive/2008/11/03/1324746.html</a></p>
+<p>3.<a href="http://blog.csdn.net/laotse/article/details/5903651" target="_blank" rel="external">http://blog.csdn.net/laotse/article/details/5903651</a></p>
+<p>&nbsp;</p>
 
       
     </div>
@@ -494,7 +460,7 @@
   
     <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
   
-    <li><a href="/categories/计算机网络/">计算机网络</a><small>9</small></li>
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>8</small></li>
   
   </ul>
 </div>

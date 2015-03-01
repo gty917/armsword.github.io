@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2015-02-02T12:44:10.298Z</updated>
+  <updated>2015-03-01T05:16:52.381Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -534,91 +534,6 @@
   </entry>
   
   <entry>
-    <title><![CDATA[各操作系统使用梯子教程]]></title>
-    <link href="http://armsword.com/2014/07/02/climb-a-ladder/"/>
-    <id>http://armsword.com/2014/07/02/climb-a-ladder/</id>
-    <published>2014-07-02T09:54:23.000Z</published>
-    <updated>2014-11-22T14:47:23.000Z</updated>
-    <content type="html"><![CDATA[<p>马上要找工作，论文也没写，算法也没准备好，实验室也忙的要死，按我性格肯定不会写这篇文章的，毕竟懂得搜索是程序员必须具备的最基础素质。但既然在微信上答应<a href="http://weibo.com/pennyliang" target="_blank" rel="external">梁博</a>写个详细的教程，那索性详细的写写吧。</p>
-<p>1.PPTP使用</p>
-<p>梁博的VPN地址：pennyjob.net 这个只开通了PPTP协议，所以我们只要在各系统下设置PPTP的登录方式就可以了。</p>
-<p>（1）Window 7</p>
-<p>1.打开“控制面板”-“网络和Internet”-“网络和共享中心” 点击“设置新的连接或网络”</p>
-<p>2.选择“连接到工作区”</p>
-<p>如图所示：</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702165157.png" alt=""></p>
-<p>&nbsp;</p>
-<p>3.如果已经存在其他连接，则在这一步选择“否，创建新连接”；如果没有，则这一步将被跳过（可能不会出现）</p>
-<p>4.选择“使用我的Internet连接（VPN）”，点击下一步</p>
-<p>5.“Internet地址栏”里输入服务器地址，如果使用梁博的VPN，就输入pennyjob.net，目标名称随便</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702165925.png" alt=""></p>
-<p>6.输入你的用户名和密码</p>
-<p>如果你使用了梁博的VPN，用户名为pennyjob，密码为pj1.</p>
-<p>7.打开已经设置好的VPN连接，然后点击属性按钮</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702170204.png" alt=""></p>
-<p>8.在安全选项卡中，VPN类型选择PPTP，数据加密选择“可选加密（没有加密也可以选择）”，然后点击“确认”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702170405.png" alt=""></p>
-<p>9.连接，访问下facebook.com试试，我用梁博的账号访问了下</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702170606.png" alt=""></p>
-<p>&nbsp;</p>
-<p>PS：PPTP是很脆弱的，容易受防火墙等因素影响，如果你按照上述流程弄完，依然无法访问，在命令行里输入netsh winsock reset ，之后重启下系统，再试试能否连接，如果不行的话，无解。（至少我认为无解，除了重装系统，貌似M$也没解决方案）。</p>
-<p>(2)Win XP</p>
-<p>我装有Win XP的机器现在系统在Ubuntu环境下跑着数据呢，不方便重启切换到Win XP下，所以无图，但是我会详细文字叙述，不好意思了，各位看官。</p>
-<p>1.打开网络连接，点击左上方的“创建一个新的链接”</p>
-<p>2.会出现“新建连接向导”，选择“链接到我的工作场所的网络”</p>
-<p>3.蹦出“新建连接向导”，选择“虚拟专用网络连接”，下一步</p>
-<p>4.填写链接名称，公司名随意填写，下一步</p>
-<p>5.选择“不拔初始连接”</p>
-<p>6.填写VPN服务器的名称地址，如果此处使用了梁博的VPN，填写pennyjob.net</p>
-<p>7.出现正在完成新建连接向导，选择“在我的桌面上添加一个到此连接的快捷方式”，点击完成</p>
-<p>8.在登录窗口选择“属性”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702171508.png" alt=""></p>
-<p>9.选择VPN属性为“PPTP VPN”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702171554.png" alt=""></p>
-<p>10.“安全”取消勾选“要求数据加密”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702171524.png" alt=""></p>
-<p>11.确定，之后就可以正常使用了。</p>
-<p>（3）安卓4.0（基本上大同小异，我就只能4.0举例了）</p>
-<p>1.打开设定，选择“更多”</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172436.png" alt=""></p>
-<p>2.选择VPN</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172454.png" alt=""></p>
-<p>3.按图所示，高级设置不用管就行</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172601.png" alt=""></p>
-<p>4.输入用户和密码</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172625.png" alt=""></p>
-<p>5.访问下FB试试</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/07/20140702172709.png" alt=""></p>
-<p>（4）iPhone/iPad</p>
-<p>我没有iPhone/iPad，但是这个使用很简单，文字描述下就可以了，方法网上搜索的：</p>
-<p>1.点击桌面上“设置”</p>
-<p>2.点击“通用”，进入通用设置</p>
-<p>3.点击“网络”，进入网络设置</p>
-<p>4.点击“VPN”进入VPN设置，点击“添加VPN”</p>
-<p>5.点击PPTP设置</p>
-<p>描述随便写，服务器写VPN地址，账户和密码对应，加密级别选择“无”</p>
-<p>6.点击VPN开关，打开VPN，就可以了。</p>
-<p>PS：想修改DNS好像需要越狱吧，修不修改DNS影响不大，不想越狱的不用管了。（此行可忽略不计）</p>
-<p>（5）*inux系统</p>
-<p>这个不用我多说了吧，经常使用的，大家有自力更生能力，不会使用<a href="http://wen.lu" target="_blank" rel="external">http://wen.lu</a>搜索下哈。</p>
-<p>2.SSH</p>
-<p>我不建议使用SSH，如果执意使用的话，我这里分享网友写的一个教程：</p>
-<p><a href="http://www.zotob.org/1.html" target="_blank" rel="external">点我</a></p>
-<p>3.其实我是推荐使用shadowsocks的</p>
-<p>github地址：<a href="https://github.com/clowwindy/shadowsocks" target="_blank" rel="external">https://github.com/clowwindy/shadowsocks</a></p>
-<p>但是梁博服务端没有配置，他没要求我写，我就不写了，看官们有兴趣的看下github吧，有源码和各系统客户端。</p>
-<p>PS：梁博好人一个，但是大家拿到VPN后，请合理使用，少去下载视频、观看视频，这样会严重影响别人使用，Enjoy！</p>
-<p>&nbsp;</p>
-]]></content>
-    <summary type="html">
-    <![CDATA[<p>马上要找工作，论文也没写，算法也没准备好，实验室也忙的要死，按我性格肯定不会写这篇文章的，毕竟懂得搜索是程序员必须具备的最基础素质。但既然在微信上答应<a href="http://weibo.com/pennyliang" target="_blank" rel="ext]]>
-    </summary>
-    
-      <category term="计算机网络" scheme="http://armsword.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-  </entry>
-  
-  <entry>
     <title><![CDATA[使用C++实现一简单智能指针类]]></title>
     <link href="http://armsword.com/2014/06/26/cpp-achieve-smart-pointer/"/>
     <id>http://armsword.com/2014/06/26/cpp-achieve-smart-pointer/</id>
@@ -920,6 +835,83 @@
     </summary>
     
       <category term="ML/NLP" scheme="http://armsword.com/categories/ML-NLP/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Linux IO复用—select poll 和 epoll]]></title>
+    <link href="http://armsword.com/2014/03/07/linux-io-multiplexing/"/>
+    <id>http://armsword.com/2014/03/07/linux-io-multiplexing/</id>
+    <published>2014-03-07T09:33:18.000Z</published>
+    <updated>2014-11-25T15:45:54.000Z</updated>
+    <content type="html"><![CDATA[<p>在Socket编程时，为了处理大量客户的连接请求，需要使用非阻塞I/O和端口复用，select、poll和epoll是Linux API提供的I/O复用方式。其实在*nix下的网络并发方法向来不缺，比如典型的Apache模型（Process Per Connection，简称PPC），TPC（Thread Per Connection）模型，这两种模型思想类似，就是利用了多进程、多线程概念，让进来的每一个连接去干别的事情去。但是连接多了以后，首先需要较大的内存，且进程/线程切换开销会非常大，因此这类模型能接受的最大连接数都不会太高。</p>
+<p>Linux 2.6中加入了epoll之后（据说Windows下使用的是IOCP，但是我没使用过），在高性能服务器领域中得到广泛的应用，主要原因就是高效。在讲epoll之前，我们先总结下select、poll，因为epoll其实也就是他们的增强版本，比如select是一个系统调用，而epoll是个模块，由三个系统调用组成，内核中由文件系统实现。</p>
+<p>&lt;1&gt; select</p>
+<p>select的第一个参数为fdset集合中最大描述符值加1，select对应于内核中的sys_select调用，sys_select首先将第二三四个参数指向的fd_set拷贝到内核，然后对每个被SET的描述符进行poll，并记录在临时结果中(fdset)，如果有事件发生，select会将临时结果写到用户空间并返回，当轮询一遍后没有任何事件发生，如果指定了超时时间，则select会睡眠到超时，睡眠结束后再进行下一次轮询，并将临时结果写到用户空间，然后返回。select返回后，需要逐一检查关注的描述符是否被SET（事件是否发生）。</p>
+<pre><code><span class="keyword">int</span> <span class="keyword">select</span>(<span class="keyword">int</span> nfds, fd_set* readfds, fd_set* writefds, fd_set* exceptfds, <span class="keyword">struct</span> timeval* timeout);
+</code></pre><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">参数                  描述</div><div class="line">nfds             sets的文件描述符的最大值</div><div class="line">readfds          fd_<span class="keyword">set</span> <span class="built_in">type</span> 类型，只读的描述符集 </div><div class="line">writefds         fd_<span class="keyword">set</span> <span class="built_in">type</span> 类型，只写的描述符集 </div><div class="line">errorfds         fd_<span class="keyword">set</span> <span class="built_in">type</span> 类型，错误的描述符集 </div><div class="line">timeout          超时等待时间</div></pre></td></tr></table></figure>
+
+<p>为了维护fd_set类型的参数，会使用下面四个宏：FD_SET(), FD_CLR(), FD_ZERO() 和 FD_ISSET()。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> fd_set</div><div class="line">{</div><div class="line">u_int fd_count;</div><div class="line"><span class="keyword">int</span> fd_array[FD_SETSIZE];</div><div class="line">}</div><div class="line"><span class="comment">//fd_array可SIZE*8个socket</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> FD_ISSET(<span class="keyword">int</span> fd,fd_set *fdset);</div><div class="line"><span class="comment">//返回值：若fd在描述符集中则返回非0值，否则返回0</span></div><div class="line"></div><div class="line"><span class="keyword">void</span> FD_CLR(<span class="keyword">int</span> fd,fd_set *fdset); <span class="comment">//fd指描述符</span></div><div class="line"><span class="keyword">void</span> FD_SET(<span class="keyword">int</span> fd,fd_set *fdset);</div><div class="line"><span class="keyword">void</span> FD_ZERO(fd_set *fdset);</div></pre></td></tr></table></figure>
+
+<p>select 函数监视的文件描述符分3类，分别是writefds，readfds、和exceptfds。调用后 select 函数会阻塞，直到有描述符就绪（有数据可读、可写、或者except）、或者超时（timeout指定等待的时间，timeout== NULL表示永远等待，timeout == 0表示不等待、立即返回，其他表示等待的时间）。当 select 函数返回后，可以通过遍历 fdset ，来找到就绪的描述符。</p>
+<p>select 的一个优点就是跨平台，缺点就是单个进程能够监视的文件描述符的数量存在最大限制，linux下一般为1024，Windows下好像无此限制，虽然可以修改这一限制，但是这样也会造成效率低下。</p>
+<p>运行过程：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">int sock;</div><div class="line">FILE *fp;</div><div class="line">struct fd_set fds;</div><div class="line">struct timeval timeout={<span class="number">3</span>,<span class="number">0</span>}; //select等待<span class="number">3</span>秒，<span class="number">3</span>秒轮询，要非阻塞就置<span class="number">0</span></div><div class="line">char buffer[<span class="number">256</span>]={<span class="number">0</span>}; //<span class="number">256</span>字节的接收缓冲区</div><div class="line">//假定已经建立UDP连接，具体过程不写，简单，当然TCP也同理，主机ip和port都已经给定，要写的文件已经打开</div><div class="line">sock=socket(<span class="keyword">...</span>);</div><div class="line">bind(<span class="keyword">...</span>);</div><div class="line">fp=fopen(<span class="keyword">...</span>);</div><div class="line"><span class="keyword">while</span>(<span class="number">1</span>)</div><div class="line">{</div><div class="line"> FD_ZERO(&amp;fds); //每次循环都要清空集合，否则不能检测描述符变化</div><div class="line"> FD_SET(sock,&amp;fds); //添加描述符</div><div class="line"> FD_SET(fp,&amp;fds); //同上</div><div class="line"> maxfdp=sock&gt;fp?sock+<span class="number">1</span>:fp+<span class="number">1</span>; //描述符最大值加<span class="number">1</span></div><div class="line"></div><div class="line">// <span class="keyword">for</span>(int i =<span class="number">0</span> ;i &lt; maxfds; i++) <span class="keyword">if</span>(FD_ISSET()) { }</div><div class="line"> <span class="keyword">switch</span>(select(maxfdp,&amp;fds,&amp;fds,<span class="literal">NULL</span>,&amp;timeout)) //select使用</div><div class="line"> {</div><div class="line"></div><div class="line">case -<span class="number">1</span>: exit(-<span class="number">1</span>);<span class="keyword">break</span>; //select错误，退出程序</div><div class="line"> case <span class="number">0</span>:<span class="keyword">break</span>; //再次轮询</div><div class="line"> default:</div><div class="line"> <span class="keyword">if</span>(FD_ISSET(sock,&amp;fds)) //测试sock是否可读，即是否网络上有数据</div><div class="line"> {</div><div class="line"> recvfrom(sock,buffer,<span class="number">256</span>,.....);//接受网络数据</div><div class="line"> <span class="keyword">if</span>(FD_ISSET(fp,&amp;fds)) //测试文件是否可写</div><div class="line"> fwrite(fp,buffer...);//写入文件</div><div class="line"> ......</div><div class="line"> }</div><div class="line"> }</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>注意：每次select 有数据要遍历全部socket，每次select之前要重置fds的值。</p>
+<p>&lt;2&gt; poll</p>
+<p>poll函数类似于 select，可用于任何类型的文件描述符，与 select 不同，poll不是为每个状态（可读性、可写性和异常状态）构造一个描述符集，而是构造一个pollfd 结构数组向内核传递需要关注的事件，故没有描述符个数的限制，每个数组元素指定一个描述符编号以及对其所关心的状态，pollfd中的events字段和revents字段分别用于标示关注的事件和发生的事件。</p>
+<p>poll的实现机制与select类似，其对应内核中的sys_poll，只不过poll向内核传递pollfd数组，然后对pollfd中的每个描述符进行poll，poll返回后，需要对pollfd中的每个元素检查其revents值，来判断事件是否发生。</p>
+<p>返回值：</p>
+<p>-1：有错误产生<br>0：超时时间到，而且没有描述符有状态变化<br>&gt;0：有状态变化的描述符个数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> poll(<span class="keyword">struct</span> pollfd fdarray[],nfds_t nfds,<span class="keyword">int</span> timeout);</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> pollfd{</div><div class="line"> <span class="keyword">int</span> fd; <span class="comment">//需要检查的文件描述符</span></div><div class="line"> <span class="keyword">short</span> events; <span class="comment">//等待的需要测试事件</span></div><div class="line"> <span class="keyword">short</span> revents; <span class="comment">//实际发生了的事件，也就是返回结果</span></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>应将每个数组元素的events成员设置为下图所示的值。通过这些值告诉内核我们对该描述符关心的是什么。返回时，内核设置revents成员，以说明对于该描述符已经发生了什么事件。（注意，poll没有更改events成员，这与select不同，select修改其参数以指示哪一个描述符已准备好了。）</p>
+<p>poll的events和revents标志：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/03/20140307205917.jpg" alt=""><br><code>timeout == -1 永远等待。当所指定的描述符中的一个已准备好，或捕捉到一个信号时则返回。如果捕捉到一个信号，则poll返回-1，errno设置为EINTR 
+timeout == 0 不等待
+timeout &gt; 0 等待timeout毫秒，如果已超时但是还没有一个描述符准备好，则返回值是0。</code><br>运行过程（与select相似）：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">struct pollfd fds[IN_FILES];</div><div class="line">char buf[MAX_BUFFER_SIZE];</div><div class="line"><span class="keyword">int</span> i,res,real_read, maxfd;</div><div class="line">fds[<span class="number">0</span>].fd = <span class="number">0</span>;</div><div class="line"><span class="keyword">if</span>((fds[<span class="number">1</span>].fd=<span class="keyword">open</span>(&quot;data1&quot;,O_RDONLY|O_NONBLOCK)) &<span class="keyword">lt</span>; <span class="number">0</span>)</div><div class="line">{</div><div class="line"> fprintf(stderr,&quot;<span class="keyword">open</span> data1 error:<span class="variable">%s</span>&quot;,strerror(errno));</div><div class="line"> <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line">}</div><div class="line"><span class="keyword">if</span>((fds[<span class="number">2</span>].fd=<span class="keyword">open</span>(&quot;data2&quot;,O_RDONLY|O_NONBLOCK)) &<span class="keyword">lt</span>; <span class="number">0</span>)</div><div class="line">{</div><div class="line"> fprintf(stderr,&quot;<span class="keyword">open</span> data2 error:<span class="variable">%s</span>&quot;,strerror(errno));</div><div class="line"> <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line">}</div><div class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &<span class="keyword">lt</span>; IN_FILES; i++)</div><div class="line">{</div><div class="line"> fds[i].events = POLLIN;</div><div class="line">}</div><div class="line"><span class="keyword">while</span>(fds[<span class="number">0</span>].events || fds[<span class="number">1</span>].events || fds[<span class="number">2</span>].events)</div><div class="line">{</div><div class="line"> <span class="keyword">if</span> (poll(fds, IN_FILES, TIME_DELAY) &<span class="keyword">lt</span>;= <span class="number">0</span>)</div><div class="line"> {</div><div class="line"> <span class="keyword">printf</span>(&quot;Poll error\n&quot;);</div><div class="line"> <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line"> }</div><div class="line"> <span class="keyword">for</span> (i = <span class="number">0</span>; i&<span class="keyword">lt</span>; IN_FILES; i++)</div><div class="line"> {</div><div class="line"> <span class="keyword">if</span> (fds[i].revents)</div><div class="line"> {</div><div class="line"> memset(buf, <span class="number">0</span>, MAX_BUFFER_SIZE);</div><div class="line"> real_read = <span class="keyword">read</span>(fds[i].fd, buf, MAX_BUFFER_SIZE);</div><div class="line"> <span class="keyword">if</span> (real_read &<span class="keyword">lt</span>; <span class="number">0</span>)</div><div class="line"> {</div><div class="line"> <span class="keyword">if</span> (errno != EAGAIN)</div><div class="line"> {</div><div class="line"> <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line"> }</div><div class="line"> }</div><div class="line"> <span class="keyword">else</span> <span class="keyword">if</span> (!real_read)</div><div class="line"> {</div><div class="line"> <span class="keyword">close</span>(fds[i].fd);</div><div class="line"> fds[i].events = <span class="number">0</span>;</div><div class="line"></div><div class="line">......</div><div class="line"></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>&lt;3&gt; epoll</p>
+<p>epoll通过epoll_create创建一个用于epoll轮询的描述符，通过epoll_ctl添加/修改/删除事件，通过epoll_wait 检查事件，epoll_wait 的第二个参数用于存放结果。</p>
+<p>epoll与select、poll不同，首先，其不用每次调用都向内核拷贝事件描述信息，在第一次调用后，事件信息就会与对应的epoll描述符关联起来。另外epoll不是通过轮询，而是通过在等待的描述符上注册回调函数，当事件发生时，回调函数负责把发生的事件存储在就绪事件链表中，最后写到用户空间。</p>
+<p>epoll返回后，该参数指向的缓冲区中即为发生的事件，对缓冲区中每个元素进行处理即可，而不需要像poll、select那样进行轮询检查。</p>
+<p>系统调用：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//创建一个epoll的句柄，size用来告诉内核这个监听的数目一共有多大。</span></div><div class="line"><span class="keyword">int</span> epoll_create(<span class="keyword">int</span> <span class="keyword">size</span>);</div></pre></td></tr></table></figure>
+
+<p>&nbsp;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">epoll的事件注册函数，它与select()是在监听事件时告诉内核要监听什么类型的事件不同，而是在这里先注册要监听的事件类型。第一个参数是epoll_create()的返回值，第二个参数表示动作，用三个宏来表示：</div><div class="line">EPOLL_CTL_ADD：注册新的fd到epfd中；</div><div class="line">EPOLL_CTL_MOD：修改已经注册的fd的监听事件；</div><div class="line">EPOLL_CTL_DEL：从epfd中删除一个fd；</div><div class="line">第三个参数是需要监听的fd，第四个参数是告诉内核需要监听什么事。</div><div class="line">*/</div><div class="line"><span class="keyword">int</span> epoll_ctl(<span class="keyword">int</span> epfd, <span class="keyword">int</span> op, <span class="keyword">int</span> fd, <span class="keyword">struct</span> epoll_event *<span class="keyword">event</span>);</div></pre></td></tr></table></figure>
+
+<p>struct epoll_event结构如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> union epoll_data {</div><div class="line"> <span class="keyword">void</span> *ptr;</div><div class="line"> int fd;</div><div class="line"> __uint32_t u32;</div><div class="line"> __uint64_t u64;</div><div class="line">} epoll_data_t;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span></span></div><div class="line">{</div><div class="line"> __uint32_t events; <span class="comment">//Epoll events</span></div><div class="line"> epoll_data_t data; <span class="comment">//User data variable</span></div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>`<br>events可以是以下几个宏的集合：<br>EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；<br>EPOLLOUT：表示对应的文件描述符可以写；<br>EPOLLPRI：表示对应的文件描述符有紧急的数据可读（这里应该表示有带外数据到来）；<br>EPOLLERR：表示对应的文件描述符发生错误；<br>EPOLLHUP：表示对应的文件描述符被挂断；<br>EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。<br>EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">等待事件的产生，类似于select()调用，参数events用来从内核得到事件的集合，maxevents告之内核这个events有多大，这个maxevents的值不能大于创建epoll_create()时的size，参数timeout是超时时间（毫秒，0会立即返回，-1将不确定，也有说法是永久阻塞），该函数返回需要处理的事件数目</div><div class="line">*/</div><div class="line"><span class="keyword">int</span> epoll_wait(<span class="keyword">int</span> epfd, <span class="keyword">struct</span> epoll_event * events, <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout);</div></pre></td></tr></table></figure>
+
+<p>运行过程：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> (n = <span class="number">0</span>; n &lt; nfds; ++n) {</div><div class="line"> <span class="keyword">if</span> (events[n].data.fd == listener) { <span class="comment">// 如果是主socket的事件的话，则表示</span></div><div class="line"> <span class="comment">// 有新连接进入了，进行新连接的处理。</span></div><div class="line"> client = accept(listener, (<span class="keyword">struct</span> sockaddr *) &amp;local, &amp;addrlen);</div><div class="line"> <span class="keyword">if</span> (client &lt; <span class="number">0</span>){</div><div class="line"> perror(&quot;accept&quot;);</div><div class="line"> <span class="keyword">continue</span>;</div><div class="line"> }</div><div class="line"> setnonblocking(client); <span class="comment">// 将新连接置于非阻塞模式</span></div><div class="line"> ev.events = EPOLLIN | EPOLLET; <span class="comment">// 并且将新连接也加入EPOLL的监听队列。</span></div><div class="line"> <span class="comment">// 注意，这里的参数EPOLLIN | EPOLLET并没有设置对写socket的监听，</span></div><div class="line"> <span class="comment">// 如果有写操作的话，这个时候epoll是不会返回事件的，如果要对写操作</span></div><div class="line"> <span class="comment">// 也监听的话，应该是EPOLLIN | EPOLLOUT | EPOLLET</span></div><div class="line"> ev.data.fd = client;</div><div class="line"> <span class="keyword">if</span> (epoll_ctl(kdpfd, EPOLL_CTL_ADD, client, &amp;ev) &lt; <span class="number">0</span>) {</div><div class="line"> <span class="comment">// 设置好event之后，将这个新的event通过epoll_ctl加入到epoll的监听队列里面，</span></div><div class="line"> <span class="comment">// 这里用EPOLL_CTL_ADD来加一个新的epoll事件，通过EPOLL_CTL_DEL来减少一个</span></div><div class="line"> <span class="comment">// epoll事件，通过EPOLL_CTL_MOD来改变一个事件的监听方式。</span></div><div class="line"> fprintf(stderr, &quot;epoll <span class="keyword">set</span> insertion error: fd=%d0, client);</div><div class="line"> <span class="keyword">return</span> -<span class="number">1</span>;</div><div class="line"> }</div><div class="line"> } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">event</span>[n].events &amp; EPOLLIN) { <span class="comment">// 如果是已经连接的用户，并且收到数据，</span></div><div class="line"> <span class="comment">// 那么进行读入</span></div><div class="line"> <span class="keyword">int</span> sockfd_r;</div><div class="line"> <span class="keyword">if</span> ((sockfd_r = <span class="keyword">event</span>[n].data.fd) &lt; <span class="number">0</span>)</div><div class="line"> <span class="keyword">continue</span>;</div><div class="line"> read(sockfd_r, buffer, MAXSIZE);</div><div class="line"> <span class="comment">// 修改sockfd_r上要处理的事件为EPOLLOUT</span></div><div class="line"> ev.data.fd = sockfd_r;</div><div class="line"> ev.events = EPOLLOUT | EPOLLET;</div><div class="line"> epoll_ctl(epfd, EPOLL_CTL_MOD, sockfd_r, &amp;ev)</div><div class="line"> } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">event</span>[n].events &amp; EPOLLOUT) { <span class="comment">// 如果有数据发送</span></div><div class="line"> <span class="keyword">int</span> sockfd_w = events[n].data.fd;</div><div class="line"> write(sockfd_w, buffer, <span class="keyword">sizeof</span>(buffer));</div><div class="line"> <span class="comment">// 修改sockfd_w上要处理的事件为EPOLLIN</span></div><div class="line"> ev.data.fd = sockfd_w;</div><div class="line"> ev.events = EPOLLIN | EPOLLET;</div><div class="line"> epoll_ctl(epfd, EPOLL_CTL_MOD, sockfd_r, &amp;ev)</div><div class="line"> }</div><div class="line"> do_use_fd(events[n].data.fd);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>可简单归结为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> fd = epoll_create(xxA); <span class="comment">//xxA可监听的socket</span></div><div class="line"><span class="keyword">struct</span> epoll_event events[xxxB];<span class="comment">//可返回的事件数</span></div><div class="line"><span class="keyword">while</span>(<span class="number">1</span>){</div><div class="line"> <span class="keyword">int</span> nfds = epoll_wait( ); <span class="comment">//wait event occur</span></div><div class="line"> <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;nfds; i++){</div><div class="line"> …. }<span class="comment">//end for</span></div><div class="line"></div><div class="line">}<span class="comment">//end while</span></div></pre></td></tr></table></figure>
+
+<p>epoll_wait返回的都是有效数据，可直接从struct epoll_events[]中获取事件，效率高。每次取事件后，要重新注册此socket的事件epoll(epoll_ctl)。</p>
+<p>参考资料：</p>
+<p>《UNIX环境高级编程》</p>
+<p><a href="http://zh.wikipedia.org/wiki/Select_(Unix" target="_blank" rel="external">http://zh.wikipedia.org/wiki/Select_(Unix</a>)</p>
+<p><a href="http://zh.wikipedia.org/wiki/Epoll" target="_blank" rel="external">http://zh.wikipedia.org/wiki/Epoll</a></p>
+<p><a href="http://www.cnblogs.com/xuxm2007/archive/2011/08/15/2139809.html" target="_blank" rel="external">http://www.cnblogs.com/xuxm2007/archive/2011/08/15/2139809.html</a></p>
+<p><a href="http://www.cnblogs.com/bigwangdi/p/3182958.html" target="_blank" rel="external">http://www.cnblogs.com/bigwangdi/p/3182958.html</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>在Socket编程时，为了处理大量客户的连接请求，需要使用非阻塞I/O和端口复用，select、poll和epoll是Linux API提供的I/O复用方式。其实在*nix下的网络并发方法向来不缺，比如典型的Apache模型（Process Per Connection，简]]>
+    </summary>
+    
+      <category term="Linux" scheme="http://armsword.com/categories/Linux/"/>
     
   </entry>
   
