@@ -4,7 +4,7 @@
   <subtitle><![CDATA[莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://armsword.com/"/>
-  <updated>2015-03-02T11:23:51.378Z</updated>
+  <updated>2015-03-02T11:26:06.750Z</updated>
   <id>http://armsword.com/</id>
   
   <author>
@@ -16,8 +16,8 @@
   
   <entry>
     <title><![CDATA[几种Hash算法的实现]]></title>
-    <link href="http://armsword.com/2015/03/02/several-realization-of-hash-algorithm-md/"/>
-    <id>http://armsword.com/2015/03/02/several-realization-of-hash-algorithm-md/</id>
+    <link href="http://armsword.com/2015/03/02/several-realization-of-hash-algorithm/"/>
+    <id>http://armsword.com/2015/03/02/several-realization-of-hash-algorithm/</id>
     <published>2015-03-02T08:38:51.000Z</published>
     <updated>2015-03-02T11:23:29.000Z</updated>
     <content type="html"><![CDATA[<p>哈希被广泛使用在很多领域，如数据存储，加密，计算机视觉（几何哈希），此处就简单整理下几个常见的Hash函数的实现，有空陆续补充吧。</p>
