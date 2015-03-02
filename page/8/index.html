@@ -55,6 +55,58 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2013-04-25T11:52:44.000Z"><a href="/2013/04/25/net-snmp-install-configure/">4月 25 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/25/net-snmp-install-configure/">Ubuntu下net-snmp的简单安装和配置</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1、官网下载最新版本</p>
+<p><a href="http://www.net-snmp.com/download.html" target="_blank" rel="external">http://www.net-snmp.com/download.html</a></p>
+<p>解压缩 tar xzvf net-snmp-5.7.2.tar.gz</p>
+<p>cd net-snmp-5.7.2</p>
+<p>2、安装依赖环境</p>
+<p>apt-get install libperl-dev</p>
+<p>3、配置net-snmp</p>
+<p>./configure —prefix=/usr/local/snmp —with-mib-modules=ucd-snmp/diskio</p>
+<p>—with-mib-modules=ucd-snmp/diskio 选项，可以让服务器支持磁盘I/O监控。<br>—with-default-snmp-version 选项，是默认装V3版本<br>—with-sys-location 位置<br>—with-sys-contact 联系人<br>—with-logfile 日志文件目录<br>—with-persistent-directory</p>
+<p>4、编译并安装</p>
+<p>make</p>
+<p>make install  最好记得加上sudo哦~</p>
+<p>5、配置文件 snmpd.conf</p>
+<p>这里有两种方式，一种方式是用命令snmpconf -g basic_setup生成snmpd.conf文件，比较费时，我这里用了一种较简便的方法生成配置文件,就是把解压后的那个文件目录下的EXAMPLE.conf文件拷在我们的安装路径下并修改，命令格式如下：</p>
+<p>sudo cp EXAMPLE.conf /usr/local/snmp/share/snmp/snmpd.conf</p>
+<p>这里最新版本的貌似与其他版本的配置不一样，具体配置我还没有弄清楚，还有这个地方，snmpd进程好像是起不来的。所以，折腾了半天，我安装了SNMP</p>
+<p>sudo apt-get install snmpd</p>
+<p>6、设置环境变量</p>
+<p>在/etc/environmet里面自己添加。</p>
+<p>之后使用snmpwalk命令查看下：</p>
+<p>linuxer@imlinuxer:/var$ snmpwalk -v 2c -c public 10.109.33.96<br>SNMPv2-MIB::sysDescr.0 = STRING: Linux firewall.waf 2.6.32-220.el6.i686 #1 SMP Tue Dec 6 16:15:40 GMT 2011 i686<br>SNMPv2-MIB::sysObjectID.0 = OID: NET-SNMP-MIB::netSnmpAgentOIDs.10<br>DISMAN-EVENT-MIB::sysUpTimeInstance = Timeticks: (11998) 0:01:59.98<br>SNMPv2-MIB::sysContact.0 = STRING: Root &lt;root@localhost&gt; (configure /etc/snmp/snmp.local.conf)<br>SNMPv2-MIB::sysName.0 = STRING: firewall.waf<br>SNMPv2-MIB::sysLocation.0 = STRING: Unknown (edit /etc/snmp/snmpd.conf)<br>SNMPv2-MIB::sysORLastChange.0 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORID.1 = OID: SNMP-MPD-MIB::snmpMPDMIBObjects.3.1.1<br>SNMPv2-MIB::sysORID.2 = OID: SNMP-USER-BASED-SM-MIB::usmMIBCompliance<br>SNMPv2-MIB::sysORID.3 = OID: SNMP-FRAMEWORK-MIB::snmpFrameworkMIBCompliance<br>SNMPv2-MIB::sysORID.4 = OID: SNMPv2-MIB::snmpMIB<br>SNMPv2-MIB::sysORID.5 = OID: TCP-MIB::tcpMIB<br>SNMPv2-MIB::sysORID.6 = OID: IP-MIB::ip<br>SNMPv2-MIB::sysORID.7 = OID: UDP-MIB::udpMIB<br>SNMPv2-MIB::sysORID.8 = OID: SNMP-VIEW-BASED-ACM-MIB::vacmBasicGroup<br>SNMPv2-MIB::sysORDescr.1 = STRING: The MIB for Message Processing and Dispatching.<br>SNMPv2-MIB::sysORDescr.2 = STRING: The MIB for Message Processing and Dispatching.<br>SNMPv2-MIB::sysORDescr.3 = STRING: The SNMP Management Architecture MIB.<br>SNMPv2-MIB::sysORDescr.4 = STRING: The MIB module for SNMPv2 entities<br>SNMPv2-MIB::sysORDescr.5 = STRING: The MIB module for managing TCP implementations<br>SNMPv2-MIB::sysORDescr.6 = STRING: The MIB module for managing IP and ICMP implementations<br>SNMPv2-MIB::sysORDescr.7 = STRING: The MIB module for managing UDP implementations<br>SNMPv2-MIB::sysORDescr.8 = STRING: View-based Access Control Model for SNMP.<br>SNMPv2-MIB::sysORUpTime.1 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.2 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.3 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.4 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.5 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.6 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.7 = Timeticks: (38) 0:00:00.38<br>SNMPv2-MIB::sysORUpTime.8 = Timeticks: (38) 0:00:00.38<br>HOST-RESOURCES-MIB::hrSystemUptime.0 = Timeticks: (16030332) 1 day, 20:31:43.32<br>HOST-RESOURCES-MIB::hrSystemUptime.0 = No more variables left in this MIB View (It is past the end of the MIB tree)</p>
+<p>linuxer@imlinuxer:~$ snmpwalk -v 2c -c public localhost<br>SNMPv2-MIB::sysDescr.0 = STRING: Linux imlinuxer 3.5.0-27-generic #46-Ubuntu SMP Mon Mar 25 20:00:05 UTC 2013 i686<br>SNMPv2-MIB::sysObjectID.0 = OID: NET-SNMP-MIB::netSnmpAgentOIDs.10<br>DISMAN-EVENT-MIB::sysUpTimeInstance = Timeticks: (939957) 2:36:39.57<br>SNMPv2-MIB::sysContact.0 = STRING: Me &lt;me@example.org&gt;<br>SNMPv2-MIB::sysName.0 = STRING: imlinuxer<br>SNMPv2-MIB::sysLocation.0 = STRING: Sitting on the Dock of the Bay<br>SNMPv2-MIB::sysServices.0 = INTEGER: 72<br>SNMPv2-MIB::sysORLastChange.0 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORID.1 = OID: SNMP-FRAMEWORK-MIB::snmpFrameworkMIBCompliance<br>SNMPv2-MIB::sysORID.2 = OID: SNMP-MPD-MIB::snmpMPDCompliance<br>SNMPv2-MIB::sysORID.3 = OID: SNMP-USER-BASED-SM-MIB::usmMIBCompliance<br>SNMPv2-MIB::sysORID.4 = OID: SNMPv2-MIB::snmpMIB<br>SNMPv2-MIB::sysORID.5 = OID: TCP-MIB::tcpMIB<br>SNMPv2-MIB::sysORID.6 = OID: IP-MIB::ip<br>SNMPv2-MIB::sysORID.7 = OID: UDP-MIB::udpMIB<br>SNMPv2-MIB::sysORID.8 = OID: SNMP-VIEW-BASED-ACM-MIB::vacmBasicGroup<br>SNMPv2-MIB::sysORDescr.1 = STRING: The SNMP Management Architecture MIB.<br>SNMPv2-MIB::sysORDescr.2 = STRING: The MIB for Message Processing and Dispatching.<br>SNMPv2-MIB::sysORDescr.3 = STRING: The management information definitions for the SNMP User-based Security Model.<br>SNMPv2-MIB::sysORDescr.4 = STRING: The MIB module for SNMPv2 entities<br>SNMPv2-MIB::sysORDescr.5 = STRING: The MIB module for managing TCP implementations<br>SNMPv2-MIB::sysORDescr.6 = STRING: The MIB module for managing IP and ICMP implementations<br>SNMPv2-MIB::sysORDescr.7 = STRING: The MIB module for managing UDP implementations<br>SNMPv2-MIB::sysORDescr.8 = STRING: View-based Access Control Model for SNMP.<br>SNMPv2-MIB::sysORUpTime.1 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.2 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.3 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.4 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.5 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.6 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.7 = Timeticks: (1) 0:00:00.01<br>SNMPv2-MIB::sysORUpTime.8 = Timeticks: (1) 0:00:00.01<br>HOST-RESOURCES-MIB::hrSystemUptime.0 = Timeticks: (2875468) 7:59:14.68<br>HOST-RESOURCES-MIB::hrSystemDate.0 = STRING: 2013-4-25,19:51:51.0,+8:0<br>HOST-RESOURCES-MIB::hrSystemInitialLoadDevice.0 = INTEGER: 1536<br>HOST-RESOURCES-MIB::hrSystemInitialLoadParameters.0 = STRING: “BOOT_IMAGE=/boot/vmlinuz-3.5.0-27-generic root=UUID=226da7a1-f349-4cbf-a63f-3abed38a7371 ro quiet splash vt.handoff=7<br>“<br>HOST-RESOURCES-MIB::hrSystemNumUsers.0 = Gauge32: 2<br>HOST-RESOURCES-MIB::hrSystemProcesses.0 = Gauge32: 155<br>HOST-RESOURCES-MIB::hrSystemMaxProcesses.0 = INTEGER: 0<br>HOST-RESOURCES-MIB::hrSystemMaxProcesses.0 = No more variables left in this MIB View (It is past the end of the MIB tree)</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2013-04-12T09:51:23.000Z"><a href="/2013/04/12/lamp-install/">4月 12 2013</a></time>
       
       
@@ -438,49 +490,6 @@
 </article>
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2012-10-08T12:09:33.000Z"><a href="/2012/10/08/pe-view-tools/">10月 8 2012</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2012/10/08/pe-view-tools/">模仿Stud_PE写了个PE查看工具</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>代码写的比较简单，其实主要是接上篇文章的练习之作，依然还是Win32 Console环境。由于出现了野指针，导致debug了好长时间才找出毛病。这里贴下代码吧，代码原理比较简单，上篇文章已经详细说明了。并且各大论坛和书籍都有类型的介绍或相关的代码。我们将系统自带的计算器calc.exe复制到C盘根目录下。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdio.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;windows.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;stdlib.h&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> main()</div><div class="line">{</div><div class="line"> FILE *fp;</div><div class="line"> <span class="keyword">char</span> ch;</div><div class="line"> <span class="keyword">int</span> i;</div><div class="line"> <span class="keyword">char</span> filename[MAX_PATH];</div><div class="line"> IMAGE_DOS_HEADER DOS_header; <span class="comment">//DOS头文件</span></div><div class="line"> IMAGE_NT_HEADERS NT_header; <span class="comment">//PE头文件</span></div><div class="line"> IMAGE_SECTION_HEADER *SN_header;</div><div class="line"> <span class="built_in">memset</span>(filename,<span class="number">0</span>,<span class="keyword">sizeof</span>(filename));</div><div class="line"></div><div class="line"> <span class="built_in">printf</span>(&quot;请输入文件名:\n&quot;);</div><div class="line"> gets(filename);</div><div class="line"> fp = fopen(filename,&quot;rb&quot;);</div><div class="line"> <span class="keyword">if</span> (fp == NULL)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;打开文件出错！\n&quot;);</div><div class="line"> <span class="built_in">exit</span>(<span class="number">0</span>);</div><div class="line"> }</div><div class="line"> <span class="built_in">printf</span>(&quot;检查当前文件%s的前两个字节是否为MZ\n&quot;,filename);</div><div class="line"> ch = fgetc(fp); <span class="comment">//使用fgets()一次判断也可以</span></div><div class="line"> <span class="keyword">if</span>(ch != <span class="string">'M'</span>)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;该文件不是有效的PE文件！\n&quot;);</div><div class="line"> <span class="built_in">exit</span>(<span class="number">0</span>);</div><div class="line"> }</div><div class="line"> <span class="keyword">else</span></div><div class="line"> {</div><div class="line"> ch = fgetc(fp); <span class="comment">//fgetc()移动指针</span></div><div class="line"> <span class="keyword">if</span> (ch != <span class="string">'Z'</span>)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;该文件不是有效的PE文件！\n&quot;);</div><div class="line"> <span class="built_in">exit</span>(<span class="number">0</span>);</div><div class="line"> }</div><div class="line"></div><div class="line">}</div><div class="line"></div><div class="line"> rewind(fp); <span class="comment">//文件指针移动到开头</span></div><div class="line"> <span class="built_in">printf</span>(&quot;\n----------------PE头文件信息------------------\n&quot;);</div><div class="line"> fread(&amp;DOS_header,<span class="keyword">sizeof</span>(<span class="keyword">struct</span> _IMAGE_DOS_HEADER),<span class="number">1</span>,fp);</div><div class="line"> <span class="built_in">printf</span>(&quot;文件头偏移：%X h\n&quot;,DOS_header.e_lfanew);<span class="comment">//e_magic、e_lfnew</span></div><div class="line"> fseek(fp,DOS_header.e_lfanew,<span class="number">0</span>); <span class="comment">//移动e_lfanew</span></div><div class="line"> fread(&amp;NT_header,<span class="keyword">sizeof</span>(<span class="keyword">struct</span> _IMAGE_NT_HEADERS),<span class="number">1</span>,fp);</div><div class="line"> <span class="keyword">if</span>(NT_header.Signature != <span class="number">0x00004550</span>)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;该文件不是有效的PE文件！\n&quot;);</div><div class="line"> fclose(fp);</div><div class="line"> <span class="built_in">exit</span>(<span class="number">0</span>);</div><div class="line"> }</div><div class="line"> <span class="built_in">printf</span>(&quot;节的个数：%x h\n&quot;,NT_header.FileHeader.NumberOfSections);</div><div class="line"> <span class="built_in">printf</span>(&quot;基地址：%xH\n&quot;,NT_header.OptionalHeader.ImageBase);</div><div class="line"> <span class="built_in">printf</span>(&quot;执行入口RVA：%x h\n&quot;,NT_header.OptionalHeader.AddressOfEntryPoint);</div><div class="line"> <span class="built_in">printf</span>(&quot;内存文件映像大小：%x h\n&quot;,NT_header.OptionalHeader.SizeOfImage);</div><div class="line"> system(&quot;pause&quot;);</div><div class="line"> system(&quot;cls&quot;);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n----------------PE节文件信息------------------\n&quot;);</div><div class="line"> SN_header = (IMAGE_SECTION_HEADER *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(IMAGE_SECTION_HEADER)*(NT_header.FileHeader.NumberOfSections));</div><div class="line"> <span class="comment">//SN_header = new IMAGE_SECTION_HEADER[NT_header.FileHeader.NumberOfSections];</span></div><div class="line"> fread(SN_header,NT_header.FileHeader.NumberOfSections*<span class="keyword">sizeof</span>(<span class="keyword">struct</span> _IMAGE_SECTION_HEADER),<span class="number">1</span>,fp);</div><div class="line"> <span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;NT_header.FileHeader.NumberOfSections;i++)</div><div class="line"> {</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的节表名称:%s\n&quot;,i+<span class="number">1</span>,SN_header[i].Name);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的文件偏移:%X h\n&quot;,i+<span class="number">1</span>,SN_header[i].PointerToRawData);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的内存偏移:%X h\n&quot;,i+<span class="number">1</span>,SN_header[i].VirtualAddress);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的实际大小:%X h\n&quot;,i+<span class="number">1</span>,SN_header[i].Misc.VirtualSize);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节对齐后大小:%X h\n&quot;,i+<span class="number">1</span>,SN_header[i].SizeOfRawData);</div><div class="line"> <span class="built_in">printf</span>(&quot;\n第 %d 节的相关属性:%XH\n&quot;,i+<span class="number">1</span>,SN_header[i].Characteristics);</div><div class="line"></div><div class="line">}</div><div class="line"> fclose(fp);</div><div class="line"> getchar();</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>输出：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">请输入文件名:</div><div class="line"><span class="tag">C</span>:\<span class="tag">calc</span><span class="class">.exe</span></div><div class="line">检查当前文件<span class="tag">C</span>:\<span class="tag">calc</span><span class="class">.exe</span>的前两个字节是否为<span class="tag">MZ</span></div><div class="line"></div><div class="line"><span class="tag">----------------PE</span>头文件信息<span class="tag">------------------</span></div><div class="line">文件头偏移：<span class="tag">D8</span> <span class="tag">h</span></div><div class="line">节的个数：4 <span class="tag">h</span></div><div class="line">基地址：1000000<span class="tag">H</span></div><div class="line">执行入口<span class="tag">RVA</span>：12<span class="tag">d6c</span> <span class="tag">h</span></div><div class="line">内存文件映像大小：<span class="tag">c0000</span> <span class="tag">h</span></div><div class="line"><span class="tag">----------------PE</span>节文件信息<span class="tag">------------------</span></div><div class="line"></div><div class="line">第 1 节的节表名称:<span class="class">.text</span></div><div class="line"></div><div class="line">第 1 节的文件偏移<span class="pseudo">:400</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 1 节的内存偏移<span class="pseudo">:1000</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 1 节的实际大小<span class="pseudo">:52CA1</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 1 节对齐后大小<span class="pseudo">:52E00</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 1 节的相关属性<span class="pseudo">:60000020H</span></div><div class="line"></div><div class="line">第 2 节的节表名称:<span class="class">.data</span></div><div class="line"></div><div class="line">第 2 节的文件偏移<span class="pseudo">:53200</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 2 节的内存偏移<span class="pseudo">:54000</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 2 节的实际大小<span class="pseudo">:40C0</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 2 节对齐后大小<span class="pseudo">:4200</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 2 节的相关属性<span class="pseudo">:C0000040H</span></div><div class="line"></div><div class="line">第 3 节的节表名称:<span class="class">.rsrc</span></div><div class="line"></div><div class="line">第 3 节的文件偏移<span class="pseudo">:57400</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 3 节的内存偏移<span class="pseudo">:59000</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 3 节的实际大小<span class="pseudo">:62798</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 3 节对齐后大小<span class="pseudo">:62800</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 3 节的相关属性<span class="pseudo">:40000040H</span></div><div class="line"></div><div class="line">第 4 节的节表名称:<span class="class">.reloc</span></div><div class="line"></div><div class="line">第 4 节的文件偏移<span class="pseudo">:B9C00</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 4 节的内存偏移<span class="pseudo">:BC000</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 4 节的实际大小<span class="pseudo">:3B3C</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 4 节对齐后大小<span class="pseudo">:3C00</span> <span class="tag">h</span></div><div class="line"></div><div class="line">第 4 节的相关属性<span class="pseudo">:42000040H</span></div></pre></td></tr></table></figure>
-
-<p>我们用Peid查看下该文件信息，之后我们比较下结果：</p>
-<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121008200753.jpg" alt=""></p>
-<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121008164836.jpg" alt=""></p>
-<p>当然我的比Peid的简单多了，因为我火候还没到呢，-_-!</p>
-<p>另外，放张图，来纪念由于自己的失误，而照成的野指针，因为费了大约2个小时来找bug，不过幸运的事，在找bug过程中，我学习了不少知识。</p>
-<p><img src="http://armsword.com/wp-content/uploads/2012/10/20121008164835.jpg" alt=""></p>
-<p>图中fp = 0x00000000 ，为啥啊，因为我在判断fp是否为NULL的时候，对它赋值了。糗大了。</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
 
 <nav id="pagination">
   
@@ -519,7 +528,7 @@
   
     <li><a href="/categories/我的生活/">我的生活</a><small>3</small></li>
   
-    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>5</small></li>
   
     <li><a href="/categories/计算机网络/">计算机网络</a><small>8</small></li>
   
@@ -531,6 +540,10 @@
 <div class="widget tag">
   <h3 class="title">最新文章</h3>
   <ul class="entry">
+    
+      <li>
+        <a href="/2015/03/02/several-realization-of-hash-algorithm-md/">几种Hash算法的实现</a>
+      </li>
     
       <li>
         <a href="/2015/01/31/baidu-lossless-music-downloader/">写了一个Chrome插件 - 百度无损音乐下载插件</a>
@@ -554,10 +567,6 @@
     
       <li>
         <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
-      </li>
-    
-      <li>
-        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
       </li>
     
   </ul>

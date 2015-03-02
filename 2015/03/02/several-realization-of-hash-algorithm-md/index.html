@@ -1,0 +1,252 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>几种Hash算法的实现 | armsword的涅槃之地</title>
+  <meta name="author" content="armsword">
+  
+  <meta name="description" content="程序员,搜索引擎,网络编程,后台开发,北邮人,阿里巴巴,神马搜索,Linux,C,C++,Python">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="几种Hash算法的实现"/>
+  <meta property="og:site_name" content="armsword的涅槃之地"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico"> 
+  <link rel="alternate" href="/atom.xml" title="armsword的涅槃之地" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">armsword的涅槃之地</a></h1>
+  <h2><a href="/">莫思身外无穷事，且读生平未见书 || 不为无益之事，何以遣有涯之生</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about-me">About</a></li>
+    
+      <li><a href="/document-information">文档资料</a></li>
+    
+  <li><a href="/atom.xml">RSS</a><li>
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2015-03-02T08:38:51.000Z"><a href="/2015/03/02/several-realization-of-hash-algorithm-md/">3月 2 2015</a></time>
+      
+      
+  
+    <h1 class="title">几种Hash算法的实现</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>哈希被广泛使用在很多领域，如数据存储，加密，计算机视觉（几何哈希），此处就简单整理下几个常见的Hash函数的实现，有空陆续补充吧。</p>
+<h2 id="BKDR_Hash_Function">BKDR Hash Function</h2>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">// 本算法由于在Brian Kernighan与Dennis Ritchie的《The C Programming Language》一书被展示而得名，是一种简单快捷的<span class="built_in">hash</span>算法。</div><div class="line"></div><div class="line">// 也是Java目前采用的字符串的Hash算法（累乘因子为<span class="number">31</span>）。</div><div class="line"></div><div class="line">// 此哈希函数用的最多</div><div class="line"></div><div class="line">template&lt;class T&gt;</div><div class="line">size_t BKDRHash(const T *str)</div><div class="line">{</div><div class="line">	register size_t <span class="built_in">hash</span> = <span class="number">0</span>;</div><div class="line">	<span class="keyword">while</span> (size_t ch = (size_t)*str++)</div><div class="line">	{		</div><div class="line">		<span class="built_in">hash</span> = <span class="built_in">hash</span> * <span class="number">131</span> + ch;   // 也可以乘以<span class="number">31</span>、<span class="number">131</span>、<span class="number">1313</span>、<span class="number">13131</span>、<span class="number">131313</span>..</div><div class="line">		// 可将乘法分解为位运算及加减法可以提高效率，如将上式表达为：<span class="built_in">hash</span> = <span class="built_in">hash</span> &lt;&lt; <span class="number">7</span> + <span class="built_in">hash</span> &lt;&lt; <span class="number">1</span> + <span class="built_in">hash</span> + ch;</div><div class="line">	}</div><div class="line">	<span class="keyword">return</span> <span class="built_in">hash</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>其中累乘因子也可以为131、1313、13131，比如下述代码就使用了33。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">unsigned <span class="keyword">int</span> times33(<span class="keyword">char</span> *<span class="keyword">str</span>)</div><div class="line">{</div><div class="line">    unsigned <span class="keyword">int</span> val = <span class="number">0</span>;</div><div class="line">    <span class="keyword">while</span> (*<span class="keyword">str</span>) </div><div class="line">        val = (val &lt;&lt; <span class="number">5</span>) + val + (*<span class="keyword">str</span>++);</div><div class="line">    <span class="keyword">return</span> val;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>此算法也会有如下变种，如：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">unsigned <span class="keyword">int</span> timesnum(<span class="keyword">char</span> *<span class="keyword">str</span>, <span class="keyword">int</span> num)</div><div class="line">{</div><div class="line">    unsigned <span class="keyword">int</span> val = <span class="number">0</span>;</div><div class="line">    <span class="keyword">while</span> (*<span class="keyword">str</span>) </div><div class="line">        val = val * num + (*<span class="keyword">str</span>++);</div><div class="line">    <span class="keyword">return</span> val;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<h3 id="SDBM_Hash_Function">SDBM Hash Function</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">// 本算法是由于在开源项目<span class="type">SDBM</span>（一种简单的数据库引擎）中被应用而得名，它与<span class="type">BKDRHash</span>思想一致，只是种子不同而已。</div><div class="line"></div><div class="line"><span class="keyword">template</span>&lt;class T&gt;</div><div class="line">size_t <span class="type">SDBMHash</span>(<span class="keyword">const</span> T *str)</div><div class="line">{</div><div class="line">	register size_t hash = <span class="number">0</span>;</div><div class="line">	<span class="keyword">while</span> (size_t ch = (size_t)*str++)</div><div class="line">	{</div><div class="line">		hash = <span class="number">65599</span> * hash + ch;		</div><div class="line">		//hash = (size_t)ch + (hash &lt;&lt; <span class="number">6</span>) + (hash &lt;&lt; <span class="number">16</span>) - hash;</div><div class="line">	}</div><div class="line">	<span class="keyword">return</span> hash;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<h3 id="AP_Hash_Function">AP Hash Function</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Arash Partow发明的一种hash算法 </span></div><div class="line"><span class="comment">// 比较优秀的一种哈希算法</span></div><div class="line">unsigned <span class="keyword">int</span> APhash(<span class="keyword">char</span> *<span class="keyword">str</span>)</div><div class="line">{</div><div class="line">    unsigned <span class="keyword">int</span> val = <span class="number">0</span>;</div><div class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</div><div class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; *<span class="keyword">str</span>; i++) </div><div class="line">        <span class="keyword">if</span> ((i & <span class="number">1</span>) == <span class="number">0</span>)</div><div class="line">            val ^= ((val &lt;&lt; <span class="number">7</span>)^(*<span class="keyword">str</span>++)^(val&gt;&gt;<span class="number">3</span>));</div><div class="line">        <span class="keyword">else</span></div><div class="line">            val ^= (~((val &lt;&lt; <span class="number">11</span>)^(*<span class="keyword">str</span>++)^(val&gt;&gt;<span class="number">5</span>)));</div><div class="line"></div><div class="line">    <span class="keyword">return</span> (val & <span class="number">0x7FFFFFFF</span>);	</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<h2 id="FNV_Hash_Function">FNV Hash Function</h2>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">// <span class="type">Unix</span> system系统中使用的一种著名hash算法，后来微软也在其hash_map中实现。</div><div class="line"></div><div class="line"><span class="keyword">template</span>&lt;class T&gt;</div><div class="line">size_t <span class="type">FNVHash</span>(<span class="keyword">const</span> T* str)</div><div class="line">{</div><div class="line">	<span class="keyword">if</span>(!*str)</div><div class="line">		<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">	register size_t hash = <span class="number">2166136261</span>;</div><div class="line">	<span class="keyword">while</span> (size_t ch = (size_t)*str++)</div><div class="line">	{</div><div class="line">		hash *= <span class="number">16777619</span>;</div><div class="line">		hash ^= ch;</div><div class="line">	}</div><div class="line">	<span class="keyword">return</span> hash;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>其实关于为什么要用异或，我搜索了下原因，见<a href="http://stackoverflow.com/questions/5889238/why-is-xor-the-default-way-to-combine-hashes" target="_blank" rel="external">Why is XOR the default way to combine hashes?</a></p>
+<h2 id="MySQL中出现的字符串哈希函数">MySQL中出现的字符串哈希函数</h2>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">unsigned</span> <span class="keyword">int</span> MySQLhash(<span class="keyword">char</span> *str)</div><div class="line">{</div><div class="line">    <span class="keyword">register</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> nr = <span class="number">1</span>, nr2 = <span class="number">4</span>;</div><div class="line">    <span class="keyword">while</span>(*str) {</div><div class="line">        nr ^= (((nr & <span class="number">63</span>) + nr2)*((<span class="keyword">unsigned</span> <span class="keyword">int</span>)*str++)) + (nr &lt;&lt; <span class="number">8</span>);</div><div class="line">        nr2 += <span class="number">3</span>;	</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> (<span class="keyword">unsigned</span> <span class="keyword">int</span>)nr;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>参考链接：<br><a href="https://github.com/armsword/Source/blob/master/spiderq/src/hashs.cpp" target="_blank" rel="external">spiderq</a><br><a href="http://blog.csdn.net/qq7366020/article/details/8730425" target="_blank" rel="external">各种哈希函数冲突率分析</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/算法-数据结构/">算法/数据结构</a>
+  </div>
+
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="几种Hash算法的实现" data-url="http://armsword.com/2015/03/02/several-realization-of-hash-algorithm-md/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"armsword"};
+(function() {
+        var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                        (document.getElementsByTagName('head')[0] 
+                            || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:armsword.com">
+  </form>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>23</small></li>
+  
+    <li><a href="/categories/Database/">Database</a><small>2</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>14</small></li>
+  
+    <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
+  
+    <li><a href="/categories/Web-Script/">Web/Script</a><small>4</small></li>
+  
+    <li><a href="/categories/Windows/">Windows</a><small>3</small></li>
+  
+    <li><a href="/categories/我的生活/">我的生活</a><small>3</small></li>
+  
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>5</small></li>
+  
+    <li><a href="/categories/计算机网络/">计算机网络</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2015/03/02/several-realization-of-hash-algorithm-md/">几种Hash算法的实现</a>
+      </li>
+    
+      <li>
+        <a href="/2015/01/31/baidu-lossless-music-downloader/">写了一个Chrome插件 - 百度无损音乐下载插件</a>
+      </li>
+    
+      <li>
+        <a href="/2015/01/26/jwsmtp-analyse/">jwSMTP源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2014/12/01/learn-emacs-note/">Emacs学习笔记</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/22/move-from-wordpress-to-hexo/">将WordPress迁移到hexo并同时托管到Github和Gitcafe上</a>
+      </li>
+    
+      <li>
+        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+      </li>
+    
+      <li>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://linuxer.me" target="_blank" title="armsword的涅槃之地">armsword</a></li>
+<li><a href="http://yanyiwu.com" target="_blank" title="YanYi">YanYi</a></li>
+<li><a href="http://dreamshield.net/" target="_blank" title="DreamShield">DreamShield</a></li>
+<li><a href="http://blog.purplecow.me" target="_blank" title="PurpleCow">PurpleCow</a></li>
+<li><a href="http://cstdlib.com" target="_blank" title="徐小夫">徐小夫</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft"> 
+  
+  &copy; 2015 armsword
+  
+  || 
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1253622272'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1253622272' type='text/javascript'%3E%3C/script%3E"));</script>
+
+ 
+</div>
+<div class="clearfix"></div>
+</footer>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="totop" style="position:fixed;bottom:30px;right:30px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+
+<script src="/js/totop.js"></script>
+
+
+</body>
+</html>

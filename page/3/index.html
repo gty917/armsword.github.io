@@ -55,6 +55,72 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2014-05-18T09:22:17.000Z"><a href="/2014/05/18/light-cgi-server/">5月 18 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/05/18/light-cgi-server/">写了一个简单的CGI Server</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>之前看过一些开源程序的源码，也略微知道些Apache的CGI处理程序架构，于是用了一段时间，用C写了一个简单的CGI Server，代码算上头文件，一共1200行左右，难度中等偏上。麻雀虽小，五脏俱全。如果把程序里所涉及的HTTP协议，Linux下POSIX编程等等搞清楚，我想找工作中肯定是有足够的竞争力的，当然我也只是皮毛而已，不再班门弄斧了，下面简单的说下程序流程吧，方便小伙伴们阅读。</p>
+<p>程序源代码：<a href="https://github.com/armsword/LightCgiServer" target="_blank" rel="external">戳我</a></p>
+<p>在说程序流程之前，我先简单说下CGI吧，CGI这个东西比较老了，N年之前，没有PHP JSP等等动态脚本之前，这个是非常火的。只要能支持输入输出的程序，都可以编写CGI脚本，比如Apache就集成了CGI服务器功能，你可以使用Python编写简单的CGI脚本，可以参照前几天我发的文章，<a href="http://armsword.com/2014/05/07/let-apache-understand-python-cgi.html" target="_blank" rel="external">点击此处</a>，现在CGI 脚本基本上使用的比较少了，但是在一些对效率要求比较高的设计里还是可以看到一些身影，比如腾讯的QQ相册，QQ空间里就可以看到（你可以打开QQ空间，查看源码-查找CGI），他们的脚本应该是C/C++编写的，效率，你懂的，如果你想更多的了解CGI脚本相关，可以<a href="http://www.jdon.com/idea/cgi.htm" target="_blank" rel="external">点击此处</a>，推荐了解一些，但是不值得深入学习，那个精力不如学习PHP/Python了。。。</p>
+<p>其实说白了，CGI 扮演的就是在服务器和特定解释器之间输入输出协议的角色，每个来自用户的请求，Web服务器都会唤起特定语言解释器的命令行，执行CGI脚本。</p>
+<p>现在来介绍下此CGI Server，我不想长篇大论了，一幅图来描述其执行过程（字比较丑，凑合看吧），具体看代码吧：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/05/20140518171043.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>如果你比较理解HTTP协议，大部分都没有难点，中文URL编码这个可以看<a href="http://armsword.com/2014/05/15/c-let-url-encode-and-decode.html" target="_blank" rel="external">上一篇文章</a>，可能唯一的难点是管道部分，这个使用了经典的fork-exece模型，关于管道，一张图能很好的解释：<br><img src="http://armsword.com/wp-content/uploads/2014/05/20140518171356.jpg" alt=""></p>
+<p>不过程序中使用了双管道，读写模型，如果你对此不理解，可以翻阅《Unix环境高级编程》。</p>
+<p>如果你对HTTP不慎了解，参考链接里的两篇文章，能帮助你更好的了解HTTP协议，其实HTTP1.1里面的难点，理解以下几句话就足够了：</p>
+<p>http协议规定头必然有2个连续的”\r\n”，就像Cookie后面就跟了2个\r\n，所以读取请求头的时候只要读到\r\n\r\n，那么前面就是头，后面就是实体。实体大小在上面有一个Content-Length标记。所以从\r\n\r\n后面读Content-Length大小后就结束了。所以服务端一般是1、判断状态码，http协议规定1xx 204 304肯定不包括实体，所以读到\r\n\r\n就不用再读；2、判断没有Content-Length；3、判断有没有chunked。有Content-Length直接读，而chunked的最后7个一定是\r\n0\r\n\r\n。</p>
+<p>chunked编码，这种编码一般是gzip压缩的</p>
+<pre><code><span class="status">HTTP/1.1 <span class="number">200</span> OK </span>
+<span class="attribute">Cache-Control</span>: <span class="string">private </span>
+<span class="attribute">Content-Type</span>: <span class="string">text/html; charset=utf-8 </span>
+<span class="attribute">Server</span>: <span class="string">Microsoft-IIS/7.5</span>
+<span class="attribute">X-AspNetMvc-Version</span>: <span class="string">2.0</span>
+<span class="attribute">X-AspNet-Version</span>: <span class="string">4.0.30319 </span>
+<span class="attribute">Set-Cookie</span>: <span class="string">Set-Cookie: X-Powered-By: ASP.NET </span>
+<span class="attribute">ntCoent-Length</span>: <span class="string">166137</span>
+<span class="attribute">Content-Encoding</span>: <span class="string">gzip </span>
+<span class="attribute">Transfer-Encoding</span>: <span class="string">chunked </span>
+
+<span class="http">
+
+<span class="r">2D23 
+...........}.s.G.......j....*u......y....%<span class="keyword">...</span>;QO.M.[....3..,<span class="keyword">...</span>
+.!..O....H-.<span class="string">"v..&amp;gt;.............=YY </span></span></span>
+</code></pre><p>&nbsp;<br>在处理chunked时候，像上面chunked\r\n\r\n后面是实体，第一行2D23就是一chunk的大小所以在2D23\r\n后面开始读2D23个然后会紧跟着\r\n，然后后面就是下一chunk的大小，直到最后一chunk是0大小。实体结束，最后再来一个\r\n。也就是说chunked的最后7个一定是\r\n0\r\n\r\n，本来判断读到\r\n0\r\n\r\n就结束应该没问题，但是为了保险起见，还是一次一次的读大小值再读取指定的大小数据。</p>
+<p>另外，此代码里有部分缺陷，一是我急于完成，某些结构设计不合理，所以可扩展性比较差。第二，有少部分内存泄漏，懒得修改了。毕竟，我也得忙着找工作，时间比较紧张，但是总的来说，如果你想找后台开发相关的职位，如果你没有更好的项目经验，此代码如果你能读懂，写到简历上，面试官肯定会问你的。</p>
+<p>能力和精力有限，希望能对你们有所帮助 ^-^</p>
+<p>参考链接：</p>
+<p>1.<a href="http://www.cnblogs.com/TankXiao/archive/2012/02/13/2342672.html" target="_blank" rel="external">http://www.cnblogs.com/TankXiao/archive/2012/02/13/2342672.html</a></p>
+<p>2.<a href="http://www.cnblogs.com/li0803/archive/2008/11/03/1324746.html" target="_blank" rel="external">http://www.cnblogs.com/li0803/archive/2008/11/03/1324746.html</a></p>
+<p>3.<a href="http://blog.csdn.net/laotse/article/details/5903651" target="_blank" rel="external">http://blog.csdn.net/laotse/article/details/5903651</a></p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2014-05-15T07:33:44.000Z"><a href="/2014/05/15/c-let-url-encode-and-decode/">5月 15 2014</a></time>
       
       
@@ -443,102 +509,6 @@ timeout &gt; 0 等待timeout毫秒，如果已超时但是还没有一个描述�
 </article>
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2014-03-06T15:13:09.000Z"><a href="/2014/03/06/socket-concurrency/">3月 6 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/03/06/socket-concurrency/">常用的socket并发方法总结</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>套接字相关函数默认是采用阻塞方式操作，而大多数情况下，程序不仅仅只拥有一个套接字。因此当进程以阻塞方式操作其中之一时，必将导致不能使用其他套接字。如果用户希望这些套接字同时工作，就必须设计并发打套接字程序，即在一个套接字读写的同时保证另一个套接字也能正常操作。</p>
-<p>以下几种方法是常用的并发模型：</p>
-<p>1.非阻塞并发模型</p>
-<p>I/O阻塞是影响进程并发的重要原因，进程一旦进入阻塞，就不能再执行任何操作。比如进程调用输入函数后，在默认情况下就必需一直阻塞直到产生满足条件的数据为止。</p>
-<p>套接字也是一种I/O设备，它有四类阻塞，分别是输入类（read，recv和recvfrom等）、输出类（write和send）、连接申请类（connect）和连接处理（accept），其中UDP协议数据发送函数sendto不产生阻塞。</p>
-<p>当套接字调用以上函数时，将导致进程阻塞。因此把套接字函数的阻塞模式更改为非阻塞模式，是实现并发套接字程序的一种方法。</p>
-<p>函数fcntl设置套接字描述符的O_NONBLOCK标志后，即可将I/O方式更改为非阻塞方式。此时如果输入函数（read、recv、recvfrom）、输出函数（write、send）或者连接处理函数（accept）的成功条件不满足，将立即返回-1并置errno为EAGAIN错误，如果连接申请函数（connect）的成功条件不满足，将返回-1并置errno为EINPROGRESS错误。</p>
-<p>如：将套接字描述符nSock设置为非阻塞方式：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> nType;</div><div class="line">nType = <span class="keyword">fcntl</span>(nSock,F_GETFL,<span class="number">0</span>);</div><div class="line"><span class="keyword">fcntl</span>(nSock,F_SETFL,nType|O_NONBLOCK);</div></pre></td></tr></table></figure>
-
-<p>首先读取了描述符的信息，然后在此基础上增加了非阻塞标志。</p>
-<p>2.信号驱动模型</p>
-<p>Windows下有消息驱动的概念，在<em>nix环境下也存在着类似的机制，不过不是消息去驱动方式，而是信号驱动I/O模式。在这种模式下，进程可以一边做其他的事，一边等待信号。当文件描述符就绪时，</em>inx内核会向进程发送SIGIO信号（某些系统是SIGPOLL信号），进程获取该信号并调用预先准备的处理函数执行I/O操作。当函数调用完毕后，进程回到接收信号前的代码处继续工作。</p>
-<p>在一个套接字上实现信号驱动的步骤如下：</p>
-<p>（1）为信号SIGIO设计处理函数并捕获信号</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void <span class="func"><span class="keyword">func</span><span class="params">(int sig)</span></span> <span class="comment">//信号处理函数</span></div><div class="line">{</div><div class="line"> ......</div><div class="line"> signal(<span class="type">SIGIO</span>,<span class="func"><span class="keyword">func</span></span>);</div><div class="line">}</div><div class="line"></div><div class="line">......</div><div class="line">signal(<span class="type">SIGIO</span>,<span class="func"><span class="keyword">func</span></span>); <span class="comment">//捕获信号SIGIO</span></div></pre></td></tr></table></figure>
-
-<p>（2）设定套接字的归属主，设置接收SIGIO信号的进程或进程组</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function">fcntl</span>(nSock,F_SETOWN,<span class="function">getpid</span>()); <span class="comment">//设置接收信号的进程</span></div><div class="line">或者</div><div class="line"><span class="function">fcntl</span>(nSock,F_SETOWN,<span class="function">getpgrp</span>()); <span class="comment">//设置接收信号的进程组</span></div></pre></td></tr></table></figure>
-
-<p>（3）设置套接字的异步I/O属性</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> nType;</div><div class="line">nType = <span class="keyword">fcntl</span>(nSock,F_GETFL,<span class="number">0</span>);</div><div class="line"><span class="keyword">fcntl</span>(nSock,F_SETFL,nType|O_ASYNC);</div></pre></td></tr></table></figure>
-
-<p>套接字信号驱动的设置非常简单，但在实践中却难以实现。因为UNIX内核并不仅仅在套接字有输入时才发送SIGIO信号，在套接字连接、输出、错误和其他状态变化时均发送该信号，这样就直接导致了进程在接收信号后无法正确地判断下一步的行为。</p>
-<p>3.超时并发模型</p>
-<p>超时也是防止阻塞的一种手段，它可以保证进程不被永远挂起。阻塞函数的超时时间长度决定了进程的并发程序，超时时间越小，并发度越高，超时时间越大，则并发度越低。</p>
-<p>（1）通过套接字选项设置超时</p>
-<p>可以通过套接字选项SO_SNDTIMEO和SO_RCVTIMEO分别设置套接字描述符上的写入和读取操作的超时时间。但本方法有如下缺陷：</p>
-<p>&lt;1&gt;只能设置套接字描述符上的读取和写入操作的超时时间，不能设置connect和accept等连接操作的超时。</p>
-<p>&lt;2&gt;某些版本的*nix不支持这两个套接字选项。</p>
-<p>（2）通过信号SIGALRM设置超时</p>
-<p>在*nix下的阻塞函数一般都有在进程接收到任意信号后中断返回的传统，套接字函数也不例外，利用这个特性使用定时器信号SIGALRM实现套接字的超时处理。</p>
-<p>步骤如下：</p>
-<p>&lt;1&gt;定义超时标志。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> nTimeOut = <span class="number">0</span>;</div></pre></td></tr></table></figure>
-
-<p>静态整型变量nTimeOut代表函数超时，默认取值为0表示没有超时，取值为1时表示已经超时。</p>
-<p>&lt;2&gt;为信号SIGALRM设计处理函数。</p>
-<p>进程捕获定时器信号SIGALRM后将调用函数OnTimeOut进行处理：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> OnTimeout(<span class="keyword">int</span> nSignal)</div><div class="line">{</div><div class="line"> <span class="keyword">signal</span>(nSignal,SIG_IGN); <span class="comment">//超时一次后就忽略信号SIGALARM，防止循环超时</span></div><div class="line"> nTimeOut = <span class="number">1</span>; <span class="comment">//设置超时标识为“已超时”</span></div><div class="line"> <span class="keyword">return</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>&lt;3&gt;捕获信号SIGALRM并设置定时器。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function">signal</span>(SIGALRM,OnTimeOut); <span class="comment">//捕获信号SIGALRM</span></div><div class="line"><span class="function">alarm</span>(TIMEOUT); <span class="comment">//TIMEOUT秒后发送定时器信号SIGALRM</span></div></pre></td></tr></table></figure>
-
-<p>&lt;4&gt;调用套接字阻塞处理函数，比如套接字接收（recv、read、recvfrom）、发送（send、write）、连接申请（connect）或接收连接（accept）。</p>
-<p>&lt;5&gt;取消定时器并忽略信号SIGALRM</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">alarm(<span class="number">0</span>);</div><div class="line">signal(SIGALRM,SIG_IGN);</div><div class="line"><span class="keyword">if</span>(nTimeOut == <span class="number">1</span>) <span class="comment">//超时处理</span></div><div class="line"><span class="keyword">else</span> <span class="comment">//非超时处理</span></div></pre></td></tr></table></figure>
-
-<p>（3）通过信号SIGALRM与跳转设置超时</p>
-<p>&lt;1&gt;定义超时标志和跳转结构</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> nTimeOut = <span class="number">0</span>;</div><div class="line">jmp_buf env;</div></pre></td></tr></table></figure>
-
-<p>&lt;2&gt;为信号SIGALRM设置处理函数</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//在处理函数中除了更改超时标志外，还增加了跳转语句，如函数OnTimeOut所示：</span></div><div class="line"><span class="keyword">void</span> OnTimeout(<span class="keyword">int</span> nSignal)</div><div class="line">{</div><div class="line"> <span class="keyword">signal</span>(nSignal,SIG_IGN); <span class="comment">//超时一次后就忽略信号SIGALARM，防止循环超时</span></div><div class="line"> nTimeOut = <span class="number">1</span>; <span class="comment">//设置超时标识为“已超时”</span></div><div class="line"> longjmp(env,<span class="number">1</span>); <span class="comment">//语句跳转</span></div><div class="line"> <span class="keyword">return</span>; <span class="comment">//本句实际上已经不会执行了</span></div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>&lt;3&gt;记录跳转点</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">setjmp(<span class="keyword">env</span>);</div></pre></td></tr></table></figure>
-
-<p>&lt;4&gt;超时判断</p>
-<p>&lt;5&gt;捕获信号SIGALRM并设置定时器</p>
-<p>&lt;6&gt;调用套接字阻塞处理函数，比如套接字接收（recv、read、recvfrom）、发送（send、write）、连接申请（connect）或接收连接（accept）等。</p>
-<p>&lt;7&gt;取消定时器并忽略信号SIGALRM。</p>
-<p>4.多路复用并发模型</p>
-<p>如select，多路复用函数把一些文件描述符集合在一起，如果某个文件描述符的状态发生变化，比如进入“写就绪”或者“读就绪”状态，函数select会立即返回，并且通知进程读取或写入数据，如果没有I/O到达，进程将进入阻塞，直到函数select超时退出为止。</p>
-<p>select/poll/epoll是Socket并发常用的方法，等有空再总结吧。</p>
-<p>&nbsp;</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
 
 <nav id="pagination">
   
@@ -577,7 +547,7 @@ timeout &gt; 0 等待timeout毫秒，如果已超时但是还没有一个描述�
   
     <li><a href="/categories/我的生活/">我的生活</a><small>3</small></li>
   
-    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>4</small></li>
+    <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>5</small></li>
   
     <li><a href="/categories/计算机网络/">计算机网络</a><small>8</small></li>
   
@@ -589,6 +559,10 @@ timeout &gt; 0 等待timeout毫秒，如果已超时但是还没有一个描述�
 <div class="widget tag">
   <h3 class="title">最新文章</h3>
   <ul class="entry">
+    
+      <li>
+        <a href="/2015/03/02/several-realization-of-hash-algorithm-md/">几种Hash算法的实现</a>
+      </li>
     
       <li>
         <a href="/2015/01/31/baidu-lossless-music-downloader/">写了一个Chrome插件 - 百度无损音乐下载插件</a>
@@ -612,10 +586,6 @@ timeout &gt; 0 等待timeout毫秒，如果已超时但是还没有一个描述�
     
       <li>
         <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
-      </li>
-    
-      <li>
-        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
       </li>
     
   </ul>
