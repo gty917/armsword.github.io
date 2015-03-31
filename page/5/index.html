@@ -55,160 +55,6 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2013-12-05T11:27:16.000Z"><a href="/2013/12/05/regular-expression-operations/">12月 5 2013</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2013/12/05/regular-expression-operations/">Regular expression operations</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>之前接触过正则表达式，但是用的不熟练，原因主要是自己一直用C/C++开发，用正则时候比较少，所以也就没有达到熟能生巧的地步。这几天，用python做点东西，需要用到正则，python在文本处理方面是一把利器，你懂的，所以，就把网上那个非常有名的《正则表达式30分钟入门教程》和《python 正则表达式指南》重温了下，这里把里面的内容摘抄下，主要是方便自己查阅。</p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/12/201312502.png" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/12/201312504.png" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/12/201312506.png" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/12/201312508.png" alt=""></p>
-<p>由于我们使用python的正则，不同语言下，正则是稍微有些差异的。这里贴个网友们整理的python下的正则语法图片。我仔细看下，应该是参考<a href="http://docs.python.org/2/library/re.html#module-re" target="_blank" rel="external">http://docs.python.org/2/library/re.html#module-re</a> 这里的，不过挺一目了然的。水印是原博主的博客地址，后面我也会放出地址，想看完整版的可以去查看原帖。</p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/12/pyre.png" alt=""></p>
-<p>参考链接：</p>
-<p><a href="http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html" target="_blank" rel="external">《Python正则表达式指南》</a></p>
-<p><a href="http://deerchao.net/tutorials/regex/regex.htm" target="_blank" rel="external">《正则表达式30分钟入门指南》</a></p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2013-12-04T15:21:39.000Z"><a href="/2013/12/04/kdd-note/">12月 4 2013</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2013/12/04/kdd-note/">文本挖掘技术笔记</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>我第一次接触自然语言处理还是研一的时候，当时我读的是那本经典书籍《数学之美》，之后我就对NLP/文本挖掘/IR方向兴趣比较大，所以也一直想毕业后去搜索相关公司。但是考虑到自己的基础水平，迟迟没有深入研究，其实主要原因是我一直在补计算机类基础知识呢，因为我是比较看重基础的，现在还差编译原理了，时间不够用了，也得感叹下，要学的知识太多了。前几天双11买了本《统计自然语言处理》，打算深入的研究下，所以这2天我把北京大学的文本挖掘的课件快速的看了看，算法之类的公式推倒我没细看，主要是记录下一些知识点。</p>
-<p>本人主要是给自己看的，所以比较乱，也没有逻辑可言。基本上都是关键知识点，比如一些专有名词等等。</p>
-<p>一、分词</p>
-<p>（1）分词基本方法</p>
-<p>1.最大匹配法</p>
-<p>基于其他匹配的分词方法：<br>1&gt; 最大匹配法 (Maximum Matching method)<br>匹配的方法是从左向右<br>2&gt; 逆向最大匹配法 (Reverse Maximum method)<br>匹配方向与MM法相反,是从右向左。<br>实验表明:对于汉语来说,逆向最大匹配法比最大匹配法更有效。<br>3&gt; 双向匹配法(Bi-direction Matching method)<br>比较MM法与RMM法的分词结果,从而决定正确的分词。<br>4&gt; 最佳匹配法(Optimum Matching method, OM法)<br>将词典中的单词按它们在文本中的出现频度的大小排列,高频度的单词排在前,频度低的单词排在后,从而提高匹配的速度。<br>5&gt; 联想-回溯法(Association-Backtracking method)<br>采用联想和回溯的机制来进行匹配。</p>
-<p>2.最大概率法分词</p>
-<p>基本思想是:<br>(1)一个待切分的汉字串可能包含多种分词结果<br>(2)将其中概率最大的那个作为该字串的分词结果</p>
-<p>3.最短路径分词方法</p>
-<p>基本思想:<br>在词图上选择一条词数最少的路径</p>
-<p>（2）词性标注</p>
-<p>自动词性标注就是用计算机来自动地给文本中的词标注词性。<br>1.标注技术路线:<br>基于概率统计和基于规则</p>
-<p>（3）文档模型</p>
-<p>1.布尔模型<br>2.向量空间模型（VSM）<br>3.概率模型<br>Term Weights 、Term frequency (tf) 、Inverse document frequency (idf)</p>
-<p>（4）文本间相似性计算</p>
-<p>1.基于概率模型的相关度<br>2.基于VSM的相关度计算方法<br>基于向量空间模型的常用方法：<br>欧氏距离(很少使用）<br>向量内积<br>向量夹角余弦<br>1&gt;余弦相似度<br>2&gt;Jaccard相似度</p>
-<p>（5）文本序列</p>
-<p>序列比较可以分为四种基本情况:<br>(1)两条长度相近的序列相似找出序列的差别<br>(2)一条序列是否包含另一条序列(子序列)<br>(3)两条序列中是否有非常相同的子序列<br>(4)一条序列与另一条序列逆序相似<br>相似度:它是两个序列的函数,其值越大,表示两个序列越相似<br>距离:距离越大,则两个序列的相似度就越小<br>1&gt;海明距离<br>2&gt;编辑距离<br>通过点矩阵进行序列比较</p>
-<p>（6）TextTiling</p>
-<p>TextTiling (Hearst and Plaunt 1993)is one of the most famous system forTopic Segmentation.(对文档分段)<br>TextTiling method:<br>1&gt;先把文档分成块(tile),每块k个句子。<br>2&gt;计算相邻块之间的相似度,用标准的文档相似度计算公式。<br>3&gt;用结果绘图。非常相似处会出现波峰,很不相似的地方出现波谷。选择波谷处作为分界线,把块组成段,这些段很可能是有关同一个Subtopic的。</p>
-<p>（7）特征空间的变化</p>
-<p>1&gt;Latent Semantic Analysis (LSA)<br>LSI思想方法最初应用于文本信息检索领域有效地解决了同义词和多义词的问题,通过识别文本中的同义词, LSI将信息检索精度提高了10%—30%.(查询扩展)<br>Latent Semantic Indexing (LSI)</p>
-<p>基本方法:<br>利用矩阵理论中的“奇异值分解(singular value decomposition,SVD)”技术,将词频矩阵转化为奇异矩阵(K×K)<br>基本步骤:<br>1.建立词频矩阵,frequency matrix<br>2.计算frequency matrix的奇异值分解分解frequency matrix成3个矩阵U,S,V。U和V是正交矩阵(UTU=I),S是奇异值的对角矩阵(K×K)<br>3.对于每一个文档 d,用排除了SVD中消除后的词的新的向量替换原有的向量<br>4.用转换后的文档索引和相似度计算</p>
-<p>（8）词频矩阵</p>
-<p>词频矩阵:矩阵表示一组文档<br>1&gt;行对应关键词t,列对应文档d向量<br>2&gt;将每一个文档视为空间的一个向量<br>3&gt;向量值反映单词t与文档d的关联度</p>
-<p>二、文本检索技术</p>
-<p>1.基于分类的检索<br>2.基于主题词的检索<br>3.基于元数据的检索</p>
-<p>1.信息检索模型:<br>IR模型可形式地表示为一个四元组&lt; D, Q, F, R(qi,dj) &gt;<br>其中:<br>D是一个文档集合,<br>Q是一个查询集合,用户任务的表达<br>F是一个框架,用以构建文档,查询以及它们之间关系的模型<br>R(qi,dj) 是一个排序函数,它给查询qi和文档 dj 之间的相关度赋予一个排序值</p>
-<p>2.布尔检索模型</p>
-<p>3.向量空间模型(VSM)</p>
-<p>4.概率模型</p>
-<p>5.语言模型<br>1&gt;一元(Unigram)模型<br>假设词与词之间是相互独立的,一个词出现的概率与这个词前面的词没有存在必然联系。 P (W 1W 2 ..W n ) = P (W 1 ) P (W 2 )… P (W n )<br>2&gt;N元(NGram)模型<br>假设词与词之间是相互关联的,一个词出现的概率与这个词前面的词存在一定的关联。<br>二元(Bigram)模型<br>P (W1W 2 ..W n ) = P (W1 ) P (W 2 | W1 )… P (W n | W n −1 )<br>N元(NGram)模型<br>P(WW2..Wn ) = P(W )P(W2 | W )… (Wn | Wn−1Wn−2..W1)</p>
-<p>检索质量的评价：</p>
-<p>文本检索的基本度量<br>1&gt;查准率(precision):既相关又被检索到的实际文档与检索到的文档的百分比。<br>2&gt;查全率(召回率recall):既相关又被检索到的实际文档与查询相关的文档的百分比</p>
-<p>索引作用:<br>索引<br>1&gt;提供从记录的特征快速查询到记录的数据结构(B树、散列表、位图索引等)<br>2&gt;数据库,文档数据库,SE/IR系统</p>
-<p>签名文件:<br>定义:是一个记录每一个文档的特征的文件<br>方法:每一个特征对应一个固定长度的位串,一个比特位对应一个词汇,若某一位对应的词出现在文档中则该位置1,否则置0。<br>按位操作进行匹配,确定文档的相似性<br>可以多词对应一个比特位,来减少位串的长度,但增加搜素开销,存在多对一映射的缺点。</p>
-<p>倒排索引创建-算法优化<br>1&gt;Term编码(词典组织)<br>每个term用整数编码,减小存储空间<br>英文-前缀编码<br>(liber,liberal,liberalist…)<br>散列表(MPH,无冲突散列)<br>2&gt;减少磁盘的随机访问次数<br>&lt;termid,docid&gt;在内存中排序,排序结果分<br>批写入磁盘,最后合并。<br>两趟算法,在内存中直接倒排,小倒排文件<br>分批写入磁盘,最后多路合并。<br>3&gt;数据压缩</p>
-<p>倒排索引创建-两趟算法<br>索引创建—两趟算法<br>1.Parsing ,提取index term,统计df和tf,通过hash表转换为term id,生成词典文件(lexicon file)。<br>2.按统计得到的index term的tf,df属性,可以估计出对应posting list长度,预申请空间。再次parsing文档集,在内存中执行倒排。结果保存到临时文件。<br>3.对多次生成的临时倒排文件,多路合并,压缩输出,得到最终倒排文件。</p>
-<p>倒排索引创建-整数压缩</p>
-<p>三、文本自动分类技术</p>
-<p>文本自动分类：<br>基本步骤<br>1&gt;定义分类体系<br>2&gt;将预先分类过的文档作为训练集<br>3&gt;从训练集中得出分类模型(需要测试过程,不断细化)<br>4&gt;用训练获得出的分类模型对其它文档加以分类</p>
-<p>文本分类基本步骤:<br>1. 用户定义分类树<br>2. 用户为分类节点提供训练文档<br>3. 特征选择<br>4. 训练<br>5. 自动分类</p>
-<p>评价指标:<br>「准确率」(P, precision)<br>「召回率」(R, recall)</p>
-<p>特征抽取<br>特征抽取(feature extraction):<br>1&gt;预处理<br>去掉html一些tag标记<br>禁用词(stop words)去除、词根还原(stemming)<br>(中文)分词、词性标注、短语识别、…<br>词频统计 (TF DF)<br>数据清洗:去掉噪声文档或文档内垃圾数据<br>2&gt;文本表示<br>向量空间模型<br>3&gt;降维技术<br>特征选择(Feature Selection)<br>特征重构(Re-parameterisation,如LSI)</p>
-<p>特征选择:<br>目的<br>避免过拟合(over fitting),提高分类准确度<br>• 如果经过某种学习之后的分类模型,使得训练文档适应得很好(导致很高的自动分类精度),但对训练集之外的文档显得差许多,则称此时的学习模型有Over-fitting problem<br>• 希望模型的表现对训练集和未知文档基本一致。<br>通过降维,大大节省计算时间和空间<br>• 样例空间涉及的总词项数很大(N在10万量级),但每篇文档只涉及其中的一小部分(例如一篇网页通常只有几百个词)(到1/10 – 1/100,甚至更多)</p>
-<p>特征选取的方法:<br>1&gt;文档频率法(DF, document frequency)<br>2&gt;信息增益法(information gain)<br>3&gt;互信息法(mutual information)<br>4&gt;The χ^2 test(chi-square,开方拟合检验)</p>
-<p>特征选择—DF:<br>基于DF的启发式要点<br>1&gt;太频繁的词项没有区分度<br>• Term的DF大于某个阈值去掉太稀有的词项独立表达的类别信息不强<br>• 稀有词项的全局影响力不大<br>• 在训练集中,某些文档如果有某个稀有词项,它们通常也会有一些常见词项(对那一类)和通常信息获取观念有些抵触:稀有的更有代表性(这是一种ad hoc方法,不依据什么理论)<br>2&gt;最容易实现,可扩展性好</p>
-<p>特征选择—RSJ:</p>
-<p>特征选择—熵:<br>1&gt;设信息出现(例如“硬币出现某一面”,“一篇文档属于某一类”)的概率空间p = {p1, p2, …, pm}<br>2&gt;在引入某个词项t之前,系统的熵(即一个随机文档落入某个类的概率空间的熵)<br>3&gt;在观察到t以后,文档落入某个类ci的概率就应该是条件概率P(ci|t)<br>对应于相关表中的A/A+C<br>注意,对不同的ci,每个分量不一定相同<br>4&gt;term类别分布的熵<br>该值越大,说明分布越均匀,越有可能出现在较多的类别中;<br>该值越小,说明分布越倾斜,词可能出现在较少的类别中</p>
-<p>特征选择—相对熵:<br>相对熵(not 交叉熵):也称为KL距离(Kullback-Leibler divergence)反映了文本类别的概率分布和在出现了某个特定词汇条件下的文本类别的概率分布之间的距离。<br>该值越大,词对文本类别分布的影响也大。</p>
-<p>特征选择—信息增益IG<br>信息增益(Information Gain, IG):<br>该term为整个分类所能提供的信息量<br>t出现与否导致的熵的变化<br>不考虑任何特征的熵和考虑该特征后的熵的差值</p>
-<p>特征选择—互信息MI：<br>1&gt;统计语言学建模的一种方法,是评估两个随机变量X, Y相关程度的一种度量。<br>2&gt;X, Y分别对应词项t的出现情况和类别的出现情况<br>3&gt;关心的P(t), P(c), P(t,c)都可以通过统计训练集中的数据情况得到</p>
-<p>特征选择—χ^2 (卡方):<br>1&gt;源于统计学的卡方分布(chi-square)<br>2&gt;从(类,词项)相关表出发<br>3&gt;χ2 统计量:<br>度量两者(term和类别)独立性的缺乏程度χ2 越大,独立性越小,相关性越大若AD&lt;BC,则类和词独立, N=A+B+C+D</p>
-<p>特征选择—Term强度(TS):<br>term strength<br>一种新颖的角度,考察一个词项在“相似文档”中出现的可能性<br>假定我们已经有了一个相似文档的集合S,设x, y为其中任意两个文档,那么词项t对这个集合的术语强度为s(t) = Pr(tєy|tєx)<br>S中的文档要满足一定的“相似度”指标,S不一定就是训练集中的那些类。通常由聚类来确定S。<br>分类算法:<br>1&gt;决策树(Decision Trees)<br>2&gt;KNN算法(K-Nearest Neighbour)<br>3&gt;贝叶斯网络(Bayes Network)<br>4&gt;神经网络(Neural Networks)<br>5&gt;Boosting<br>6&gt;支持向量机(SVM)</p>
-<p>四、文本自动聚类技术</p>
-<p>什么是聚类?<br>聚类(簇Cluster): 数据对象的集合在同一个簇中,数据对象是相似的不同簇之间的对象是不相似的。</p>
-<p>什么是聚类分析?<br>聚类分析就是按照一定的规律和要求对事物进行区分和分类的过程,在这一过程中没有任何关于类分的先验知识,没有指导,仅靠事物间的相似性作为类属划分的准则。<br>一个数据集合分组成几个簇<br>聚类分析是一种无监督分类:没有预定义的类<br>聚类分析(Clustering):给定一数据样本集X{X1,X2,…,Xn},根据数据点间的相似程度将数据集合分成k簇{C1,C2,…,Ck}的过程称为聚类分析。</p>
-<p>文本聚类基本步骤：<br>1.用户指定用于聚类的数据集合<br>2.特征选取<br>3.聚合: 将每个文档分配到相应的类中<br>4.标注: 给每个聚类选择关键词</p>
-<p>什么是一个好的聚类方法?<br>1&gt;聚类方法的好坏:该方法是否能发现某些或所有的隐含模式;<br>一个好的聚类方法要能产生高质量的聚类结果——簇,这些簇要具备以下两个特点:<br>高的簇内相似性<br>低的簇间相似性<br>2&gt;聚类结果的好坏取决于:<br>聚类方法采用的相似性评估方法<br>该方法的具体实现;</p>
-<p>聚类算法:<br>1&gt;划分方法<br>2&gt;层次方法<br>3&gt;密度方法<br>4&gt;网格方法<br>5&gt;在线聚类</p>
-<p>五、话题检测跟踪技术 Topic Detection and Tracking (TDT)</p>
-<p>六、文本过滤技术(IF)</p>
-<p>信息过滤的定义:<br>从动态的信息流中将满足用户兴趣的信息挑选出来,用户的兴趣一般在较长一段时间内比较稳定不会改变(静态)</p>
-<p>信息过滤系统的特点:<br>新信息的产生速度很快,相对来说,人的兴趣变化比较缓慢,可以看成相对静态的和稳定的。<br>信息过滤主要借用信息检索和用户建模(User modeling)两个领域的技术。<br>用户的需求或者兴趣通常采用User Profile建模来表示。<br>新信息到来的时候,根据用户的User Profile,有选择地挑出信息给用户。</p>
-<p>基于内容的过滤与协同过滤</p>
-<p>七、关联分析技术</p>
-<p>关联规则挖掘:<br>简单的说,关联规则挖掘就是发现大量数据中项集之间有趣的关联在交易数据、关系数据或其他信息载体中,查找存在于项目集合或对象集合之间的频繁模式、关联、相关性或因果结构。</p>
-<p>六和七结合起来，其实就是推荐系统，可以参考下面3篇文章。</p>
-<p><a href="http://www.ibm.com/developerworks/cn/web/1103_zhaoct_recommstudy1/index.html?ca=drs-" target="_blank" rel="external">探索推荐引擎内部的秘密，第 1 部分: 推荐引擎初探</a></p>
-<p><a href="http://www.ibm.com/developerworks/cn/web/1103_zhaoct_recommstudy2/index.html?ca=drs-" target="_blank" rel="external">探索推荐引擎内部的秘密，第 2 部分: 深入推荐引擎相关算法—协同过滤</a></p>
-<p><a href="http://www.ibm.com/developerworks/cn/web/1103_zhaoct_recommstudy3/index.html?ca=drs-" target="_blank" rel="external">探索推荐引擎内部的秘密，第 3 部分: 深入推荐引擎相关算法—聚类</a></p>
-<p>八、文档自动摘要技术</p>
-<p>1&gt;提示字串法<br>2&gt;频率统计法<br>3&gt;文章框架法<br>4&gt;信息提取法<br>5&gt;理解分析法<br>6&gt;仿人算法</p>
-<p>九、信息抽取</p>
-<p>1&gt;实体提取<br>上下文无关实体的提取<br>• Context-Free Entity Extraction<br>2&gt;基于规则的实体提取<br>关系提取(Relational Extraction)</p>
-<p>文本信息抽取的方法<br>1&gt;有限状态机<br>2&gt;Wrapper<br>3&gt;Hidden Markov Models</p>
-<p>十、智能问答(QA)技术</p>
-<p>主要方法<br>1&gt;Pattern-based Approach<br>2&gt;Knowledge-Based Approach<br>3&gt;Web-based Approach</p>
-<p>十一、本体(Ontology)</p>
-<p>给出构成相关领域词汇的基本术语和关系,以及利用这些术语和关系构成的规定这些词汇外延的规则的定义。</p>
-<p>之后再放几张当时的截图吧：</p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd001.png" alt=""></p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd002.png" alt=""></p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd005.png" alt=""></p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd006.png" alt=""></p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd007.png" alt=""></p>
-<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd005.png" alt=""></p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
         <time datetime="2013-11-10T15:58:57.000Z"><a href="/2013/11/10/undefined-reference-to/">11月 10 2013</a></time>
       
       
@@ -535,6 +381,102 @@ void put(K key, T data);
 </article>
 
 
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-09-14T14:20:46.000Z"><a href="/2013/09/14/io-synchronous-and-blocking/">9月 14 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/09/14/io-synchronous-and-blocking/">IO模型以及同步、异步与阻塞、非阻塞的区别</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1.同步、异步：你总是做完一件再去做另一件，不管是否需要时间等待，这就是同步；异步呢则反之，你可以同时做几件事，并非一定需要一件事做完再做另一件事。同步简单理解成一问一答同步进行，异步可以简单理解为不必等一个问题有答了再去问另一个问题，尽管问，有答了再通知你。<br>在实际的程序中：<br>同步消息通知机制：就好比简单的read/write 操作,它们需要等待这两个操作成功才能返回。<br>同步, 是由处理消息者自己去等待消息是否被触发。<br>异步消息通知机制：类似于select/poll 之类的多路复用IO 操作，当所关注的消息被触发时,由消息触发机制通知触发对消息的处理。<br>异步, 由触发机制来通知处理消息者。</p>
+<p>2.阻塞、非阻塞：阻塞调用是指调用结果返回之前，当前线程会被挂起。函数只有在得到结果之后才会返回。非阻塞：指在不能立刻得到结果之前，该函数不会阻塞当前线程，而会立刻返回。可以简单理解为需要做一件事能不能立即得到返回应答，如果不能立即获得返回，需要等待，那就阻塞了，否则就可以理解为非阻塞。<br>有人也许会把阻塞调用和同步调用等同起来，实际上他是不同的。<br>对于同步调用来说，很多时候当前线程还是激活的，只是从逻辑上当前函数没有返回而已。<br>socket接收数据函数recv是一个阻塞调用的例子。<br>当socket工作在阻塞模式的时候， 如果没有数据的情况下调用该函数，则当前线程就会被挂起，直到有数据为止</p>
+<p>3.Unix网络编程中说到：<br>将IO模型分为五类：阻塞IO，非阻塞IO，IO复用，信号驱动，异步IO。<br>基本 Linux I/O 模型的简单矩阵：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/09/figure1.gif" alt=""><br>阻塞I/O模型：<br>最流行的I/O模型是阻塞I/O模型，缺省情形下，所有文件操作都是阻塞的。我们以套接口为例来讲解此模型。在进程空间中调用recvfrom，其系统调用直到数据报到达且被拷贝到应用进程的缓冲区中或者发生错误才返回，期间一直在等待。我们就说进程在从调用recvfrom开始到它返回的整段时间内是被阻塞的。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201391401.jpg" alt=""><br>非阻塞I/O模型：<br>进程把一个套接口设置成非阻塞是在通知内核：当所请求的I/O操作不能满足要求时候，不把本进程投入睡眠，而是返回一个错误。也就是说当数据没有到达时并不等待，而是以一个错误返回。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309142.jpg" alt=""><br>I/O复用模型：<br>linux提供select/poll，进程通过将一个或多个fd传递给select或poll系统调用，阻塞在select；这样select/poll可以帮我们侦测许多fd是否就绪。但是select/poll是顺序扫描fd是否就绪，而且支持的fd数量有限。linux还提供了一个epoll系统调用，epoll是基于事件驱动方式，而不是顺序扫描,当有fd就绪时，立即回调函数rollback；<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309143.jpg" alt=""><br>信号驱动异步I/O模型：<br>首先开启套接口信号驱动I/O功能, 并通过系统调用sigaction安装一个信号处理函数（此系统调用立即返回，进程继续工作，它是非阻塞的）。当数据报准备好被读时，就为该进程生成一个SIGIO信号。随即可以在信号处理程序中调用recvfrom来读数据报，井通知主循环数据已准备好被处理中。也可以通知主循环，让它来读数据报。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309144.jpg" alt=""><br>异步I/O模型（AIO模型）：<br>告知内核启动某个操作，并让内核在整个操作完成后(包括将数据从内核拷贝到用户自己的缓冲区)通知我们。这种模型与信号驱动模型的主要区别是：信号驱动I/O：由内核通知我们何时可以启动一个I/O操作；异步I/O模型：由内核通知我们I/O操作何时完成。<br><img src="http://armsword.com/wp-content/uploads/2013/09/201309145.jpg" alt=""><br>具体的可以查看参考链接(2)。</p>
+<p>4.通常，我们写服务器处理模型的程序时，有以下几种模型：<br>（1）每收到一个请求，创建一个新的进程，来处理该请求；<br>（2）每收到一个请求，创建一个新的线程，来处理该请求；<br>（3）每收到一个请求，放入一个事件列表，让主进程通过非阻塞I/O方式来处理请求<br>上面的几种方式，各有千秋，<br>第（1）中方法，由于创建新的进程的开销比较大，所以，会导致服务器性能比较差,但实现比较简单。<br>第（2）种方式，由于要涉及到线程的同步，有可能会面临死锁等问题。<br>第（3）种方式，在写应用程序代码时，逻辑比前面两种都复杂。<br>综合考虑各方面因素，一般普遍认为第（3）种方式是大多数网络服务器采用的方式，这也是接下来要讨论的重点—事件驱动处理库。</p>
+<p>select 模型：<br>①最大并发数限制，因为一个进程所打开的 FD（文件描述符）是有限制的，由 FD_SETSIZE 设置，默认值是1024/2048，因此Select模型的最大并发数就被相应限制了。<br>②效率问题，select 每次调用都会线性扫描全部的FD集合这样效率就会呈现线性下降，把 FD_SETSIZE 改大的后果就是，大家都慢慢来，什么？都超时了。<br>③内核/用户空间内存拷贝问题，如何让内核把FD消息通知给用户空间呢？在这个问题上select 采取了内存拷贝方法。</p>
+<p>总结为：1.连接数受限 2.查找配对速度慢 3.数据由内核拷贝到用户态</p>
+<p>poll 模型：<br>基本上效率和select是相同的，select缺点的②和③它都没有改掉。</p>
+<p>epoll模型：<br>①epoll没有最大并发连接的限制，上限是最大可以打开文件的数目，这个数字一般远大于 2048, 一般来说这个数目和系统内存关系很大 ，具体数目可以 cat /proc/sys/fs/file-max 察看。</p>
+<p>②效率提升，epoll最大的优点就在于它只管你“活跃”的连接,而跟连接总数无关，因此在实际的网络环境中,epoll 的效率就会远远高于select和poll。</p>
+<p>③内存拷贝,epoll在这点上使用了“共享内存”,这个内存拷贝也省略了。</p>
+<p>参考链接：<br>(1)《怎样理解阻塞非阻塞与同步异步的区别》<a href="http://www.zhihu.com/question/19732473" target="_blank" rel="external">http://www.zhihu.com/question/19732473</a><br>(2)《Unix Network Programming Vol1 1002003, 3Ed》 <a href="http://english.tebyan.net/newindex.aspx?pid=31159&amp;BookID=23760&amp;PageIndex=92&amp;Language=3" target="_blank" rel="external">http://english.tebyan.net/newindex.aspx?pid=31159&amp;BookID=23760&amp;PageIndex=92&amp;Language=3</a><br>(3)<a href="http://blog.chinaunix.net/uid-26000296-id-3754118.html" target="_blank" rel="external">http://blog.chinaunix.net/uid-26000296-id-3754118.html</a><br>(4)<a href="http://blog.csdn.net/colzer/article/details/8169075" target="_blank" rel="external">http://blog.csdn.net/colzer/article/details/8169075</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-09-07T11:51:53.000Z"><a href="/2013/09/07/offer/">9月 7 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/09/07/offer/">看了点《剑指offer》</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>早就听说，《剑指offer》这本书特别赞，对于马上要找工作的同学（技术岗）帮助特别大，今天随便翻了几十页，这本书确实值得读一读，比如一些简单的程序，这本书会提示你别忘记考虑边界条件，特殊情况，比如判断指针为空，字符串长度为0情况以及错误处理方面，还多次提到别忘记写test case，还有一些问题答案虽然很简单，但是其解释特别详细，原理也说的很明白。当然参加过ACM的同学这本书可能就意义不是太大了。这里简单记录下几道入门题目：</p>
+<p>1.C++里定义一个空的类型，里面没有任何成员变量和成员函数。对该类型求sizeof，得到的结果是多少？</p>
+<p>答案：1</p>
+<p>这个时候面试官肯定如果问你为什么不是0，我想不少同学就可能答不出来具体的原因了，当然这本书很好的讲解了这些基础原理。</p>
+<p>原因：空类型的实例中不包含任何信息，本来求sizeof应该是0，但是当我们声明该类型的实例的时候，它必须在内存中占有一定的空间，否则无法使用这些实例。至于占用多少内存，由编译器决定。Visual Studio中每个空类型的实例占用1字节的空间。</p>
+<p>问：如果在该类型中添加一个构造函数和析构函数，再对该类型求sizeof，得到的结果又是多少？</p>
+<p>答：和前面一样，还是1。调用构造函数和析构函数只需要知道函数的地址即可，而这些函数的地址只与类型相关，而与类型的实例无关，编译器也不会因为这两个函数而在实例内添加任何额外的信息。</p>
+<p>问：那如果把析构函数标记为虚函数呢？ 你看看，这题都是逐渐深入的。所以这是我推荐这本书的主要原因。</p>
+<p>答：C++编译器一旦发现一个类型中有虚函数，就会为该类型生成虚函数表，并在该类型的每一个实例中添加一个虚函数表的指针。在32位的机器上，一个指针占4字节的空间，因此求sizeof得到4；如果是64位的机器，一个指针占8字节的空间，因此求sizeof则得到8。</p>
+<p>2.分析以下程序的编译运行结果，3个选项：A.编译错误；B.编译成功，运行时程序崩溃；C.编译运行正常，输出10</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">class</span> A</div><div class="line">{</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">int</span> value;</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> A(<span class="keyword">int</span> n) {value = n;}</div><div class="line"> A(A other) {value = other.value;}</div><div class="line"> <span class="keyword">void</span> Print() {std::<span class="built_in">cout</span> &lt;&lt; value &lt;&lt; std::endl;}</div><div class="line">};</div><div class="line"></div><div class="line"><span class="keyword">int</span> _tmain(<span class="keyword">int</span> argc,_TCHAR* argv[])</div><div class="line">{</div><div class="line"> A a = <span class="number">10</span>;</div><div class="line"> A b = a;</div><div class="line"> b.Print();</div><div class="line"> <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>在上述代码中，复制构造函数A(A other)传入的参数是A的一个实例。由于是传值参数，我们把形参复制到实参会调用复制构造函数。因此如果允许复制构造函数传值，就会在复制构造函数内调用复制构造函数，就会形成永无休止的递归调用从而导致栈溢出。因此C++的标准不允许复制构造函数传值参数，在VS和GCC中，都将编译出错。要解决这个问题，我们可以把构造函数修改为A(const A&amp; other)，也就是把传值参数改成常量引用。</p>
+<p>3.如下为类型CMyString的声明，请为该类型添加赋值运算符函数</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">class CMyString</div><div class="line">{</div><div class="line"><span class="keyword">public</span>:</div><div class="line"> <span class="title">CMyString</span>(<span class="keyword">char</span>* pData = NULL);</div><div class="line"> CMyString(<span class="keyword">const</span> CMyString&amp; str);</div><div class="line"> ~CMyString(<span class="keyword">void</span>);</div><div class="line"><span class="keyword">private</span>:</div><div class="line"> <span class="keyword">char</span>* m_pData;</div><div class="line">};</div></pre></td></tr></table></figure>
+
+<p>此题其实不是太难，但是此题书中的解题思路和考虑的问题让我叹服，这里把书中的观点表述下：<br>(1)是否把返回值的类型声明为该类型的引用，并在函数结束前返回实例自身的引用(即<em>this)。只有返回一个引用，才可以允许连续赋值。否则如果函数的返回值是void，应用该赋值运算符将不能做连续赋值。假设有3个CMyString的对象:str1、str2和str3，在程序中语句str1=str2=str3将不能通过编译。<br>(2)是否把传入的参数的类型声明为常量引用。如果传入的参数不是引用而是实例，那么从形参到实参会调用一次复制构造函数。把参数声明为引用可以避免这样的无谓消耗，能提高代码的效率。同时，我们在赋值运算符函数内不会改变传入的实例的状态，因此应该为传入的引用参数加上const关键字。<br>(3)是否释放实例自身已有的内存。如果我们忘记在分配内存之前释放自身已有的空间，程序将出现内存泄漏。<br>(4)是否判断传入的参数和当前的实例(</em>this)是不是同一个实例。如果是同一个，则不进行赋值操作，直接返回。如果事先不判断就进行赋值，那么在释放实例自身的内存的时候就会导致严重的问题：当*this和传入的参数是同一个实例时，那么一旦释放了自身的内存，传入的参数的内存也同时被释放了，因此再也找不到需要赋值的内容了。<br>经典的解法：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">CMyString&amp; CMyString::<span class="keyword">operator</span> =(<span class="keyword">const</span> CMyString &amp;str)</div><div class="line">{</div><div class="line"> <span class="keyword">if</span>(<span class="keyword">this</span> == &amp;str)</div><div class="line"> <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line"></div><div class="line"><span class="keyword">delete</span> []m_pData;</div><div class="line"> m_pData = NULL;</div><div class="line"> m_pData = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="built_in">strlen</span>(str.m_pData) + <span class="number">1</span>];</div><div class="line"> <span class="built_in">strcpy</span>(m_pData,str.m_pData);</div><div class="line"></div><div class="line"><span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>考虑异常安全性的解法：<br>在前面的函数中，我们在分配内存之前先用delete释放了实例m_pData的内存。如果此时内存不足导致new char 抛出异常，m_pData将是一个空指针，这样非常容易导致程序崩溃。也就是说一旦在赋值运算符函数内部抛出一个异常，CMyString的实例不再保持有效的状态，这就违背了异常安全性(Exception Safety)原则。<br>要想在赋值运算符函数中实现异常安全性，我们有两种方法。一个简单的方式是我们先用new分配新内容再用delete释放已有的内存。这样只在分配内容成功之后再释放原来的内容，也就是当分配内存失败时我们能确保CMyString的实例不会被修改。我们还有一个更好的办法是先创建一个临时实例，再交换临时实例和原来的实例。下面是这种思路的参考代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">CMyString&amp; CMyString::operator =(<span class="keyword">const</span> CMyString &amp;<span class="keyword">str</span>)</div><div class="line">{</div><div class="line"> <span class="keyword">if</span>(this != &amp;<span class="keyword">str</span>)</div><div class="line"> {</div><div class="line"> CMyString strTemp(<span class="keyword">str</span>);</div><div class="line"> <span class="keyword">char</span>* pTemp = strTemp.m_pData;</div><div class="line"> strTemp.m_pData = m_pData;</div><div class="line"> m_pData = pTemp;</div><div class="line"> }</div><div class="line"> <span class="keyword">return</span> *this;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>在这个函数中，我们先创建一个临时实例strTemp，接着把strTemp.m_pData和实例自身的m_pData做交换。由于strTemp是一个局部变量，但程序运行到if的外面时也就出了该变量的作用域，就会自动调用strTemp的析构函数，把strTemp.m_pData所指向的内存释放掉。由于strTemp.m_pData指向的内存就是实例之前m_pData的内存，这就相当于自动调用析构函数释放实例的内存。<br>在新的代码中，我们在CMyString的构造函数里用new分配内存。如果由于内存不足抛出诸如bad_alloc等异常，我们还没有修改原来实例的状态，因此实例的状态还是有效的，这也就保证了异常安全性。</p>
+<p>参考资料：<br>《剑指offer》</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
 
 <nav id="pagination">
   
@@ -567,11 +509,11 @@ void put(K key, T data);
   
     <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
   
-    <li><a href="/categories/Web-Script/">Web/Script</a><small>4</small></li>
+    <li><a href="/categories/Web-Script/">Web/Script</a><small>3</small></li>
   
     <li><a href="/categories/Windows/">Windows</a><small>2</small></li>
   
-    <li><a href="/categories/我的生活/">我的生活</a><small>3</small></li>
+    <li><a href="/categories/我的生活/">我的生活</a><small>2</small></li>
   
     <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>5</small></li>
   
@@ -607,11 +549,11 @@ void put(K key, T data);
       </li>
     
       <li>
-        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
       </li>
     
       <li>
-        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
       </li>
     
   </ul>

@@ -55,102 +55,6 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2014-03-06T15:13:09.000Z"><a href="/2014/03/06/socket-concurrency/">3月 6 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/03/06/socket-concurrency/">常用的socket并发方法总结</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>套接字相关函数默认是采用阻塞方式操作，而大多数情况下，程序不仅仅只拥有一个套接字。因此当进程以阻塞方式操作其中之一时，必将导致不能使用其他套接字。如果用户希望这些套接字同时工作，就必须设计并发打套接字程序，即在一个套接字读写的同时保证另一个套接字也能正常操作。</p>
-<p>以下几种方法是常用的并发模型：</p>
-<p>1.非阻塞并发模型</p>
-<p>I/O阻塞是影响进程并发的重要原因，进程一旦进入阻塞，就不能再执行任何操作。比如进程调用输入函数后，在默认情况下就必需一直阻塞直到产生满足条件的数据为止。</p>
-<p>套接字也是一种I/O设备，它有四类阻塞，分别是输入类（read，recv和recvfrom等）、输出类（write和send）、连接申请类（connect）和连接处理（accept），其中UDP协议数据发送函数sendto不产生阻塞。</p>
-<p>当套接字调用以上函数时，将导致进程阻塞。因此把套接字函数的阻塞模式更改为非阻塞模式，是实现并发套接字程序的一种方法。</p>
-<p>函数fcntl设置套接字描述符的O_NONBLOCK标志后，即可将I/O方式更改为非阻塞方式。此时如果输入函数（read、recv、recvfrom）、输出函数（write、send）或者连接处理函数（accept）的成功条件不满足，将立即返回-1并置errno为EAGAIN错误，如果连接申请函数（connect）的成功条件不满足，将返回-1并置errno为EINPROGRESS错误。</p>
-<p>如：将套接字描述符nSock设置为非阻塞方式：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> nType;</div><div class="line">nType = <span class="keyword">fcntl</span>(nSock,F_GETFL,<span class="number">0</span>);</div><div class="line"><span class="keyword">fcntl</span>(nSock,F_SETFL,nType|O_NONBLOCK);</div></pre></td></tr></table></figure>
-
-<p>首先读取了描述符的信息，然后在此基础上增加了非阻塞标志。</p>
-<p>2.信号驱动模型</p>
-<p>Windows下有消息驱动的概念，在<em>nix环境下也存在着类似的机制，不过不是消息去驱动方式，而是信号驱动I/O模式。在这种模式下，进程可以一边做其他的事，一边等待信号。当文件描述符就绪时，</em>inx内核会向进程发送SIGIO信号（某些系统是SIGPOLL信号），进程获取该信号并调用预先准备的处理函数执行I/O操作。当函数调用完毕后，进程回到接收信号前的代码处继续工作。</p>
-<p>在一个套接字上实现信号驱动的步骤如下：</p>
-<p>（1）为信号SIGIO设计处理函数并捕获信号</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void <span class="func"><span class="keyword">func</span><span class="params">(int sig)</span></span> <span class="comment">//信号处理函数</span></div><div class="line">{</div><div class="line"> ......</div><div class="line"> signal(<span class="type">SIGIO</span>,<span class="func"><span class="keyword">func</span></span>);</div><div class="line">}</div><div class="line"></div><div class="line">......</div><div class="line">signal(<span class="type">SIGIO</span>,<span class="func"><span class="keyword">func</span></span>); <span class="comment">//捕获信号SIGIO</span></div></pre></td></tr></table></figure>
-
-<p>（2）设定套接字的归属主，设置接收SIGIO信号的进程或进程组</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function">fcntl</span>(nSock,F_SETOWN,<span class="function">getpid</span>()); <span class="comment">//设置接收信号的进程</span></div><div class="line">或者</div><div class="line"><span class="function">fcntl</span>(nSock,F_SETOWN,<span class="function">getpgrp</span>()); <span class="comment">//设置接收信号的进程组</span></div></pre></td></tr></table></figure>
-
-<p>（3）设置套接字的异步I/O属性</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> nType;</div><div class="line">nType = <span class="keyword">fcntl</span>(nSock,F_GETFL,<span class="number">0</span>);</div><div class="line"><span class="keyword">fcntl</span>(nSock,F_SETFL,nType|O_ASYNC);</div></pre></td></tr></table></figure>
-
-<p>套接字信号驱动的设置非常简单，但在实践中却难以实现。因为UNIX内核并不仅仅在套接字有输入时才发送SIGIO信号，在套接字连接、输出、错误和其他状态变化时均发送该信号，这样就直接导致了进程在接收信号后无法正确地判断下一步的行为。</p>
-<p>3.超时并发模型</p>
-<p>超时也是防止阻塞的一种手段，它可以保证进程不被永远挂起。阻塞函数的超时时间长度决定了进程的并发程序，超时时间越小，并发度越高，超时时间越大，则并发度越低。</p>
-<p>（1）通过套接字选项设置超时</p>
-<p>可以通过套接字选项SO_SNDTIMEO和SO_RCVTIMEO分别设置套接字描述符上的写入和读取操作的超时时间。但本方法有如下缺陷：</p>
-<p>&lt;1&gt;只能设置套接字描述符上的读取和写入操作的超时时间，不能设置connect和accept等连接操作的超时。</p>
-<p>&lt;2&gt;某些版本的*nix不支持这两个套接字选项。</p>
-<p>（2）通过信号SIGALRM设置超时</p>
-<p>在*nix下的阻塞函数一般都有在进程接收到任意信号后中断返回的传统，套接字函数也不例外，利用这个特性使用定时器信号SIGALRM实现套接字的超时处理。</p>
-<p>步骤如下：</p>
-<p>&lt;1&gt;定义超时标志。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> nTimeOut = <span class="number">0</span>;</div></pre></td></tr></table></figure>
-
-<p>静态整型变量nTimeOut代表函数超时，默认取值为0表示没有超时，取值为1时表示已经超时。</p>
-<p>&lt;2&gt;为信号SIGALRM设计处理函数。</p>
-<p>进程捕获定时器信号SIGALRM后将调用函数OnTimeOut进行处理：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> OnTimeout(<span class="keyword">int</span> nSignal)</div><div class="line">{</div><div class="line"> <span class="keyword">signal</span>(nSignal,SIG_IGN); <span class="comment">//超时一次后就忽略信号SIGALARM，防止循环超时</span></div><div class="line"> nTimeOut = <span class="number">1</span>; <span class="comment">//设置超时标识为“已超时”</span></div><div class="line"> <span class="keyword">return</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>&lt;3&gt;捕获信号SIGALRM并设置定时器。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function">signal</span>(SIGALRM,OnTimeOut); <span class="comment">//捕获信号SIGALRM</span></div><div class="line"><span class="function">alarm</span>(TIMEOUT); <span class="comment">//TIMEOUT秒后发送定时器信号SIGALRM</span></div></pre></td></tr></table></figure>
-
-<p>&lt;4&gt;调用套接字阻塞处理函数，比如套接字接收（recv、read、recvfrom）、发送（send、write）、连接申请（connect）或接收连接（accept）。</p>
-<p>&lt;5&gt;取消定时器并忽略信号SIGALRM</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">alarm(<span class="number">0</span>);</div><div class="line">signal(SIGALRM,SIG_IGN);</div><div class="line"><span class="keyword">if</span>(nTimeOut == <span class="number">1</span>) <span class="comment">//超时处理</span></div><div class="line"><span class="keyword">else</span> <span class="comment">//非超时处理</span></div></pre></td></tr></table></figure>
-
-<p>（3）通过信号SIGALRM与跳转设置超时</p>
-<p>&lt;1&gt;定义超时标志和跳转结构</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> nTimeOut = <span class="number">0</span>;</div><div class="line">jmp_buf env;</div></pre></td></tr></table></figure>
-
-<p>&lt;2&gt;为信号SIGALRM设置处理函数</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//在处理函数中除了更改超时标志外，还增加了跳转语句，如函数OnTimeOut所示：</span></div><div class="line"><span class="keyword">void</span> OnTimeout(<span class="keyword">int</span> nSignal)</div><div class="line">{</div><div class="line"> <span class="keyword">signal</span>(nSignal,SIG_IGN); <span class="comment">//超时一次后就忽略信号SIGALARM，防止循环超时</span></div><div class="line"> nTimeOut = <span class="number">1</span>; <span class="comment">//设置超时标识为“已超时”</span></div><div class="line"> longjmp(env,<span class="number">1</span>); <span class="comment">//语句跳转</span></div><div class="line"> <span class="keyword">return</span>; <span class="comment">//本句实际上已经不会执行了</span></div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>&lt;3&gt;记录跳转点</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">setjmp(<span class="keyword">env</span>);</div></pre></td></tr></table></figure>
-
-<p>&lt;4&gt;超时判断</p>
-<p>&lt;5&gt;捕获信号SIGALRM并设置定时器</p>
-<p>&lt;6&gt;调用套接字阻塞处理函数，比如套接字接收（recv、read、recvfrom）、发送（send、write）、连接申请（connect）或接收连接（accept）等。</p>
-<p>&lt;7&gt;取消定时器并忽略信号SIGALRM。</p>
-<p>4.多路复用并发模型</p>
-<p>如select，多路复用函数把一些文件描述符集合在一起，如果某个文件描述符的状态发生变化，比如进入“写就绪”或者“读就绪”状态，函数select会立即返回，并且通知进程读取或写入数据，如果没有I/O到达，进程将进入阻塞，直到函数select超时退出为止。</p>
-<p>select/poll/epoll是Socket并发常用的方法，等有空再总结吧。</p>
-<p>&nbsp;</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
         <time datetime="2014-02-13T17:05:21.000Z"><a href="/2014/02/14/tcp-and-udp-note/">2月 14 2014</a></time>
       
       
@@ -288,48 +192,6 @@
 <p>参考文献：</p>
 <p>《图解TCP/IP：第5版》</p>
 <p>&nbsp;</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2014-01-01T13:43:51.000Z"><a href="/2014/01/01/get-baidu-music-addr/">1月 1 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/01/01/get-baidu-music-addr/">获得百度无损品质音乐的下载地址</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>现在很多超高品质音乐都已开始收费了，百度也不例外。许多穷学生买不起会员，但是也想下载些无损品质音乐，怎么办呢？这里简单给个方法吧，包括获取方法，代码就不贴了。</p>
-<p>1.首先选择一个音乐，在点击下载界面获取音乐的ID，如下图所示</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/01/20140101190532.jpg" alt=""></p>
-<p>如《黑蝙蝠中队》的连接地址为：<a href="http://music.baidu.com/song/966991/download?__o=%2Fsearch" target="_blank" rel="external">http://music.baidu.com/song/966991/download?__o=%2Fsearch</a></p>
-<p>我们记住这个歌曲的ID：966991（在song和download之间那个数字）</p>
-<p>2.抓包解析，还是老方法，这里不说了，自己仔细分析即可，得到一个包含json串的地址：</p>
-<p><a href="http://music.baidu.com/data/music/song?song_id=966991&amp;rate=921&amp;.r=0.181309352396056061388580827431" target="_blank" rel="external">http://music.baidu.com/data/music/song?song_id=966991&amp;rate=921&amp;.r=0.181309352396056061388580827431</a></p>
-<p>记住rate后&amp;前的数字921。</p>
-<p>3.打开上面的地址，查看json串里songLink里面对应的值，此值就是音乐的下载地址：<br><code>&quot;songLink&quot;: &quot;http:\/\/zhangmenshiting.baidu.com\/data2\/music\/33809115\/966991111600921.flac?xcode=8dd148655a820585261c4450f7f4304e9d0fba1db032ff5f&quot;</code><br>将\/\/转成正常的 / 就可以了。</p>
-<p>4.如果想下载其他音乐，只需要按照第一步操作获取音乐的ID，然后构造下载地址，下载地址按照下面方面构造：<br><code>http://music.baidu.com/data/music/song?song_id=第一步获取的ID&amp;amp;rate=999&amp;amp;.r=0.181309352396056061388580827431</code><br>其中song_id等于第一步里面你获取的ID。然后在json串里得到下载地址就可以了。</p>
-<p>说明：</p>
-<p>rate后面那个数字代表音乐的品质，900以上的表示无损音乐，可以取任意值。8xx 7xx 一直往下知道1xx但不是固定，代表着超高，高和标准品质，但是不是完全固定。这里不详细查找了，代码也比较好写。分析就这样吧。</p>
 
       
     </div>
@@ -491,6 +353,160 @@
 </article>
 
 
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-12-05T11:27:16.000Z"><a href="/2013/12/05/regular-expression-operations/">12月 5 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/12/05/regular-expression-operations/">Regular expression operations</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>之前接触过正则表达式，但是用的不熟练，原因主要是自己一直用C/C++开发，用正则时候比较少，所以也就没有达到熟能生巧的地步。这几天，用python做点东西，需要用到正则，python在文本处理方面是一把利器，你懂的，所以，就把网上那个非常有名的《正则表达式30分钟入门教程》和《python 正则表达式指南》重温了下，这里把里面的内容摘抄下，主要是方便自己查阅。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/201312502.png" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/12/201312504.png" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/12/201312506.png" alt=""><br><img src="http://armsword.com/wp-content/uploads/2013/12/201312508.png" alt=""></p>
+<p>由于我们使用python的正则，不同语言下，正则是稍微有些差异的。这里贴个网友们整理的python下的正则语法图片。我仔细看下，应该是参考<a href="http://docs.python.org/2/library/re.html#module-re" target="_blank" rel="external">http://docs.python.org/2/library/re.html#module-re</a> 这里的，不过挺一目了然的。水印是原博主的博客地址，后面我也会放出地址，想看完整版的可以去查看原帖。</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/pyre.png" alt=""></p>
+<p>参考链接：</p>
+<p><a href="http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html" target="_blank" rel="external">《Python正则表达式指南》</a></p>
+<p><a href="http://deerchao.net/tutorials/regex/regex.htm" target="_blank" rel="external">《正则表达式30分钟入门指南》</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-12-04T15:21:39.000Z"><a href="/2013/12/04/kdd-note/">12月 4 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/12/04/kdd-note/">文本挖掘技术笔记</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>我第一次接触自然语言处理还是研一的时候，当时我读的是那本经典书籍《数学之美》，之后我就对NLP/文本挖掘/IR方向兴趣比较大，所以也一直想毕业后去搜索相关公司。但是考虑到自己的基础水平，迟迟没有深入研究，其实主要原因是我一直在补计算机类基础知识呢，因为我是比较看重基础的，现在还差编译原理了，时间不够用了，也得感叹下，要学的知识太多了。前几天双11买了本《统计自然语言处理》，打算深入的研究下，所以这2天我把北京大学的文本挖掘的课件快速的看了看，算法之类的公式推倒我没细看，主要是记录下一些知识点。</p>
+<p>本人主要是给自己看的，所以比较乱，也没有逻辑可言。基本上都是关键知识点，比如一些专有名词等等。</p>
+<p>一、分词</p>
+<p>（1）分词基本方法</p>
+<p>1.最大匹配法</p>
+<p>基于其他匹配的分词方法：<br>1&gt; 最大匹配法 (Maximum Matching method)<br>匹配的方法是从左向右<br>2&gt; 逆向最大匹配法 (Reverse Maximum method)<br>匹配方向与MM法相反,是从右向左。<br>实验表明:对于汉语来说,逆向最大匹配法比最大匹配法更有效。<br>3&gt; 双向匹配法(Bi-direction Matching method)<br>比较MM法与RMM法的分词结果,从而决定正确的分词。<br>4&gt; 最佳匹配法(Optimum Matching method, OM法)<br>将词典中的单词按它们在文本中的出现频度的大小排列,高频度的单词排在前,频度低的单词排在后,从而提高匹配的速度。<br>5&gt; 联想-回溯法(Association-Backtracking method)<br>采用联想和回溯的机制来进行匹配。</p>
+<p>2.最大概率法分词</p>
+<p>基本思想是:<br>(1)一个待切分的汉字串可能包含多种分词结果<br>(2)将其中概率最大的那个作为该字串的分词结果</p>
+<p>3.最短路径分词方法</p>
+<p>基本思想:<br>在词图上选择一条词数最少的路径</p>
+<p>（2）词性标注</p>
+<p>自动词性标注就是用计算机来自动地给文本中的词标注词性。<br>1.标注技术路线:<br>基于概率统计和基于规则</p>
+<p>（3）文档模型</p>
+<p>1.布尔模型<br>2.向量空间模型（VSM）<br>3.概率模型<br>Term Weights 、Term frequency (tf) 、Inverse document frequency (idf)</p>
+<p>（4）文本间相似性计算</p>
+<p>1.基于概率模型的相关度<br>2.基于VSM的相关度计算方法<br>基于向量空间模型的常用方法：<br>欧氏距离(很少使用）<br>向量内积<br>向量夹角余弦<br>1&gt;余弦相似度<br>2&gt;Jaccard相似度</p>
+<p>（5）文本序列</p>
+<p>序列比较可以分为四种基本情况:<br>(1)两条长度相近的序列相似找出序列的差别<br>(2)一条序列是否包含另一条序列(子序列)<br>(3)两条序列中是否有非常相同的子序列<br>(4)一条序列与另一条序列逆序相似<br>相似度:它是两个序列的函数,其值越大,表示两个序列越相似<br>距离:距离越大,则两个序列的相似度就越小<br>1&gt;海明距离<br>2&gt;编辑距离<br>通过点矩阵进行序列比较</p>
+<p>（6）TextTiling</p>
+<p>TextTiling (Hearst and Plaunt 1993)is one of the most famous system forTopic Segmentation.(对文档分段)<br>TextTiling method:<br>1&gt;先把文档分成块(tile),每块k个句子。<br>2&gt;计算相邻块之间的相似度,用标准的文档相似度计算公式。<br>3&gt;用结果绘图。非常相似处会出现波峰,很不相似的地方出现波谷。选择波谷处作为分界线,把块组成段,这些段很可能是有关同一个Subtopic的。</p>
+<p>（7）特征空间的变化</p>
+<p>1&gt;Latent Semantic Analysis (LSA)<br>LSI思想方法最初应用于文本信息检索领域有效地解决了同义词和多义词的问题,通过识别文本中的同义词, LSI将信息检索精度提高了10%—30%.(查询扩展)<br>Latent Semantic Indexing (LSI)</p>
+<p>基本方法:<br>利用矩阵理论中的“奇异值分解(singular value decomposition,SVD)”技术,将词频矩阵转化为奇异矩阵(K×K)<br>基本步骤:<br>1.建立词频矩阵,frequency matrix<br>2.计算frequency matrix的奇异值分解分解frequency matrix成3个矩阵U,S,V。U和V是正交矩阵(UTU=I),S是奇异值的对角矩阵(K×K)<br>3.对于每一个文档 d,用排除了SVD中消除后的词的新的向量替换原有的向量<br>4.用转换后的文档索引和相似度计算</p>
+<p>（8）词频矩阵</p>
+<p>词频矩阵:矩阵表示一组文档<br>1&gt;行对应关键词t,列对应文档d向量<br>2&gt;将每一个文档视为空间的一个向量<br>3&gt;向量值反映单词t与文档d的关联度</p>
+<p>二、文本检索技术</p>
+<p>1.基于分类的检索<br>2.基于主题词的检索<br>3.基于元数据的检索</p>
+<p>1.信息检索模型:<br>IR模型可形式地表示为一个四元组&lt; D, Q, F, R(qi,dj) &gt;<br>其中:<br>D是一个文档集合,<br>Q是一个查询集合,用户任务的表达<br>F是一个框架,用以构建文档,查询以及它们之间关系的模型<br>R(qi,dj) 是一个排序函数,它给查询qi和文档 dj 之间的相关度赋予一个排序值</p>
+<p>2.布尔检索模型</p>
+<p>3.向量空间模型(VSM)</p>
+<p>4.概率模型</p>
+<p>5.语言模型<br>1&gt;一元(Unigram)模型<br>假设词与词之间是相互独立的,一个词出现的概率与这个词前面的词没有存在必然联系。 P (W 1W 2 ..W n ) = P (W 1 ) P (W 2 )… P (W n )<br>2&gt;N元(NGram)模型<br>假设词与词之间是相互关联的,一个词出现的概率与这个词前面的词存在一定的关联。<br>二元(Bigram)模型<br>P (W1W 2 ..W n ) = P (W1 ) P (W 2 | W1 )… P (W n | W n −1 )<br>N元(NGram)模型<br>P(WW2..Wn ) = P(W )P(W2 | W )… (Wn | Wn−1Wn−2..W1)</p>
+<p>检索质量的评价：</p>
+<p>文本检索的基本度量<br>1&gt;查准率(precision):既相关又被检索到的实际文档与检索到的文档的百分比。<br>2&gt;查全率(召回率recall):既相关又被检索到的实际文档与查询相关的文档的百分比</p>
+<p>索引作用:<br>索引<br>1&gt;提供从记录的特征快速查询到记录的数据结构(B树、散列表、位图索引等)<br>2&gt;数据库,文档数据库,SE/IR系统</p>
+<p>签名文件:<br>定义:是一个记录每一个文档的特征的文件<br>方法:每一个特征对应一个固定长度的位串,一个比特位对应一个词汇,若某一位对应的词出现在文档中则该位置1,否则置0。<br>按位操作进行匹配,确定文档的相似性<br>可以多词对应一个比特位,来减少位串的长度,但增加搜素开销,存在多对一映射的缺点。</p>
+<p>倒排索引创建-算法优化<br>1&gt;Term编码(词典组织)<br>每个term用整数编码,减小存储空间<br>英文-前缀编码<br>(liber,liberal,liberalist…)<br>散列表(MPH,无冲突散列)<br>2&gt;减少磁盘的随机访问次数<br>&lt;termid,docid&gt;在内存中排序,排序结果分<br>批写入磁盘,最后合并。<br>两趟算法,在内存中直接倒排,小倒排文件<br>分批写入磁盘,最后多路合并。<br>3&gt;数据压缩</p>
+<p>倒排索引创建-两趟算法<br>索引创建—两趟算法<br>1.Parsing ,提取index term,统计df和tf,通过hash表转换为term id,生成词典文件(lexicon file)。<br>2.按统计得到的index term的tf,df属性,可以估计出对应posting list长度,预申请空间。再次parsing文档集,在内存中执行倒排。结果保存到临时文件。<br>3.对多次生成的临时倒排文件,多路合并,压缩输出,得到最终倒排文件。</p>
+<p>倒排索引创建-整数压缩</p>
+<p>三、文本自动分类技术</p>
+<p>文本自动分类：<br>基本步骤<br>1&gt;定义分类体系<br>2&gt;将预先分类过的文档作为训练集<br>3&gt;从训练集中得出分类模型(需要测试过程,不断细化)<br>4&gt;用训练获得出的分类模型对其它文档加以分类</p>
+<p>文本分类基本步骤:<br>1. 用户定义分类树<br>2. 用户为分类节点提供训练文档<br>3. 特征选择<br>4. 训练<br>5. 自动分类</p>
+<p>评价指标:<br>「准确率」(P, precision)<br>「召回率」(R, recall)</p>
+<p>特征抽取<br>特征抽取(feature extraction):<br>1&gt;预处理<br>去掉html一些tag标记<br>禁用词(stop words)去除、词根还原(stemming)<br>(中文)分词、词性标注、短语识别、…<br>词频统计 (TF DF)<br>数据清洗:去掉噪声文档或文档内垃圾数据<br>2&gt;文本表示<br>向量空间模型<br>3&gt;降维技术<br>特征选择(Feature Selection)<br>特征重构(Re-parameterisation,如LSI)</p>
+<p>特征选择:<br>目的<br>避免过拟合(over fitting),提高分类准确度<br>• 如果经过某种学习之后的分类模型,使得训练文档适应得很好(导致很高的自动分类精度),但对训练集之外的文档显得差许多,则称此时的学习模型有Over-fitting problem<br>• 希望模型的表现对训练集和未知文档基本一致。<br>通过降维,大大节省计算时间和空间<br>• 样例空间涉及的总词项数很大(N在10万量级),但每篇文档只涉及其中的一小部分(例如一篇网页通常只有几百个词)(到1/10 – 1/100,甚至更多)</p>
+<p>特征选取的方法:<br>1&gt;文档频率法(DF, document frequency)<br>2&gt;信息增益法(information gain)<br>3&gt;互信息法(mutual information)<br>4&gt;The χ^2 test(chi-square,开方拟合检验)</p>
+<p>特征选择—DF:<br>基于DF的启发式要点<br>1&gt;太频繁的词项没有区分度<br>• Term的DF大于某个阈值去掉太稀有的词项独立表达的类别信息不强<br>• 稀有词项的全局影响力不大<br>• 在训练集中,某些文档如果有某个稀有词项,它们通常也会有一些常见词项(对那一类)和通常信息获取观念有些抵触:稀有的更有代表性(这是一种ad hoc方法,不依据什么理论)<br>2&gt;最容易实现,可扩展性好</p>
+<p>特征选择—RSJ:</p>
+<p>特征选择—熵:<br>1&gt;设信息出现(例如“硬币出现某一面”,“一篇文档属于某一类”)的概率空间p = {p1, p2, …, pm}<br>2&gt;在引入某个词项t之前,系统的熵(即一个随机文档落入某个类的概率空间的熵)<br>3&gt;在观察到t以后,文档落入某个类ci的概率就应该是条件概率P(ci|t)<br>对应于相关表中的A/A+C<br>注意,对不同的ci,每个分量不一定相同<br>4&gt;term类别分布的熵<br>该值越大,说明分布越均匀,越有可能出现在较多的类别中;<br>该值越小,说明分布越倾斜,词可能出现在较少的类别中</p>
+<p>特征选择—相对熵:<br>相对熵(not 交叉熵):也称为KL距离(Kullback-Leibler divergence)反映了文本类别的概率分布和在出现了某个特定词汇条件下的文本类别的概率分布之间的距离。<br>该值越大,词对文本类别分布的影响也大。</p>
+<p>特征选择—信息增益IG<br>信息增益(Information Gain, IG):<br>该term为整个分类所能提供的信息量<br>t出现与否导致的熵的变化<br>不考虑任何特征的熵和考虑该特征后的熵的差值</p>
+<p>特征选择—互信息MI：<br>1&gt;统计语言学建模的一种方法,是评估两个随机变量X, Y相关程度的一种度量。<br>2&gt;X, Y分别对应词项t的出现情况和类别的出现情况<br>3&gt;关心的P(t), P(c), P(t,c)都可以通过统计训练集中的数据情况得到</p>
+<p>特征选择—χ^2 (卡方):<br>1&gt;源于统计学的卡方分布(chi-square)<br>2&gt;从(类,词项)相关表出发<br>3&gt;χ2 统计量:<br>度量两者(term和类别)独立性的缺乏程度χ2 越大,独立性越小,相关性越大若AD&lt;BC,则类和词独立, N=A+B+C+D</p>
+<p>特征选择—Term强度(TS):<br>term strength<br>一种新颖的角度,考察一个词项在“相似文档”中出现的可能性<br>假定我们已经有了一个相似文档的集合S,设x, y为其中任意两个文档,那么词项t对这个集合的术语强度为s(t) = Pr(tєy|tєx)<br>S中的文档要满足一定的“相似度”指标,S不一定就是训练集中的那些类。通常由聚类来确定S。<br>分类算法:<br>1&gt;决策树(Decision Trees)<br>2&gt;KNN算法(K-Nearest Neighbour)<br>3&gt;贝叶斯网络(Bayes Network)<br>4&gt;神经网络(Neural Networks)<br>5&gt;Boosting<br>6&gt;支持向量机(SVM)</p>
+<p>四、文本自动聚类技术</p>
+<p>什么是聚类?<br>聚类(簇Cluster): 数据对象的集合在同一个簇中,数据对象是相似的不同簇之间的对象是不相似的。</p>
+<p>什么是聚类分析?<br>聚类分析就是按照一定的规律和要求对事物进行区分和分类的过程,在这一过程中没有任何关于类分的先验知识,没有指导,仅靠事物间的相似性作为类属划分的准则。<br>一个数据集合分组成几个簇<br>聚类分析是一种无监督分类:没有预定义的类<br>聚类分析(Clustering):给定一数据样本集X{X1,X2,…,Xn},根据数据点间的相似程度将数据集合分成k簇{C1,C2,…,Ck}的过程称为聚类分析。</p>
+<p>文本聚类基本步骤：<br>1.用户指定用于聚类的数据集合<br>2.特征选取<br>3.聚合: 将每个文档分配到相应的类中<br>4.标注: 给每个聚类选择关键词</p>
+<p>什么是一个好的聚类方法?<br>1&gt;聚类方法的好坏:该方法是否能发现某些或所有的隐含模式;<br>一个好的聚类方法要能产生高质量的聚类结果——簇,这些簇要具备以下两个特点:<br>高的簇内相似性<br>低的簇间相似性<br>2&gt;聚类结果的好坏取决于:<br>聚类方法采用的相似性评估方法<br>该方法的具体实现;</p>
+<p>聚类算法:<br>1&gt;划分方法<br>2&gt;层次方法<br>3&gt;密度方法<br>4&gt;网格方法<br>5&gt;在线聚类</p>
+<p>五、话题检测跟踪技术 Topic Detection and Tracking (TDT)</p>
+<p>六、文本过滤技术(IF)</p>
+<p>信息过滤的定义:<br>从动态的信息流中将满足用户兴趣的信息挑选出来,用户的兴趣一般在较长一段时间内比较稳定不会改变(静态)</p>
+<p>信息过滤系统的特点:<br>新信息的产生速度很快,相对来说,人的兴趣变化比较缓慢,可以看成相对静态的和稳定的。<br>信息过滤主要借用信息检索和用户建模(User modeling)两个领域的技术。<br>用户的需求或者兴趣通常采用User Profile建模来表示。<br>新信息到来的时候,根据用户的User Profile,有选择地挑出信息给用户。</p>
+<p>基于内容的过滤与协同过滤</p>
+<p>七、关联分析技术</p>
+<p>关联规则挖掘:<br>简单的说,关联规则挖掘就是发现大量数据中项集之间有趣的关联在交易数据、关系数据或其他信息载体中,查找存在于项目集合或对象集合之间的频繁模式、关联、相关性或因果结构。</p>
+<p>六和七结合起来，其实就是推荐系统，可以参考下面3篇文章。</p>
+<p><a href="http://www.ibm.com/developerworks/cn/web/1103_zhaoct_recommstudy1/index.html?ca=drs-" target="_blank" rel="external">探索推荐引擎内部的秘密，第 1 部分: 推荐引擎初探</a></p>
+<p><a href="http://www.ibm.com/developerworks/cn/web/1103_zhaoct_recommstudy2/index.html?ca=drs-" target="_blank" rel="external">探索推荐引擎内部的秘密，第 2 部分: 深入推荐引擎相关算法—协同过滤</a></p>
+<p><a href="http://www.ibm.com/developerworks/cn/web/1103_zhaoct_recommstudy3/index.html?ca=drs-" target="_blank" rel="external">探索推荐引擎内部的秘密，第 3 部分: 深入推荐引擎相关算法—聚类</a></p>
+<p>八、文档自动摘要技术</p>
+<p>1&gt;提示字串法<br>2&gt;频率统计法<br>3&gt;文章框架法<br>4&gt;信息提取法<br>5&gt;理解分析法<br>6&gt;仿人算法</p>
+<p>九、信息抽取</p>
+<p>1&gt;实体提取<br>上下文无关实体的提取<br>• Context-Free Entity Extraction<br>2&gt;基于规则的实体提取<br>关系提取(Relational Extraction)</p>
+<p>文本信息抽取的方法<br>1&gt;有限状态机<br>2&gt;Wrapper<br>3&gt;Hidden Markov Models</p>
+<p>十、智能问答(QA)技术</p>
+<p>主要方法<br>1&gt;Pattern-based Approach<br>2&gt;Knowledge-Based Approach<br>3&gt;Web-based Approach</p>
+<p>十一、本体(Ontology)</p>
+<p>给出构成相关领域词汇的基本术语和关系,以及利用这些术语和关系构成的规定这些词汇外延的规则的定义。</p>
+<p>之后再放几张当时的截图吧：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd001.png" alt=""></p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd002.png" alt=""></p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd005.png" alt=""></p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd006.png" alt=""></p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd007.png" alt=""></p>
+<p><img src="http://armsword.com/wp-content/uploads/2013/12/kdd005.png" alt=""></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
 
 <nav id="pagination">
   
@@ -523,11 +539,11 @@
   
     <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
   
-    <li><a href="/categories/Web-Script/">Web/Script</a><small>4</small></li>
+    <li><a href="/categories/Web-Script/">Web/Script</a><small>3</small></li>
   
     <li><a href="/categories/Windows/">Windows</a><small>2</small></li>
   
-    <li><a href="/categories/我的生活/">我的生活</a><small>3</small></li>
+    <li><a href="/categories/我的生活/">我的生活</a><small>2</small></li>
   
     <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>5</small></li>
   
@@ -563,11 +579,11 @@
       </li>
     
       <li>
-        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
       </li>
     
       <li>
-        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
       </li>
     
   </ul>

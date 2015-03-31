@@ -55,54 +55,6 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2014-10-25T16:48:01.000Z"><a href="/2014/10/26/webbench-source-analyse/">10月 26 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>我们知道知名的Web网站压力测试工具有Webbench、ab、http_load、siege等等，这种工具的源码都不是太长，所以，我用了一下午和晚上时间仔细了分析了Webbench的源码，并且写下这篇博客记录下。</p>
-<p>我们先看下一般Webbench是怎么做压力测试的吧，方法很简单，如下所示：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">#模拟<span class="number">200</span>次请求，持续时间<span class="number">5</span>秒的压力测试 -<span class="built_in">c</span> 后为并发数， -t 后为持续时间</div><div class="line">[imlinuxer@imlinuxer webbench-<span class="number">1.5</span>]# webbench -<span class="built_in">c</span> <span class="number">200</span> -t <span class="number">5</span> http:<span class="comment">//localhost/index.php</span></div><div class="line"><span class="type">Webbench</span> - <span class="type">Simple</span> <span class="type">Web</span> <span class="type">Benchmark</span> <span class="number">1.5</span></div><div class="line"><span class="type">Copyright</span> (<span class="built_in">c</span>) <span class="type">Radim</span> <span class="type">Kolar</span> <span class="number">1997</span>-<span class="number">2004</span>, <span class="type">GPL</span> <span class="type">Open</span> <span class="type">Source</span> <span class="type">Software</span>.</div><div class="line"></div><div class="line"><span class="type">Benchmarking</span>: <span class="type">GET</span> http:<span class="comment">//localhost/index.php</span></div><div class="line"><span class="number">200</span> clients, running <span class="number">5</span> sec.</div><div class="line"></div><div class="line"><span class="type">Speed</span>=<span class="number">156804</span> pages/<span class="built_in">min</span>, <span class="number">128496336</span> bytes/sec.</div><div class="line"><span class="type">Requests</span>: <span class="number">13067</span> susceed, <span class="number">0</span> failed.</div></pre></td></tr></table></figure>
-
-<p>那Webbench的原理是怎么样的？其实也是很简单的，就是根据提供的参数构造HTTP请求Header，然后使用fork，创建指定大小（webbench提供的参数-c 后的数字，上文为200）个子进程，每个子进程利用socket创建TCP连接到URL，然后通过管道向父进程发送数据，父进程通过管道读取子进程的数据，并作累计，输出即可。其简单流程图如下图所示：</p>
-<p><img src="http://armsword.com/wp-content/uploads/2014/10/20141026.png" alt=""><br>下面简单说下源码吧，源码很短，不到600行，两个文件，分别为socket.c和webbench.c。先说下socket.c，代码为</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> Socket(<span class="keyword">const</span> <span class="keyword">char</span> *host, <span class="keyword">int</span> clientPort)</div><div class="line">{</div><div class="line"><span class="keyword">int</span> sock;</div><div class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> inaddr;</div><div class="line"><span class="keyword">struct</span> sockaddr_in ad;</div><div class="line"><span class="keyword">struct</span> hostent *hp;</div><div class="line"><span class="built_in">memset</span>(&amp;ad, <span class="number">0</span>, <span class="keyword">sizeof</span>(ad));</div><div class="line">ad.sin_family = AF_INET;</div><div class="line"><span class="comment">// 将字符串转换为32位二进制网络字节序的IPv4地址</span></div><div class="line">inaddr = inet_addr(host);</div><div class="line"><span class="keyword">if</span> (inaddr != INADDR_NONE)</div><div class="line"><span class="built_in">memcpy</span>(&amp;ad.sin_addr, &amp;inaddr, <span class="keyword">sizeof</span>(inaddr));</div><div class="line"><span class="keyword">else</span></div><div class="line">{</div><div class="line"><span class="comment">// 使用域名或主机名获取ip地址</span></div><div class="line">hp = gethostbyname(host);</div><div class="line"><span class="keyword">if</span> (hp == NULL)</div><div class="line"><span class="keyword">return</span> -<span class="number">1</span>;</div><div class="line"><span class="built_in">memcpy</span>(&amp;ad.sin_addr, hp-&gt;h_addr, hp-&gt;h_length);</div><div class="line">}</div><div class="line">ad.sin_port = htons(clientPort);</div><div class="line">sock = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</div><div class="line"><span class="keyword">if</span> (sock &lt; <span class="number">0</span>)</div><div class="line"><span class="keyword">return</span> sock;</div><div class="line"><span class="keyword">if</span> (connect(sock, (<span class="keyword">struct</span> sockaddr *)&amp;ad, <span class="keyword">sizeof</span>(ad)) &lt; <span class="number">0</span>)</div><div class="line"><span class="keyword">return</span> -<span class="number">1</span>;</div><div class="line"><span class="keyword">return</span> sock;</div><div class="line">}</div></pre></td></tr></table></figure>
-
-<p>自己封装了个socket模块，只需要注意的就是URL可能不是域名，也可能是IP地址。</p>
-<p>然后就是webbench.c文件，咱们从main函数说起，因为需要对命令行做处理，所以使用了getopt_long函数，没使用这个函数的同学可以man getopt_long或者查看在线文件<a href="http://man7.org/linux/man-pages/man3/getopt.3.html" title="getopt_long" target="_blank" rel="external">man </a>。注意下此结构体为getopt_long的参数：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">// 长选项，getopt_long的参数</div><div class="line"><span class="keyword">static</span> <span class="keyword">const</span> struct option long_options[]=</div><div class="line">{</div><div class="line"> {&quot;force&quot;,no_argument,&amp;force,<span class="number">1</span>},</div><div class="line"> {&quot;reload&quot;,no_argument,&amp;force_reload,<span class="number">1</span>},</div><div class="line"> {&quot;time&quot;,required_argument,<span class="type">NULL</span>,'t'},</div><div class="line"> {&quot;help&quot;,no_argument,<span class="type">NULL</span>,'?'},</div><div class="line"> {&quot;http09&quot;,no_argument,<span class="type">NULL</span>,'<span class="number">9</span>'},</div><div class="line"> {&quot;http10&quot;,no_argument,<span class="type">NULL</span>,'<span class="number">1</span>'},</div><div class="line"> {&quot;http11&quot;,no_argument,<span class="type">NULL</span>,'<span class="number">2</span>'},</div><div class="line"> {&quot;get&quot;,no_argument,&amp;<span class="keyword">method</span>,<span class="type">METHOD_GET</span>},</div><div class="line"> {&quot;head&quot;,no_argument,&amp;<span class="keyword">method</span>,<span class="type">METHOD_HEAD</span>},</div><div class="line"> {&quot;options&quot;,no_argument,&amp;<span class="keyword">method</span>,<span class="type">METHOD_OPTIONS</span>},</div><div class="line"> {&quot;trace&quot;,no_argument,&amp;<span class="keyword">method</span>,<span class="type">METHOD_TRACE</span>},</div><div class="line"> {&quot;version&quot;,no_argument,<span class="type">NULL</span>,'V'},</div><div class="line"> {&quot;proxy&quot;,required_argument,<span class="type">NULL</span>,'p'},</div><div class="line"> {&quot;clients&quot;,required_argument,<span class="type">NULL</span>,'c'},</div><div class="line"> {<span class="type">NULL</span>,<span class="number">0</span>,<span class="type">NULL</span>,<span class="number">0</span>}</div><div class="line">};</div></pre></td></tr></table></figure>
-
-<p>之后是buildr_equest()函数，主要功能是构造HTTP头请求，构造成下面类似情况，具体可以参考代码：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="request">GET <span class="string">/</span> HTTP/1.1</span></div><div class="line"><span class="attribute">Host</span>: <span class="string">www.baidu.com</span></div><div class="line"><span class="attribute">Cache-Control</span>: <span class="string">max-age=0</span></div><div class="line"><span class="attribute">Pragma</span>: <span class="string">no-cache</span></div></pre></td></tr></table></figure>
-
-<p>之后便是打印压力测试的一些信息，没啥可说的，很容易读懂，之后到了return bench()处，bench函数是压力测试的核心代码。<br>bench里根据并发数，使用fork()创建子进程，子进程调用benchcore()函数，此函数里使用alarm和sigaction信号控制定时时间，alarm函数设置了多少时间之后产生SIGALRM信号，一旦产生此信号，运行alarm_handler函数，使得timerexpired等于1，这样可以通过判断timerexpired值来退出程序。然后子进程将数据写入管道。同时父进程读取管道数据，将数据进行累加，当全部读取完子进程后，父进程输出信息退出。</p>
-<p>总体来说，Webbench代码还是很好读懂的，当然此代码也存在一些问题，比如不支持POST请求方式，只能模拟单个IP测试等等。<br>宿舍马上要熄灯了，写的比较着急，可能逻辑混乱些。我Github里对此源码做了非常详细的源码剖析。感兴趣的同学请查看详细的源码剖析吧。</p>
-<p>链接地址：<br><a href="https://github.com/armsword/Source/tree/master/webbench-1.5" title="Webbench源码剖析" target="_blank" rel="external">https://github.com/armsword/Source/tree/master/webbench-1.5</a></p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
         <time datetime="2014-09-03T17:56:57.000Z"><a href="/2014/09/04/redis-ae-analyse/">9月 4 2014</a></time>
       
       
@@ -271,7 +223,7 @@
     </header>
     <div class="entry">
       
-        <p>之前我写过一篇文章，介绍过怎么下载百度音乐无损音乐，地址点击<a href="http://armsword.com/2014/01/01/get-baidu-music-addr/" title="百度无损音乐下载" target="_blank" rel="external">此处</a>进入，但是前几天有网友给我邮件说这个方法现在不能使用了。我今天正好回实验室改论文，弄完后，研究了下，发现之前的无损音乐下载方法确实不能使用了，之后用了几十分钟又分析了下，终于找到新方法了，因为我听见外面打雷了，貌似要下雨，我简单的说下方法吧：</p>
+        <p>之前我写过一篇文章，介绍过怎么下载百度音乐无损音乐，但是前几天有网友给我邮件说这个方法现在不能使用了。我今天正好回实验室改论文，弄完后，研究了下，发现之前的无损音乐下载方法确实不能使用了，之后用了几十分钟又分析了下，终于找到新方法了，因为我听见外面打雷了，貌似要下雨，我简单的说下方法吧：</p>
 <p>1、之前是从<a href="http://music.baidu.com/" target="_blank" rel="external">http://music.baidu.com/</a> 入手的，现在发现从此处入手已经找不到方法了。由于我又不是太懂JS语法，于是用了几十分钟，没分析到地址放弃。</p>
 <p>2、灵光一闪，从<a href="http://fm.baidu.com/" target="_blank" rel="external">http://fm.baidu.com/</a> 入手，在Chrome下抓包，细心分析后，果然发现蜘丝马迹，如下图所示：</p>
 <p><img src="http://armsword.com/wp-content/uploads/2014/08/20140809213933.png" alt=""></p>
@@ -402,6 +354,72 @@
 </article>
 
 
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-05-18T09:22:17.000Z"><a href="/2014/05/18/light-cgi-server/">5月 18 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/05/18/light-cgi-server/">写了一个简单的CGI Server</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>之前看过一些开源程序的源码，也略微知道些Apache的CGI处理程序架构，于是用了一段时间，用C写了一个简单的CGI Server，代码算上头文件，一共1200行左右，难度中等偏上。麻雀虽小，五脏俱全。如果把程序里所涉及的HTTP协议，Linux下POSIX编程等等搞清楚，我想找工作中肯定是有足够的竞争力的，当然我也只是皮毛而已，不再班门弄斧了，下面简单的说下程序流程吧，方便小伙伴们阅读。</p>
+<p>程序源代码：<a href="https://github.com/armsword/LightCgiServer" target="_blank" rel="external">戳我</a></p>
+<p>在说程序流程之前，我先简单说下CGI吧，CGI这个东西比较老了，N年之前，没有PHP JSP等等动态脚本之前，这个是非常火的。只要能支持输入输出的程序，都可以编写CGI脚本，比如Apache就集成了CGI服务器功能，你可以使用Python编写简单的CGI脚本，可以参照前几天我发的文章，<a href="http://armsword.com/2014/05/07/let-apache-understand-python-cgi.html" target="_blank" rel="external">点击此处</a>，现在CGI 脚本基本上使用的比较少了，但是在一些对效率要求比较高的设计里还是可以看到一些身影，比如腾讯的QQ相册，QQ空间里就可以看到（你可以打开QQ空间，查看源码-查找CGI），他们的脚本应该是C/C++编写的，效率，你懂的，如果你想更多的了解CGI脚本相关，可以<a href="http://www.jdon.com/idea/cgi.htm" target="_blank" rel="external">点击此处</a>，推荐了解一些，但是不值得深入学习，那个精力不如学习PHP/Python了。。。</p>
+<p>其实说白了，CGI 扮演的就是在服务器和特定解释器之间输入输出协议的角色，每个来自用户的请求，Web服务器都会唤起特定语言解释器的命令行，执行CGI脚本。</p>
+<p>现在来介绍下此CGI Server，我不想长篇大论了，一幅图来描述其执行过程（字比较丑，凑合看吧），具体看代码吧：</p>
+<p><img src="http://armsword.com/wp-content/uploads/2014/05/20140518171043.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>如果你比较理解HTTP协议，大部分都没有难点，中文URL编码这个可以看<a href="http://armsword.com/2014/05/15/c-let-url-encode-and-decode.html" target="_blank" rel="external">上一篇文章</a>，可能唯一的难点是管道部分，这个使用了经典的fork-exece模型，关于管道，一张图能很好的解释：<br><img src="http://armsword.com/wp-content/uploads/2014/05/20140518171356.jpg" alt=""></p>
+<p>不过程序中使用了双管道，读写模型，如果你对此不理解，可以翻阅《Unix环境高级编程》。</p>
+<p>如果你对HTTP不慎了解，参考链接里的两篇文章，能帮助你更好的了解HTTP协议，其实HTTP1.1里面的难点，理解以下几句话就足够了：</p>
+<p>http协议规定头必然有2个连续的”\r\n”，就像Cookie后面就跟了2个\r\n，所以读取请求头的时候只要读到\r\n\r\n，那么前面就是头，后面就是实体。实体大小在上面有一个Content-Length标记。所以从\r\n\r\n后面读Content-Length大小后就结束了。所以服务端一般是1、判断状态码，http协议规定1xx 204 304肯定不包括实体，所以读到\r\n\r\n就不用再读；2、判断没有Content-Length；3、判断有没有chunked。有Content-Length直接读，而chunked的最后7个一定是\r\n0\r\n\r\n。</p>
+<p>chunked编码，这种编码一般是gzip压缩的</p>
+<pre><code><span class="status">HTTP/1.1 <span class="number">200</span> OK </span>
+<span class="attribute">Cache-Control</span>: <span class="string">private </span>
+<span class="attribute">Content-Type</span>: <span class="string">text/html; charset=utf-8 </span>
+<span class="attribute">Server</span>: <span class="string">Microsoft-IIS/7.5</span>
+<span class="attribute">X-AspNetMvc-Version</span>: <span class="string">2.0</span>
+<span class="attribute">X-AspNet-Version</span>: <span class="string">4.0.30319 </span>
+<span class="attribute">Set-Cookie</span>: <span class="string">Set-Cookie: X-Powered-By: ASP.NET </span>
+<span class="attribute">ntCoent-Length</span>: <span class="string">166137</span>
+<span class="attribute">Content-Encoding</span>: <span class="string">gzip </span>
+<span class="attribute">Transfer-Encoding</span>: <span class="string">chunked </span>
+
+<span class="http">
+
+<span class="r">2D23 
+...........}.s.G.......j....*u......y....%<span class="keyword">...</span>;QO.M.[....3..,<span class="keyword">...</span>
+.!..O....H-.<span class="string">"v..&amp;gt;.............=YY </span></span></span>
+</code></pre><p>&nbsp;<br>在处理chunked时候，像上面chunked\r\n\r\n后面是实体，第一行2D23就是一chunk的大小所以在2D23\r\n后面开始读2D23个然后会紧跟着\r\n，然后后面就是下一chunk的大小，直到最后一chunk是0大小。实体结束，最后再来一个\r\n。也就是说chunked的最后7个一定是\r\n0\r\n\r\n，本来判断读到\r\n0\r\n\r\n就结束应该没问题，但是为了保险起见，还是一次一次的读大小值再读取指定的大小数据。</p>
+<p>另外，此代码里有部分缺陷，一是我急于完成，某些结构设计不合理，所以可扩展性比较差。第二，有少部分内存泄漏，懒得修改了。毕竟，我也得忙着找工作，时间比较紧张，但是总的来说，如果你想找后台开发相关的职位，如果你没有更好的项目经验，此代码如果你能读懂，写到简历上，面试官肯定会问你的。</p>
+<p>能力和精力有限，希望能对你们有所帮助 ^-^</p>
+<p>参考链接：</p>
+<p>1.<a href="http://www.cnblogs.com/TankXiao/archive/2012/02/13/2342672.html" target="_blank" rel="external">http://www.cnblogs.com/TankXiao/archive/2012/02/13/2342672.html</a></p>
+<p>2.<a href="http://www.cnblogs.com/li0803/archive/2008/11/03/1324746.html" target="_blank" rel="external">http://www.cnblogs.com/li0803/archive/2008/11/03/1324746.html</a></p>
+<p>3.<a href="http://blog.csdn.net/laotse/article/details/5903651" target="_blank" rel="external">http://blog.csdn.net/laotse/article/details/5903651</a></p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
 
 <nav id="pagination">
   
@@ -434,11 +452,11 @@
   
     <li><a href="/categories/ML-NLP/">ML/NLP</a><small>3</small></li>
   
-    <li><a href="/categories/Web-Script/">Web/Script</a><small>4</small></li>
+    <li><a href="/categories/Web-Script/">Web/Script</a><small>3</small></li>
   
     <li><a href="/categories/Windows/">Windows</a><small>2</small></li>
   
-    <li><a href="/categories/我的生活/">我的生活</a><small>3</small></li>
+    <li><a href="/categories/我的生活/">我的生活</a><small>2</small></li>
   
     <li><a href="/categories/算法-数据结构/">算法/数据结构</a><small>5</small></li>
   
@@ -474,11 +492,11 @@
       </li>
     
       <li>
-        <a href="/2014/11/07/finding-job-result/">一蓑烟雨任平生</a>
+        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
       </li>
     
       <li>
-        <a href="/2014/10/29/tinyhttpd-code-analyse/">tinyhttpd源码剖析</a>
+        <a href="/2014/10/26/webbench-source-analyse/">Webbench源码剖析</a>
       </li>
     
   </ul>
